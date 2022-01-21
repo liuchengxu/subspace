@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;subspace-archiving&#x2F;src&#x2F;archiver.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>archiver.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../subspace_archiving/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;subspace-archiving&#x2F;src&#x2F;archiver.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>archiver.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href='../../subspace_archiving/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container rust-logo" href='../../subspace_archiving/index.html'><img src='../../rust-logo.png' alt='logo'></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -705,154 +706,6 @@
 <span id="705">705</span>
 <span id="706">706</span>
 <span id="707">707</span>
-<span id="708">708</span>
-<span id="709">709</span>
-<span id="710">710</span>
-<span id="711">711</span>
-<span id="712">712</span>
-<span id="713">713</span>
-<span id="714">714</span>
-<span id="715">715</span>
-<span id="716">716</span>
-<span id="717">717</span>
-<span id="718">718</span>
-<span id="719">719</span>
-<span id="720">720</span>
-<span id="721">721</span>
-<span id="722">722</span>
-<span id="723">723</span>
-<span id="724">724</span>
-<span id="725">725</span>
-<span id="726">726</span>
-<span id="727">727</span>
-<span id="728">728</span>
-<span id="729">729</span>
-<span id="730">730</span>
-<span id="731">731</span>
-<span id="732">732</span>
-<span id="733">733</span>
-<span id="734">734</span>
-<span id="735">735</span>
-<span id="736">736</span>
-<span id="737">737</span>
-<span id="738">738</span>
-<span id="739">739</span>
-<span id="740">740</span>
-<span id="741">741</span>
-<span id="742">742</span>
-<span id="743">743</span>
-<span id="744">744</span>
-<span id="745">745</span>
-<span id="746">746</span>
-<span id="747">747</span>
-<span id="748">748</span>
-<span id="749">749</span>
-<span id="750">750</span>
-<span id="751">751</span>
-<span id="752">752</span>
-<span id="753">753</span>
-<span id="754">754</span>
-<span id="755">755</span>
-<span id="756">756</span>
-<span id="757">757</span>
-<span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
-<span id="763">763</span>
-<span id="764">764</span>
-<span id="765">765</span>
-<span id="766">766</span>
-<span id="767">767</span>
-<span id="768">768</span>
-<span id="769">769</span>
-<span id="770">770</span>
-<span id="771">771</span>
-<span id="772">772</span>
-<span id="773">773</span>
-<span id="774">774</span>
-<span id="775">775</span>
-<span id="776">776</span>
-<span id="777">777</span>
-<span id="778">778</span>
-<span id="779">779</span>
-<span id="780">780</span>
-<span id="781">781</span>
-<span id="782">782</span>
-<span id="783">783</span>
-<span id="784">784</span>
-<span id="785">785</span>
-<span id="786">786</span>
-<span id="787">787</span>
-<span id="788">788</span>
-<span id="789">789</span>
-<span id="790">790</span>
-<span id="791">791</span>
-<span id="792">792</span>
-<span id="793">793</span>
-<span id="794">794</span>
-<span id="795">795</span>
-<span id="796">796</span>
-<span id="797">797</span>
-<span id="798">798</span>
-<span id="799">799</span>
-<span id="800">800</span>
-<span id="801">801</span>
-<span id="802">802</span>
-<span id="803">803</span>
-<span id="804">804</span>
-<span id="805">805</span>
-<span id="806">806</span>
-<span id="807">807</span>
-<span id="808">808</span>
-<span id="809">809</span>
-<span id="810">810</span>
-<span id="811">811</span>
-<span id="812">812</span>
-<span id="813">813</span>
-<span id="814">814</span>
-<span id="815">815</span>
-<span id="816">816</span>
-<span id="817">817</span>
-<span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
-<span id="825">825</span>
-<span id="826">826</span>
-<span id="827">827</span>
-<span id="828">828</span>
-<span id="829">829</span>
-<span id="830">830</span>
-<span id="831">831</span>
-<span id="832">832</span>
-<span id="833">833</span>
-<span id="834">834</span>
-<span id="835">835</span>
-<span id="836">836</span>
-<span id="837">837</span>
-<span id="838">838</span>
-<span id="839">839</span>
-<span id="840">840</span>
-<span id="841">841</span>
-<span id="842">842</span>
-<span id="843">843</span>
-<span id="844">844</span>
-<span id="845">845</span>
-<span id="846">846</span>
-<span id="847">847</span>
-<span id="848">848</span>
-<span id="849">849</span>
-<span id="850">850</span>
-<span id="851">851</span>
-<span id="852">852</span>
-<span id="853">853</span>
-<span id="854">854</span>
-<span id="855">855</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -868,26 +721,37 @@
 <span class="comment">// See the License for the specific language governing permissions and</span>
 <span class="comment">// limitations under the License.</span>
 
+<span class="kw">mod</span> <span class="ident">record_shards</span>;
+
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::archiver::record_shards::RecordShards</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::merkle_tree</span>::{<span class="ident">MerkleTree</span>, <span class="ident">Witness</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils::GF_16_ELEMENT_BYTES</span>;
+<span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
+<span class="kw">use</span> <span class="ident">alloc::collections::VecDeque</span>;
+<span class="kw">use</span> <span class="ident">alloc::vec</span>;
+<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
+<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">parity_scale_codec</span>::{<span class="ident">Compact</span>, <span class="ident">CompactLen</span>, <span class="ident">Decode</span>, <span class="ident">Encode</span>};
 <span class="kw">use</span> <span class="ident">reed_solomon_erasure::galois_16::ReedSolomon</span>;
-<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">std::cmp::Ordering</span>;
-<span class="kw">use</span> <span class="ident">std::collections::VecDeque</span>;
-<span class="kw">use</span> <span class="ident">std::io::Write</span>;
-<span class="kw">use</span> <span class="ident">std::iter</span>;
-<span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">subspace_core_primitives::objects</span>::{
     <span class="ident">BlockObject</span>, <span class="ident">BlockObjectMapping</span>, <span class="ident">PieceObject</span>, <span class="ident">PieceObjectMapping</span>,
 };
 <span class="kw">use</span> <span class="ident">subspace_core_primitives</span>::{
-    <span class="ident">crypto</span>, <span class="ident">LastArchivedBlock</span>, <span class="ident">Piece</span>, <span class="ident">RootBlock</span>, <span class="ident">Sha256Hash</span>, <span class="ident">PIECE_SIZE</span>, <span class="ident">SHA256_HASH_SIZE</span>,
+    <span class="ident">crypto</span>, <span class="ident">ArchivedBlockProgress</span>, <span class="ident">BlockNumber</span>, <span class="ident">FlatPieces</span>, <span class="ident">LastArchivedBlock</span>, <span class="ident">RootBlock</span>,
+    <span class="ident">Sha256Hash</span>, <span class="ident">PIECE_SIZE</span>, <span class="ident">SHA256_HASH_SIZE</span>,
 };
-<span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 
 <span class="kw">const</span> <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span>: <span class="ident">LastArchivedBlock</span> <span class="op">=</span> <span class="ident">LastArchivedBlock</span> {
     <span class="ident">number</span>: <span class="number">0</span>,
-    <span class="ident">bytes</span>: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+    <span class="comment">// Special case for the genesis block.</span>
+    <span class="comment">//</span>
+    <span class="comment">// When we start archiving process with pre-genesis objects, we do not yet have any blocks</span>
+    <span class="comment">// archived, but `LastArchivedBlock` is required for `RootBlock`s to be produced, so</span>
+    <span class="comment">// `ArchivedBlockProgress::Partial(0)` indicates that we have archived 0 bytes of block `0` (see</span>
+    <span class="comment">// field above), meaning we did not in fact archive actual blocks yet.</span>
+    <span class="ident">archived_progress</span>: <span class="ident">ArchivedBlockProgress::Partial</span>(<span class="number">0</span>),
 };
 
 <span class="doccomment">/// Segment represents a collection of items stored in archival history of the Subspace blockchain</span>
@@ -902,12 +766,12 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Segment</span> {
-    <span class="kw">fn</span> <span class="ident">push_item</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">segment_item</span>: <span class="ident">SegmentItem</span>) {
+    <span class="kw">fn</span> <span class="ident">push_item</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">segment_item</span>: <span class="ident">SegmentItem</span>) {
         <span class="kw">let</span> <span class="ident"><span class="self">Self</span>::V0</span> { <span class="ident">items</span> } <span class="op">=</span> <span class="self">self</span>;
         <span class="ident">items</span>.<span class="ident">push</span>(<span class="ident">segment_item</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">pop_item</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SegmentItem</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">pop_item</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SegmentItem</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident"><span class="self">Self</span>::V0</span> { <span class="ident">items</span> } <span class="op">=</span> <span class="self">self</span>;
         <span class="ident">items</span>.<span class="ident">pop</span>()
     }
@@ -916,15 +780,6 @@
 <span class="doccomment">/// Kinds of items that are contained within a segment</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Hash</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SegmentItem</span> {
-    <span class="doccomment">/// Contains full object inside</span>
-    <span class="attribute">#[<span class="ident">codec</span>(<span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>)]</span>
-    <span class="ident">Object</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>),
-    <span class="doccomment">/// Contains the beginning of the object inside, remainder will be found in subsequent segments</span>
-    <span class="attribute">#[<span class="ident">codec</span>(<span class="ident">index</span> <span class="op">=</span> <span class="number">1</span>)]</span>
-    <span class="ident">ObjectStart</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>),
-    <span class="doccomment">/// Continuation of the partial object spilled over into the next segment</span>
-    <span class="attribute">#[<span class="ident">codec</span>(<span class="ident">index</span> <span class="op">=</span> <span class="number">2</span>)]</span>
-    <span class="ident">ObjectContinuation</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>),
     <span class="doccomment">/// Contains full block inside</span>
     <span class="attribute">#[<span class="ident">codec</span>(<span class="ident">index</span> <span class="op">=</span> <span class="number">3</span>)]</span>
     <span class="ident">Block</span> {
@@ -960,13 +815,14 @@
     <span class="ident">RootBlock</span>(<span class="ident">RootBlock</span>),
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="doccomment">/// Archived segment as a combination of root block hash, segment index and corresponding pieces</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ArchivedSegment</span> {
     <span class="doccomment">/// Root block of the segment</span>
     <span class="kw">pub</span> <span class="ident">root_block</span>: <span class="ident">RootBlock</span>,
     <span class="doccomment">/// Pieces that correspond to this segment</span>
-    <span class="kw">pub</span> <span class="ident">pieces</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Piece</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">pieces</span>: <span class="ident">FlatPieces</span>,
     <span class="doccomment">/// Mappings for objects stored in corresponding pieces.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// NOTE: Only first half (data pieces) will have corresponding mapping item in this `Vec`.</span>
@@ -974,64 +830,54 @@
 }
 
 <span class="doccomment">/// Archiver instantiation error</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Error</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Hash</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Hash</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>, <span class="ident">derive</span>(<span class="ident">thiserror::Error</span>))]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ArchiverInstantiationError</span> {
     <span class="doccomment">/// Record size it smaller that needed to hold any information</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Record size it smaller that needed to hold any information&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Record size it smaller that needed to hold any information&quot;</span>)
+    )]</span>
     <span class="ident">RecordSizeTooSmall</span>,
     <span class="doccomment">/// Segment size is not bigger than record size</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Segment size is not bigger than record size&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Segment size is not bigger than record size&quot;</span>)
+    )]</span>
     <span class="ident">SegmentSizeTooSmall</span>,
+    <span class="doccomment">/// Segment size must be multiple of two</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>, <span class="ident">error</span>(<span class="string">&quot;Segment size must be multiple of two&quot;</span>))]</span>
+    <span class="ident">SegmentSizeNotMultipleOfTwo</span>,
     <span class="doccomment">/// Segment size is not a multiple of record size</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Segment size is not a multiple of record size&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Segment size is not a multiple of record size&quot;</span>)
+    )]</span>
     <span class="ident">SegmentSizesNotMultipleOfRecordSize</span>,
     <span class="doccomment">/// Wrong record and segment size, it will not be possible to produce pieces</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Wrong record and segment size, it will not be possible to produce pieces&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Wrong record and segment size, it will not be possible to produce pieces&quot;</span>)
+    )]</span>
     <span class="ident">WrongRecordAndSegmentCombination</span>,
     <span class="doccomment">/// Invalid last archived block, its size is the same as encoded block</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid last archived block, its size {0} bytes is the same as encoded block&quot;</span>)]</span>
-    <span class="ident">InvalidLastArchivedBlock</span>(<span class="ident">u32</span>),
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Invalid last archived block, its size {0} bytes is the same as encoded block&quot;</span>)
+    )]</span>
+    <span class="ident">InvalidLastArchivedBlock</span>(<span class="ident">BlockNumber</span>),
     <span class="doccomment">/// Invalid block, its size is smaller than already archived number of bytes</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid block, its size {block_bytes} bytes is smaller than already archived {archived_block_bytes} bytes&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(
+        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thiserror&quot;</span>,
+        <span class="ident">error</span>(<span class="string">&quot;Invalid block, its size {block_bytes} bytes is smaller than already archived {archived_block_bytes} bytes&quot;</span>)
+    )]</span>
     <span class="ident">InvalidBlockSmallSize</span> {
         <span class="doccomment">/// Full block size</span>
         <span class="ident">block_bytes</span>: <span class="ident">u32</span>,
         <span class="doccomment">/// Already archived portion of the block</span>
         <span class="ident">archived_block_bytes</span>: <span class="ident">u32</span>,
     },
-    <span class="doccomment">/// No archived blocks, invalid initial state</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;No archived blocks, invalid initial state&quot;</span>)]</span>
-    <span class="ident">NoBlocksInvalidInitialState</span>,
 }
-
-<span class="kw">mod</span> <span class="ident">private</span> {
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ArchiverState</span> {}
-
-    <span class="doccomment">/// Marker struct used in archiver to define a state where archiver is used for archiving object</span>
-    <span class="doccomment">/// before genesis block</span>
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectArchiverState</span>;
-
-    <span class="kw">impl</span> <span class="ident">ArchiverState</span> <span class="kw">for</span> <span class="ident">ObjectArchiverState</span> {}
-
-    <span class="doccomment">/// Marker struct used in archiver to define a state where archiver is used for archiving blocks</span>
-    <span class="doccomment">/// at or after genesis block</span>
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlockArchiverState</span>;
-
-    <span class="kw">impl</span> <span class="ident">ArchiverState</span> <span class="kw">for</span> <span class="ident">BlockArchiverState</span> {}
-}
-
-<span class="doccomment">/// Object archiver for Subspace blockchain.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It takes pre-genesis objects and concatenates them into a buffer, buffer is</span>
-<span class="doccomment">/// sliced into segments of `RECORDED_HISTORY_SEGMENT_SIZE` size, segments are sliced into source</span>
-<span class="doccomment">/// records of `RECORD_SIZE`, records are erasure coded, Merkle Tree is built over them, and</span>
-<span class="doccomment">/// with Merkle Proofs appended records become pieces that are returned alongside corresponding root</span>
-<span class="doccomment">/// block header.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Object archiver is only used pre-genesis and should be turned into block archiver for later use.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ObjectArchiver</span> <span class="op">=</span> <span class="ident">Archiver</span><span class="op">&lt;</span><span class="ident">private::ObjectArchiverState</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Block archiver for Subspace blockchain.</span>
 <span class="doccomment">///</span>
@@ -1040,13 +886,8 @@
 <span class="doccomment">/// records of `RECORD_SIZE`, records are erasure coded, Merkle Tree is built over them, and</span>
 <span class="doccomment">/// with Merkle Proofs appended records become pieces that are returned alongside corresponding root</span>
 <span class="doccomment">/// block header.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">BlockArchiver</span> <span class="op">=</span> <span class="ident">Archiver</span><span class="op">&lt;</span><span class="ident">private::BlockArchiverState</span><span class="op">&gt;</span>;
-
-<span class="doccomment">/// Generic archiver for Subspace blockchain.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Shouldn&#39;t be used directly, but rather through `ObjectArchiver` or `BlockArchiver` type aliases.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Archiver</span><span class="op">&lt;</span><span class="ident">State</span>: <span class="ident">private::ArchiverState</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Archiver</span> {
     <span class="doccomment">/// Buffer containing blocks and other buffered items that are pending to be included into the</span>
     <span class="doccomment">/// next segment</span>
     <span class="ident">buffer</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">SegmentItem</span><span class="op">&gt;</span>,
@@ -1063,11 +904,9 @@
     <span class="ident">prev_root_block_hash</span>: <span class="ident">Sha256Hash</span>,
     <span class="doccomment">/// Last archived block</span>
     <span class="ident">last_archived_block</span>: <span class="ident">LastArchivedBlock</span>,
-    <span class="doccomment">/// Just a marker for otherwise unused generic parameter</span>
-    <span class="ident">state_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">State</span>: <span class="ident">private::ArchiverState</span><span class="op">&gt;</span> <span class="ident">Archiver</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">Archiver</span> {
     <span class="doccomment">/// Create a new instance with specified record size and recorded history segment size.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note: this is the only way to instantiate object archiver, while block archiver can be</span>
@@ -1094,6 +933,9 @@
         <span class="kw">if</span> <span class="ident">segment_size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">record_size</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::SegmentSizeTooSmall</span>);
         }
+        <span class="kw">if</span> <span class="ident">segment_size</span> <span class="op">%</span> <span class="ident">GF_16_ELEMENT_BYTES</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::SegmentSizeNotMultipleOfTwo</span>);
+        }
         <span class="kw">if</span> <span class="ident">segment_size</span> <span class="op">%</span> <span class="ident">record_size</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::SegmentSizesNotMultipleOfRecordSize</span>);
         }
@@ -1117,13 +959,105 @@
             <span class="ident">segment_index</span>: <span class="number">0</span>,
             <span class="ident">prev_root_block_hash</span>: <span class="ident">Sha256Hash::default</span>(),
             <span class="ident">last_archived_block</span>: <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span>,
-            <span class="ident">state_marker</span>: <span class="ident">PhantomData::default</span>(),
         })
+    }
+
+    <span class="doccomment">/// Create a new instance of the archiver with initial state in case of restart.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `block` corresponds to `last_archived_block` and will be processed accordingly to its state.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_initial_state</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
+        <span class="ident">record_size</span>: <span class="ident">usize</span>,
+        <span class="ident">segment_size</span>: <span class="ident">usize</span>,
+        <span class="ident">root_block</span>: <span class="ident">RootBlock</span>,
+        <span class="ident">encoded_block</span>: <span class="ident">B</span>,
+        <span class="kw-2">mut</span> <span class="ident">object_mapping</span>: <span class="ident">BlockObjectMapping</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ArchiverInstantiationError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archiver</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">record_size</span>, <span class="ident">segment_size</span>)<span class="question-mark">?</span>;
+
+        <span class="ident">archiver</span>.<span class="ident">segment_index</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">segment_index</span>() <span class="op">+</span> <span class="number">1</span>;
+        <span class="ident">archiver</span>.<span class="ident">prev_root_block_hash</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">hash</span>();
+        <span class="ident">archiver</span>.<span class="ident">last_archived_block</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">last_archived_block</span>();
+
+        <span class="comment">// The first thing in the buffer should be root block</span>
+        <span class="ident">archiver</span>
+            .<span class="ident">buffer</span>
+            .<span class="ident">push_back</span>(<span class="ident">SegmentItem::RootBlock</span>(<span class="ident">root_block</span>));
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">archived_block_bytes</span>) <span class="op">=</span> <span class="ident">archiver</span>.<span class="ident">last_archived_block</span>.<span class="ident">partial_archived</span>() {
+            <span class="kw">let</span> <span class="ident">encoded_block</span> <span class="op">=</span> <span class="ident">encoded_block</span>.<span class="ident">as_ref</span>();
+            <span class="kw">let</span> <span class="ident">encoded_block_bytes</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">encoded_block</span>.<span class="ident">len</span>())
+                .<span class="ident">expect</span>(<span class="string">&quot;Blocks length is never bigger than u32; qed&quot;</span>);
+
+            <span class="kw">match</span> <span class="ident">encoded_block_bytes</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">archived_block_bytes</span>) {
+                <span class="ident">Ordering::Less</span> =&gt; {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::InvalidBlockSmallSize</span> {
+                        <span class="ident">block_bytes</span>: <span class="ident">encoded_block_bytes</span>,
+                        <span class="ident">archived_block_bytes</span>,
+                    });
+                }
+                <span class="ident">Ordering::Equal</span> =&gt; {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::InvalidLastArchivedBlock</span>(
+                        <span class="ident">encoded_block_bytes</span>,
+                    ));
+                }
+                <span class="ident">Ordering::Greater</span> =&gt; {
+                    <span class="comment">// Take part of the encoded block that wasn&#39;t archived yet and push to the</span>
+                    <span class="comment">// buffer and block continuation</span>
+                    <span class="ident">object_mapping</span>
+                        .<span class="ident">objects</span>
+                        .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
+                            <span class="kw">let</span> <span class="ident">current_offset</span> <span class="op">=</span> <span class="ident">block_object</span>.<span class="ident">offset</span>();
+                            <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">archived_block_bytes</span> {
+                                <span class="ident">block_object</span>.<span class="ident">set_offset</span>(<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">archived_block_bytes</span>);
+                                <span class="bool-val">false</span>
+                            } <span class="kw">else</span> {
+                                <span class="bool-val">true</span>
+                            }
+                        });
+                    <span class="ident">archiver</span>.<span class="ident">buffer</span>.<span class="ident">push_back</span>(<span class="ident">SegmentItem::BlockContinuation</span> {
+                        <span class="ident">bytes</span>: <span class="ident">encoded_block</span>[(<span class="ident">archived_block_bytes</span> <span class="kw">as</span> <span class="ident">usize</span>)..].<span class="ident">to_vec</span>(),
+                        <span class="ident">object_mapping</span>,
+                    });
+                }
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(<span class="ident">archiver</span>)
+    }
+
+    <span class="doccomment">/// Get last archived block if there was any</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">last_archived_block_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">last_archived_block</span> <span class="op">!</span><span class="op">=</span> <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span> {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">last_archived_block</span>.<span class="ident">number</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        }
+    }
+
+    <span class="doccomment">/// Adds new block to internal buffer, potentially producing pieces and root block headers</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_block</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">bytes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+        <span class="ident">object_mapping</span>: <span class="ident">BlockObjectMapping</span>,
+    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span> {
+        <span class="comment">// Append new block to the buffer</span>
+        <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">push_back</span>(<span class="ident">SegmentItem::Block</span> {
+            <span class="ident">bytes</span>,
+            <span class="ident">object_mapping</span>,
+        });
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archived_segments</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+
+        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">segment</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">produce_segment</span>() {
+            <span class="ident">archived_segments</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">produce_archived_segment</span>(<span class="ident">segment</span>));
+        }
+
+        <span class="ident">archived_segments</span>
     }
 
     <span class="doccomment">/// Try to slice buffer contents into segments if there is enough data, producing one segment at</span>
     <span class="doccomment">/// a time</span>
-    <span class="kw">fn</span> <span class="ident">produce_segment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Segment</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">produce_segment</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Segment</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">segment</span> <span class="op">=</span> <span class="ident">Segment::V0</span> {
             <span class="ident">items</span>: <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">len</span>()),
         };
@@ -1164,11 +1098,6 @@
                 <span class="comment">// last segment item insertion needs to be skipped to avoid out of range panic when</span>
                 <span class="comment">// trying to cut segment item internal bytes.</span>
                 <span class="kw">let</span> <span class="ident">inner_bytes_size</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">segment_item</span> {
-                    <span class="ident">SegmentItem::Object</span>(<span class="ident">bytes</span>) =&gt; <span class="ident">bytes</span>.<span class="ident">len</span>(),
-                    <span class="ident">SegmentItem::ObjectStart</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="macro">unreachable!</span>(<span class="string">&quot;Buffer never contains SegmentItem::ObjectStart; qed&quot;</span>);
-                    }
-                    <span class="ident">SegmentItem::ObjectContinuation</span>(<span class="ident">bytes</span>) =&gt; <span class="ident">bytes</span>.<span class="ident">len</span>(),
                     <span class="ident">SegmentItem::Block</span> { <span class="ident">bytes</span>, .. } =&gt; <span class="ident">bytes</span>.<span class="ident">len</span>(),
                     <span class="ident">SegmentItem::BlockStart</span> { .. } =&gt; {
                         <span class="macro">unreachable!</span>(<span class="string">&quot;Buffer never contains SegmentItem::BlockStart; qed&quot;</span>);
@@ -1189,11 +1118,6 @@
             }
 
             <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">segment_item</span> {
-                <span class="ident">SegmentItem::Object</span>(<span class="kw">_</span>)
-                <span class="op">|</span> <span class="ident">SegmentItem::ObjectStart</span>(<span class="kw">_</span>)
-                <span class="op">|</span> <span class="ident">SegmentItem::ObjectContinuation</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="comment">// We are not interested in object here</span>
-                }
                 <span class="ident">SegmentItem::Block</span> { .. } =&gt; {
                     <span class="comment">// Skip block number increase in case of the very first block</span>
                     <span class="kw">if</span> <span class="ident">last_archived_block</span> <span class="op">!</span><span class="op">=</span> <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span> {
@@ -1201,7 +1125,7 @@
                         <span class="comment">// archived</span>
                         <span class="ident">last_archived_block</span>.<span class="ident">number</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     }
-                    <span class="ident">last_archived_block</span>.<span class="ident">bytes</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                    <span class="ident">last_archived_block</span>.<span class="ident">set_complete</span>();
                 }
                 <span class="ident">SegmentItem::BlockStart</span> { .. } =&gt; {
                     <span class="macro">unreachable!</span>(<span class="string">&quot;Buffer never contains SegmentItem::BlockStart; qed&quot;</span>);
@@ -1210,11 +1134,11 @@
                     <span class="comment">// Same block, but assume for now that the whole block was archived, but</span>
                     <span class="comment">// also store the number of bytes as opposed to `None`, we&#39;ll transform</span>
                     <span class="comment">// it into `None` if needed later</span>
-                    <span class="kw">let</span> <span class="ident">archived_bytes</span> <span class="op">=</span> <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">expect</span>(
+                    <span class="kw">let</span> <span class="ident">archived_bytes</span> <span class="op">=</span> <span class="ident">last_archived_block</span>.<span class="ident">partial_archived</span>().<span class="ident">expect</span>(
                         <span class="string">&quot;Block continuation implies that there are some bytes \
                                 archived already; qed&quot;</span>,
                     );
-                    <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">replace</span>(
+                    <span class="ident">last_archived_block</span>.<span class="ident">set_partial_archived</span>(
                         <span class="ident">archived_bytes</span>
                             <span class="op">+</span> <span class="ident">u32::try_from</span>(<span class="ident">bytes</span>.<span class="ident">len</span>())
                                 .<span class="ident">expect</span>(<span class="string">&quot;Blocks length is never bigger than u32; qed&quot;</span>),
@@ -1235,39 +1159,12 @@
             .<span class="ident">unwrap_or_default</span>();
 
         <span class="kw">if</span> <span class="ident">spill_over</span> <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="kw">let</span> <span class="ident">Segment::V0</span> { <span class="ident">items</span> } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">segment</span>;
+            <span class="kw">let</span> <span class="ident">Segment::V0</span> { <span class="ident">items</span> } <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">segment</span>;
             <span class="kw">let</span> <span class="ident">segment_item</span> <span class="op">=</span> <span class="ident">items</span>
                 .<span class="ident">pop</span>()
                 .<span class="ident">expect</span>(<span class="string">&quot;Segment over segment size always has at least one item; qed&quot;</span>);
 
             <span class="kw">let</span> <span class="ident">segment_item</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">segment_item</span> {
-                <span class="ident">SegmentItem::Object</span>(<span class="kw-2">mut</span> <span class="ident">bytes</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">split_point</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">spill_over</span>;
-                    <span class="kw">let</span> <span class="ident">continuation_bytes</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">split_point</span>..].<span class="ident">to_vec</span>();
-
-                    <span class="ident">bytes</span>.<span class="ident">truncate</span>(<span class="ident">split_point</span>);
-
-                    <span class="comment">// Push continuation element back into the buffer where removed segment item was</span>
-                    <span class="self">self</span>.<span class="ident">buffer</span>
-                        .<span class="ident">push_front</span>(<span class="ident">SegmentItem::ObjectContinuation</span>(<span class="ident">continuation_bytes</span>));
-
-                    <span class="ident">SegmentItem::ObjectStart</span>(<span class="ident">bytes</span>)
-                }
-                <span class="ident">SegmentItem::ObjectStart</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">&quot;Buffer never contains SegmentItem::ObjectStart; qed&quot;</span>);
-                }
-                <span class="ident">SegmentItem::ObjectContinuation</span>(<span class="kw-2">mut</span> <span class="ident">bytes</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">split_point</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">spill_over</span>;
-                    <span class="kw">let</span> <span class="ident">continuation_bytes</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">split_point</span>..].<span class="ident">to_vec</span>();
-
-                    <span class="ident">bytes</span>.<span class="ident">truncate</span>(<span class="ident">split_point</span>);
-
-                    <span class="comment">// Push continuation element back into the buffer where removed segment item was</span>
-                    <span class="self">self</span>.<span class="ident">buffer</span>
-                        .<span class="ident">push_front</span>(<span class="ident">SegmentItem::ObjectContinuation</span>(<span class="ident">continuation_bytes</span>));
-
-                    <span class="ident">SegmentItem::ObjectContinuation</span>(<span class="ident">bytes</span>)
-                }
                 <span class="ident">SegmentItem::Block</span> {
                     <span class="kw-2">mut</span> <span class="ident">bytes</span>,
                     <span class="kw-2">mut</span> <span class="ident">object_mapping</span>,
@@ -1280,15 +1177,10 @@
                     <span class="kw">let</span> <span class="ident">continuation_object_mapping</span> <span class="op">=</span> <span class="ident">BlockObjectMapping</span> {
                         <span class="ident">objects</span>: <span class="ident">object_mapping</span>
                             .<span class="ident">objects</span>
-                            .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
+                            .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
                                 <span class="kw">let</span> <span class="ident">current_offset</span> <span class="op">=</span> <span class="ident">block_object</span>.<span class="ident">offset</span>();
-                                <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span> {
-                                    <span class="kw">let</span> <span class="ident">BlockObject::V0</span> { <span class="ident">offset</span>, .. } <span class="op">=</span> <span class="ident">block_object</span>;
-                                    <span class="kw">let</span> <span class="ident">new_offset</span> <span class="op">=</span>
-                                        (<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">to_le_bytes</span>();
-
-                                    <span class="comment">// Correct offset and remove from original object mapping `Vec`</span>
-                                    <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">=</span> [<span class="ident">new_offset</span>[<span class="number">0</span>], <span class="ident">new_offset</span>[<span class="number">1</span>], <span class="ident">new_offset</span>[<span class="number">2</span>]];
+                                <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span> {
+                                    <span class="ident">block_object</span>.<span class="ident">set_offset</span>(<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span>);
                                     <span class="bool-val">true</span>
                                 } <span class="kw">else</span> {
                                     <span class="bool-val">false</span>
@@ -1298,7 +1190,7 @@
                     };
 
                     <span class="comment">// Update last archived block to include partial archiving info</span>
-                    <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">replace</span>(
+                    <span class="ident">last_archived_block</span>.<span class="ident">set_partial_archived</span>(
                         <span class="ident">u32::try_from</span>(<span class="ident">bytes</span>.<span class="ident">len</span>())
                             .<span class="ident">expect</span>(<span class="string">&quot;Blocks length is never bigger than u32; qed&quot;</span>),
                     );
@@ -1329,15 +1221,10 @@
                     <span class="kw">let</span> <span class="ident">continuation_object_mapping</span> <span class="op">=</span> <span class="ident">BlockObjectMapping</span> {
                         <span class="ident">objects</span>: <span class="ident">object_mapping</span>
                             .<span class="ident">objects</span>
-                            .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
+                            .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
                                 <span class="kw">let</span> <span class="ident">current_offset</span> <span class="op">=</span> <span class="ident">block_object</span>.<span class="ident">offset</span>();
-                                <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span> {
-                                    <span class="kw">let</span> <span class="ident">BlockObject::V0</span> { <span class="ident">offset</span>, .. } <span class="op">=</span> <span class="ident">block_object</span>;
-                                    <span class="kw">let</span> <span class="ident">new_offset</span> <span class="op">=</span>
-                                        (<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">to_le_bytes</span>();
-
-                                    <span class="comment">// Correct offset and remove from original object mapping `Vec`</span>
-                                    <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">=</span> [<span class="ident">new_offset</span>[<span class="number">0</span>], <span class="ident">new_offset</span>[<span class="number">1</span>], <span class="ident">new_offset</span>[<span class="number">2</span>]];
+                                <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span> {
+                                    <span class="ident">block_object</span>.<span class="ident">set_offset</span>(<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">split_point</span> <span class="kw">as</span> <span class="ident">u32</span>);
                                     <span class="bool-val">true</span>
                                 } <span class="kw">else</span> {
                                     <span class="bool-val">false</span>
@@ -1348,11 +1235,11 @@
 
                     <span class="comment">// Above code assumed that block was archived fully, now remove spilled-over</span>
                     <span class="comment">// bytes from the size</span>
-                    <span class="kw">let</span> <span class="ident">archived_bytes</span> <span class="op">=</span> <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">expect</span>(
+                    <span class="kw">let</span> <span class="ident">archived_bytes</span> <span class="op">=</span> <span class="ident">last_archived_block</span>.<span class="ident">partial_archived</span>().<span class="ident">expect</span>(
                         <span class="string">&quot;Block continuation implies that there are some bytes archived \
                         already; qed&quot;</span>,
                     );
-                    <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">replace</span>(
+                    <span class="ident">last_archived_block</span>.<span class="ident">set_partial_archived</span>(
                         <span class="ident">archived_bytes</span>
                             <span class="op">-</span> <span class="ident">u32::try_from</span>(<span class="ident">spill_over</span>)
                                 .<span class="ident">expect</span>(<span class="string">&quot;Blocks length is never bigger than u32; qed&quot;</span>),
@@ -1382,7 +1269,7 @@
         } <span class="kw">else</span> {
             <span class="comment">// Above code added bytes length even though it was assumed that all continuation bytes</span>
             <span class="comment">// fit into the segment, now we need to tweak that</span>
-            <span class="ident">last_archived_block</span>.<span class="ident">bytes</span>.<span class="ident">take</span>();
+            <span class="ident">last_archived_block</span>.<span class="ident">set_complete</span>();
         }
 
         <span class="self">self</span>.<span class="ident">last_archived_block</span> <span class="op">=</span> <span class="ident">last_archived_block</span>;
@@ -1391,7 +1278,7 @@
     }
 
     <span class="comment">// Take segment as an input, apply necessary transformations and produce archived segment</span>
-    <span class="kw">fn</span> <span class="ident">produce_archived_segment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">segment</span>: <span class="ident">Segment</span>) -&gt; <span class="ident">ArchivedSegment</span> {
+    <span class="kw">fn</span> <span class="ident">produce_archived_segment</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">segment</span>: <span class="ident">Segment</span>) -&gt; <span class="ident">ArchivedSegment</span> {
         <span class="comment">// Create mappings</span>
         <span class="kw">let</span> <span class="ident">object_mapping</span> <span class="op">=</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">corrected_object_mapping</span> <span class="op">=</span>
@@ -1401,11 +1288,6 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">base_offset_in_segment</span> <span class="op">=</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">Compact::compact_len</span>(<span class="kw-2">&amp;</span>(<span class="ident">items</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>));
             <span class="kw">for</span> <span class="ident">segment_item</span> <span class="kw">in</span> <span class="ident">items</span> {
                 <span class="kw">match</span> <span class="ident">segment_item</span> {
-                    <span class="ident">SegmentItem::Object</span>(<span class="kw">_</span>)
-                    <span class="op">|</span> <span class="ident">SegmentItem::ObjectStart</span>(<span class="kw">_</span>)
-                    <span class="op">|</span> <span class="ident">SegmentItem::ObjectContinuation</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="comment">// Ignore, no objects mappings here</span>
-                    }
                     <span class="ident">SegmentItem::Block</span> {
                         <span class="ident">bytes</span>,
                         <span class="ident">object_mapping</span>,
@@ -1421,10 +1303,9 @@
                         <span class="kw">for</span> <span class="ident">block_object</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">object_mapping</span>.<span class="ident">objects</span> {
                             <span class="comment">// `+1` corresponds to `SegmentItem::X {}` enum variant encoding</span>
                             <span class="kw">let</span> <span class="ident">offset_in_segment</span> <span class="op">=</span> <span class="ident">base_offset_in_segment</span>
-                                <span class="op">+</span> <span class="ident">block_object</span>.<span class="ident">offset</span>() <span class="kw">as</span> <span class="ident">usize</span>
                                 <span class="op">+</span> <span class="number">1</span>
-                                <span class="op">+</span> <span class="ident">Compact::compact_len</span>(<span class="kw-2">&amp;</span>(<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>));
-                            <span class="kw">let</span> <span class="ident">BlockObject::V0</span> { <span class="ident">size</span>, .. } <span class="op">=</span> <span class="ident">block_object</span>;
+                                <span class="op">+</span> <span class="ident">Compact::compact_len</span>(<span class="kw-2">&amp;</span>(<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>))
+                                <span class="op">+</span> <span class="ident">block_object</span>.<span class="ident">offset</span>() <span class="kw">as</span> <span class="ident">usize</span>;
                             <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> (<span class="ident">offset_in_segment</span> <span class="op">%</span> <span class="self">self</span>.<span class="ident">record_size</span>).<span class="ident">try_into</span>().<span class="ident">expect</span>(
                                 <span class="string">&quot;Offset within piece should always fit in 16-bit integer; qed&quot;</span>,
                             );
@@ -1432,8 +1313,8 @@
                             <span class="ident">corrected_object_mapping</span>[<span class="ident">offset_in_segment</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">record_size</span>]
                                 .<span class="ident">objects</span>
                                 .<span class="ident">push</span>(<span class="ident">PieceObject::V0</span> {
+                                    <span class="ident">hash</span>: <span class="ident">block_object</span>.<span class="ident">hash</span>(),
                                     <span class="ident">offset</span>,
-                                    <span class="ident">size</span>: <span class="kw-2">*</span><span class="ident">size</span>,
                                 })
                         }
                     }
@@ -1446,99 +1327,67 @@
             }
             <span class="ident">corrected_object_mapping</span>
         };
-        <span class="kw">let</span> <span class="ident">segment</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">segment</span> <span class="op">=</span> <span class="ident">segment</span>.<span class="ident">encode</span>();
-            <span class="comment">// Add a few bytes of padding if needed to get constant size (caused by compact length</span>
-            <span class="comment">// encoding of scale codec)</span>
-            <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">segment_size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">segment</span>.<span class="ident">len</span>());
-            <span class="ident">segment</span>.<span class="ident">resize</span>(<span class="self">self</span>.<span class="ident">segment_size</span>, <span class="number">0u8</span>);
-            <span class="ident">segment</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">record_shards</span> <span class="op">=</span> {
+            <span class="comment">// Allocate record shards that can hold both data and parity record shards (hence `*2`)</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">record_shards</span> <span class="op">=</span>
+                <span class="ident">RecordShards::new</span>(<span class="self">self</span>.<span class="ident">segment_size</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">record_size</span> <span class="op">*</span> <span class="number">2</span>, <span class="self">self</span>.<span class="ident">record_size</span>);
+            <span class="ident">segment</span>.<span class="ident">encode_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">record_shards</span>);
+            <span class="ident">record_shards</span>
         };
-
-        <span class="kw">fn</span> <span class="ident">slice_to_arrays</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">2</span>]<span class="op">&gt;</span> {
-            <span class="ident">slice</span>
-                .<span class="ident">chunks_exact</span>(<span class="number">2</span>)
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
-                .<span class="ident">collect</span>()
-        }
-
-        <span class="kw">let</span> <span class="ident">data_shards</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">2</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segment</span>
-            .<span class="ident">chunks_exact</span>(<span class="self">self</span>.<span class="ident">record_size</span>)
-            .<span class="ident">map</span>(<span class="ident">slice_to_arrays</span>)
-            .<span class="ident">collect</span>();
 
         <span class="ident">drop</span>(<span class="ident">segment</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">parity_shards</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">2</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">iter::repeat</span>(<span class="macro">vec!</span>[[<span class="number">0u8</span>; <span class="number">2</span>]; <span class="self">self</span>.<span class="ident">record_size</span> <span class="op">/</span> <span class="number">2</span>])
-                .<span class="ident">take</span>(<span class="ident">data_shards</span>.<span class="ident">len</span>())
-                .<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">record_shards_slices</span> <span class="op">=</span> <span class="ident">record_shards</span>.<span class="ident">as_mut_slices</span>();
 
         <span class="comment">// Apply erasure coding to to create parity shards/records</span>
         <span class="self">self</span>.<span class="ident">reed_solomon</span>
-            .<span class="ident">encode_sep</span>(<span class="kw-2">&amp;</span><span class="ident">data_shards</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">parity_shards</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;Encoding is running with fixed parameters and should never fail&quot;</span>);
+            .<span class="ident">encode</span>(<span class="kw-2">&amp;mut</span> <span class="ident">record_shards_slices</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;Encoding is running with fixed parameters and should never fail; qed&quot;</span>);
 
-        <span class="comment">// Combine data and parity records back into vectors for further processing</span>
-        <span class="kw">let</span> <span class="ident">records</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_shards</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">chain</span>(<span class="ident">parity_shards</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">shard</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">record</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">record_size</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pieces</span> <span class="op">=</span> <span class="ident">FlatPieces::new</span>(<span class="ident">record_shards_slices</span>.<span class="ident">len</span>());
+        <span class="ident">drop</span>(<span class="ident">record_shards_slices</span>);
 
-                <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="ident">shard</span> {
-                    <span class="ident">record</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">chunk</span>);
-                }
+        <span class="comment">// Build a Merkle tree over all records</span>
+        <span class="kw">let</span> <span class="ident">merkle_tree</span> <span class="op">=</span> <span class="ident">MerkleTree::from_data</span>(
+            <span class="ident">record_shards</span>
+                .<span class="ident">as_bytes</span>()
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">chunks_exact</span>(<span class="self">self</span>.<span class="ident">record_size</span>),
+        );
 
-                <span class="ident">record</span>
-            })
-            .<span class="ident">collect</span>();
-
-        <span class="comment">// Build a Merkle tree over data and parity records</span>
-        <span class="kw">let</span> <span class="ident">merkle_tree</span> <span class="op">=</span> <span class="ident">MerkleTree::from_data</span>(<span class="ident">records</span>.<span class="ident">iter</span>());
-
-        <span class="comment">// Take records, combine them with witnesses (Merkle proofs) to produce data and parity</span>
-        <span class="comment">// pieces</span>
-        <span class="kw">let</span> <span class="ident">pieces</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Piece</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">records</span>
-            .<span class="ident">into_iter</span>()
+        <span class="comment">// Combine data and parity records back into flat vector of pieces along with corresponding</span>
+        <span class="comment">// witnesses (Merkle proofs) created above.</span>
+        <span class="ident">pieces</span>
+            .<span class="ident">as_pieces_mut</span>()
             .<span class="ident">enumerate</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">position</span>, <span class="ident">record</span>)<span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">witness</span> <span class="op">=</span> <span class="ident">merkle_tree</span>
-                    .<span class="ident">get_witness</span>(<span class="ident">position</span>)
-                    .<span class="ident">expect</span>(<span class="string">&quot;We use the same indexes as during Merkle tree creation; qed&quot;</span>);
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">piece</span>: <span class="ident">Piece</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">PIECE_SIZE</span>];
+            .<span class="ident">zip</span>(
+                <span class="ident">record_shards</span>
+                    .<span class="ident">as_bytes</span>()
+                    .<span class="ident">as_ref</span>()
+                    .<span class="ident">chunks_exact</span>(<span class="self">self</span>.<span class="ident">record_size</span>),
+            )
+            .<span class="ident">for_each</span>(<span class="op">|</span>((<span class="ident">position</span>, <span class="ident">piece</span>), <span class="ident">shard_chunk</span>)<span class="op">|</span> {
+                <span class="kw">let</span> (<span class="ident">record_part</span>, <span class="ident">witness_part</span>) <span class="op">=</span> <span class="ident">piece</span>.<span class="ident">split_at_mut</span>(<span class="self">self</span>.<span class="ident">record_size</span>);
 
-                <span class="ident">piece</span>.<span class="ident">as_mut</span>().<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">record</span>).<span class="ident">expect</span>(
-                    <span class="string">&quot;With correct archiver parameters record is always smaller than \
-                    piece size; qed&quot;</span>,
+                <span class="ident">record_part</span>.<span class="ident">copy_from_slice</span>(<span class="ident">shard_chunk</span>);
+                <span class="ident">witness_part</span>.<span class="ident">copy_from_slice</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">merkle_tree</span>
+                        .<span class="ident">get_witness</span>(<span class="ident">position</span>)
+                        .<span class="ident">expect</span>(<span class="string">&quot;We use the same indexes as during Merkle tree creation; qed&quot;</span>),
                 );
-                <span class="ident">drop</span>(<span class="ident">record</span>);
-
-                (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">piece</span>[<span class="self">self</span>.<span class="ident">record_size</span>..]).<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">witness</span>).<span class="ident">expect</span>(
-                    <span class="string">&quot;Parameters are verified in the archiver constructor to make sure this \
-                    never happens; qed&quot;</span>,
-                );
-
-                <span class="ident">piece</span>
-            })
-            .<span class="ident">collect</span>();
-
-        <span class="kw">let</span> <span class="ident">segment_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">segment_index</span>;
-        <span class="kw">let</span> <span class="ident">merkle_tree_root</span> <span class="op">=</span> <span class="ident">merkle_tree</span>.<span class="ident">root</span>();
+            });
 
         <span class="comment">// Now produce root block</span>
         <span class="kw">let</span> <span class="ident">root_block</span> <span class="op">=</span> <span class="ident">RootBlock::V0</span> {
-            <span class="ident">segment_index</span>,
-            <span class="ident">merkle_tree_root</span>,
+            <span class="ident">segment_index</span>: <span class="self">self</span>.<span class="ident">segment_index</span>,
+            <span class="ident">records_root</span>: <span class="ident">merkle_tree</span>.<span class="ident">root</span>(),
             <span class="ident">prev_root_block_hash</span>: <span class="self">self</span>.<span class="ident">prev_root_block_hash</span>,
             <span class="ident">last_archived_block</span>: <span class="self">self</span>.<span class="ident">last_archived_block</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">root_block_hash</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">hash</span>();
-
         <span class="comment">// Update state</span>
-        <span class="self">self</span>.<span class="ident">segment_index</span> <span class="op">=</span> <span class="ident">segment_index</span> <span class="op">+</span> <span class="number">1</span>;
-        <span class="self">self</span>.<span class="ident">prev_root_block_hash</span> <span class="op">=</span> <span class="ident">root_block_hash</span>;
+        <span class="self">self</span>.<span class="ident">segment_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">prev_root_block_hash</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">hash</span>();
 
         <span class="comment">// Add root block to the beginning of the buffer to be the first thing included in the next</span>
         <span class="comment">// segment</span>
@@ -1549,150 +1398,6 @@
             <span class="ident">pieces</span>,
             <span class="ident">object_mapping</span>,
         }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">ObjectArchiver</span> {
-    <span class="doccomment">/// Adds new object to internal buffer, potentially producing pieces and root block headers</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_object</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">object</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span> {
-        <span class="comment">// Append new block to the buffer</span>
-        <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">push_back</span>(<span class="ident">SegmentItem::Object</span>(<span class="ident">object</span>));
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archived_segments</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">segment</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">produce_segment</span>() {
-            <span class="ident">archived_segments</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">produce_archived_segment</span>(<span class="ident">segment</span>));
-        }
-
-        <span class="ident">archived_segments</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_block_archiver</span>(<span class="self">self</span>) -&gt; <span class="ident">BlockArchiver</span> {
-        <span class="kw">let</span> <span class="self">Self</span> {
-            <span class="ident">buffer</span>,
-            <span class="ident">record_size</span>,
-            <span class="ident">segment_size</span>,
-            <span class="ident">reed_solomon</span>,
-            <span class="ident">segment_index</span>,
-            <span class="ident">prev_root_block_hash</span>,
-            <span class="ident">last_archived_block</span>,
-            ..
-        } <span class="op">=</span> <span class="self">self</span>;
-
-        <span class="ident">Archiver</span> {
-            <span class="ident">buffer</span>,
-            <span class="ident">record_size</span>,
-            <span class="ident">segment_size</span>,
-            <span class="ident">reed_solomon</span>,
-            <span class="ident">segment_index</span>,
-            <span class="ident">prev_root_block_hash</span>,
-            <span class="ident">last_archived_block</span>,
-            <span class="ident">state_marker</span>: <span class="ident">PhantomData::default</span>(),
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">BlockArchiver</span> {
-    <span class="doccomment">/// Create a new instance of block archiver with initial state in case of restart.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `block` corresponds to `last_archived_block` and will be processed accordingly to its state.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_initial_state</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="ident">record_size</span>: <span class="ident">usize</span>,
-        <span class="ident">segment_size</span>: <span class="ident">usize</span>,
-        <span class="ident">root_block</span>: <span class="ident">RootBlock</span>,
-        <span class="ident">encoded_block</span>: <span class="ident">B</span>,
-        <span class="kw-2">mut</span> <span class="ident">object_mapping</span>: <span class="ident">BlockObjectMapping</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ArchiverInstantiationError</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">root_block</span>.<span class="ident">last_archived_block</span>() <span class="op">==</span> <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::NoBlocksInvalidInitialState</span>);
-        }
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archiver</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">record_size</span>, <span class="ident">segment_size</span>)<span class="question-mark">?</span>;
-
-        <span class="ident">archiver</span>.<span class="ident">segment_index</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">segment_index</span>() <span class="op">+</span> <span class="number">1</span>;
-        <span class="ident">archiver</span>.<span class="ident">prev_root_block_hash</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">hash</span>();
-        <span class="ident">archiver</span>.<span class="ident">last_archived_block</span> <span class="op">=</span> <span class="ident">root_block</span>.<span class="ident">last_archived_block</span>();
-
-        <span class="comment">// The first thing in the buffer should be root block</span>
-        <span class="ident">archiver</span>
-            .<span class="ident">buffer</span>
-            .<span class="ident">push_back</span>(<span class="ident">SegmentItem::RootBlock</span>(<span class="ident">root_block</span>));
-
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">archived_block_bytes</span>) <span class="op">=</span> <span class="ident">archiver</span>.<span class="ident">last_archived_block</span>.<span class="ident">bytes</span> {
-            <span class="kw">let</span> <span class="ident">encoded_block</span> <span class="op">=</span> <span class="ident">encoded_block</span>.<span class="ident">as_ref</span>();
-            <span class="kw">let</span> <span class="ident">encoded_block_bytes</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">encoded_block</span>.<span class="ident">len</span>())
-                .<span class="ident">expect</span>(<span class="string">&quot;Blocks length is never bigger than u32; qed&quot;</span>);
-
-            <span class="kw">match</span> <span class="ident">encoded_block_bytes</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">archived_block_bytes</span>) {
-                <span class="ident">Ordering::Less</span> =&gt; {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::InvalidBlockSmallSize</span> {
-                        <span class="ident">block_bytes</span>: <span class="ident">encoded_block_bytes</span>,
-                        <span class="ident">archived_block_bytes</span>,
-                    });
-                }
-                <span class="ident">Ordering::Equal</span> =&gt; {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ArchiverInstantiationError::InvalidLastArchivedBlock</span>(
-                        <span class="ident">encoded_block_bytes</span>,
-                    ));
-                }
-                <span class="ident">Ordering::Greater</span> =&gt; {
-                    <span class="comment">// Take part of the encoded block that wasn&#39;t archived yet and push to the</span>
-                    <span class="comment">// buffer and block continuation</span>
-                    <span class="ident">object_mapping</span>
-                        .<span class="ident">objects</span>
-                        .<span class="ident">drain_filter</span>(<span class="op">|</span><span class="ident">block_object</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BlockObject</span><span class="op">|</span> {
-                            <span class="kw">let</span> <span class="ident">current_offset</span> <span class="op">=</span> <span class="ident">block_object</span>.<span class="ident">offset</span>();
-                            <span class="kw">if</span> <span class="ident">current_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">archived_block_bytes</span> {
-                                <span class="kw">let</span> <span class="ident">BlockObject::V0</span> { <span class="ident">offset</span>, .. } <span class="op">=</span> <span class="ident">block_object</span>;
-                                <span class="kw">let</span> <span class="ident">new_offset</span> <span class="op">=</span>
-                                    (<span class="ident">current_offset</span> <span class="op">-</span> <span class="ident">archived_block_bytes</span>).<span class="ident">to_le_bytes</span>();
-
-                                <span class="comment">// Correct offset and retain in object mapping `Vec`</span>
-                                <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">=</span> [<span class="ident">new_offset</span>[<span class="number">0</span>], <span class="ident">new_offset</span>[<span class="number">1</span>], <span class="ident">new_offset</span>[<span class="number">2</span>]];
-                                <span class="bool-val">false</span>
-                            } <span class="kw">else</span> {
-                                <span class="bool-val">true</span>
-                            }
-                        });
-                    <span class="ident">archiver</span>.<span class="ident">buffer</span>.<span class="ident">push_back</span>(<span class="ident">SegmentItem::BlockContinuation</span> {
-                        <span class="ident">bytes</span>: <span class="ident">encoded_block</span>[(<span class="ident">archived_block_bytes</span> <span class="kw">as</span> <span class="ident">usize</span>)..].<span class="ident">to_vec</span>(),
-                        <span class="ident">object_mapping</span>,
-                    });
-                }
-            }
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="ident">archiver</span>)
-    }
-
-    <span class="doccomment">/// Get last archived block if there was any</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">last_archived_block_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">last_archived_block</span> <span class="op">!</span><span class="op">=</span> <span class="ident">INITIAL_LAST_ARCHIVED_BLOCK</span> {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">last_archived_block</span>.<span class="ident">number</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
-    }
-
-    <span class="doccomment">/// Adds new block to internal buffer, potentially producing pieces and root block headers</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_block</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">bytes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-        <span class="ident">object_mapping</span>: <span class="ident">BlockObjectMapping</span>,
-    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span> {
-        <span class="comment">// Append new block to the buffer</span>
-        <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">push_back</span>(<span class="ident">SegmentItem::Block</span> {
-            <span class="ident">bytes</span>,
-            <span class="ident">object_mapping</span>,
-        });
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archived_segments</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">segment</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">produce_segment</span>() {
-            <span class="ident">archived_segments</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">produce_archived_segment</span>(<span class="ident">segment</span>));
-        }
-
-        <span class="ident">archived_segments</span>
     }
 }
 
@@ -1709,6 +1414,5 @@
     <span class="ident">witness</span>.<span class="ident">is_valid</span>(<span class="ident">root</span>, <span class="ident">position</span>, <span class="ident">leaf_hash</span>)
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="subspace_archiving" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="subspace_archiving" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0-nightly (8f117a77d 2021-12-13)" ></div>
 </body></html>

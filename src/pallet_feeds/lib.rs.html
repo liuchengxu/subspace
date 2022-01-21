@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;pallet-feeds&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pallet_feeds/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;pallet-feeds&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href='../../pallet_feeds/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container rust-logo" href='../../pallet_feeds/index.html'><img src='../../rust-logo.png' alt='logo'></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -170,6 +171,15 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -191,18 +201,20 @@
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">rust_2018_idioms</span>, <span class="ident">missing_debug_implementations</span>)]</span>
 
-<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Compact</span>, <span class="ident">CompactLen</span>};
 <span class="kw">use</span> <span class="ident">core::mem</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
+<span class="kw">use</span> <span class="ident">subspace_core_primitives</span>::{<span class="ident">crypto</span>, <span class="ident">Sha256Hash</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">mod</span> <span class="ident">mock</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">mod</span> <span class="ident">tests</span>;
 
 <span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
 <span class="kw">mod</span> <span class="ident">pallet</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">frame_support::dispatch::DispatchResult</span>;
     <span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">scale_info::TypeInfo</span>;
+    <span class="kw">use</span> <span class="ident">sp_std::prelude</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">pallet::config</span>]</span>
     <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> {
@@ -216,27 +228,28 @@
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
 
     <span class="doccomment">/// User-provided object to store</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">PutDataObject</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Object</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
     <span class="doccomment">/// ID of the feed</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">FeedId</span> <span class="op">=</span> <span class="ident">u64</span>;
     <span class="doccomment">/// User-provided object metadata (not addressable directly, but available in an even)</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">ObjectMetadata</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Total amount of data and number of objects stored in a feed</span>
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">TypeInfo</span>, <span class="ident">Default</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">derive</span>(<span class="ident">Debug</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">TotalObjectsAndSize</span> {
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">TypeInfo</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TotalObjectsAndSize</span> {
         <span class="doccomment">/// Total size of objects in bytes</span>
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">size</span>: <span class="ident">u64</span>,
+        <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">u64</span>,
         <span class="doccomment">/// Total number of objects</span>
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">count</span>: <span class="ident">u64</span>,
+        <span class="kw">pub</span> <span class="ident">count</span>: <span class="ident">u64</span>,
     }
 
     <span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Feeds</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">metadata</span>)]</span>
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Blake2_128Concat</span>, <span class="ident">FeedId</span>, <span class="ident">ObjectMetadata</span>, <span class="ident">OptionQuery</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+    <span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">totals</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Totals</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Blake2_128Concat</span>, <span class="ident">FeedId</span>, <span class="ident">TotalObjectsAndSize</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
@@ -248,10 +261,14 @@
     <span class="attribute">#[<span class="ident">pallet::event</span>]</span>
     <span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
-        <span class="doccomment">/// New object is added \[object_metadata, account_id, object_size\]</span>
-        <span class="ident">DataSubmitted</span>(<span class="ident">ObjectMetadata</span>, <span class="ident">T::AccountId</span>, <span class="ident">u64</span>),
-        <span class="doccomment">/// New feed is created \[feed_id, account_id\]</span>
-        <span class="ident">FeedCreated</span>(<span class="ident">FeedId</span>, <span class="ident">T::AccountId</span>),
+        <span class="doccomment">/// New object was added.</span>
+        <span class="ident">ObjectSubmitted</span> {
+            <span class="ident">metadata</span>: <span class="ident">ObjectMetadata</span>,
+            <span class="ident">who</span>: <span class="ident">T::AccountId</span>,
+            <span class="ident">object_size</span>: <span class="ident">u64</span>,
+        },
+        <span class="doccomment">/// New feed was created.</span>
+        <span class="ident">FeedCreated</span> { <span class="ident">feed_id</span>: <span class="ident">FeedId</span>, <span class="ident">who</span>: <span class="ident">T::AccountId</span> },
     }
 
     <span class="doccomment">/// `pallet-feeds` errors</span>
@@ -275,23 +292,24 @@
 
             <span class="ident">Totals</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">feed_id</span>, <span class="ident">TotalObjectsAndSize::default</span>());
 
-            <span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::FeedCreated</span>(<span class="ident">feed_id</span>, <span class="ident">who</span>));
+            <span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::FeedCreated</span> { <span class="ident">feed_id</span>, <span class="ident">who</span> });
 
             <span class="prelude-val">Ok</span>(())
         }
 
         <span class="comment">// TODO: add proper weights</span>
+        <span class="comment">// TODO: For now we don&#39;t have fees, but we will have them in the future</span>
         <span class="doccomment">/// Put a new object into a feed</span>
-        <span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">10_000</span>)]</span>
+        <span class="attribute">#[<span class="ident">pallet::weight</span>((<span class="number">10_000</span>, <span class="ident">Pays::No</span>))]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put</span>(
             <span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
             <span class="ident">feed_id</span>: <span class="ident">FeedId</span>,
-            <span class="ident">data</span>: <span class="ident">PutDataObject</span>,
+            <span class="ident">object</span>: <span class="ident">Object</span>,
             <span class="ident">metadata</span>: <span class="ident">ObjectMetadata</span>,
         ) -&gt; <span class="ident">DispatchResult</span> {
             <span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
-            <span class="kw">let</span> <span class="ident">object_size</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
+            <span class="kw">let</span> <span class="ident">object_size</span> <span class="op">=</span> <span class="ident">object</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
 
             <span class="macro">log::debug!</span>(<span class="string">&quot;metadata: {:?}&quot;</span>, <span class="ident">metadata</span>);
             <span class="macro">log::debug!</span>(<span class="string">&quot;object_size: {:?}&quot;</span>, <span class="ident">object_size</span>);
@@ -300,14 +318,18 @@
 
             <span class="macro">ensure!</span>(<span class="ident">current_feed_id</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">feed_id</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::UnknownFeedId</span>);
 
-            <span class="ident">Feeds</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">feed_id</span>, <span class="ident">metadata</span>.<span class="ident">clone</span>());
+            <span class="ident">Metadata</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">feed_id</span>, <span class="ident">metadata</span>.<span class="ident">clone</span>());
 
             <span class="ident">Totals</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="ident">feed_id</span>, <span class="op">|</span><span class="ident">feed_totals</span><span class="op">|</span> {
                 <span class="ident">feed_totals</span>.<span class="ident">size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">object_size</span>;
                 <span class="ident">feed_totals</span>.<span class="ident">count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             });
 
-            <span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::DataSubmitted</span>(<span class="ident">metadata</span>, <span class="ident">who</span>, <span class="ident">object_size</span>));
+            <span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::ObjectSubmitted</span> {
+                <span class="ident">metadata</span>,
+                <span class="ident">who</span>,
+                <span class="ident">object_size</span>,
+            });
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -316,26 +338,23 @@
 
 <span class="doccomment">/// Mapping to the object offset and size within an extrinsic</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CallObjectLocation</span> {
-    <span class="doccomment">/// Offset</span>
-    <span class="kw">pub</span> <span class="ident">offset</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Size</span>
-    <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">usize</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CallObject</span> {
+    <span class="doccomment">/// Object hash</span>
+    <span class="kw">pub</span> <span class="ident">hash</span>: <span class="ident">Sha256Hash</span>,
+    <span class="doccomment">/// Offset of object in the encoded call.</span>
+    <span class="kw">pub</span> <span class="ident">offset</span>: <span class="ident">u32</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Extract object location if an extrinsic corresponds to `put` call</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_object_location</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CallObjectLocation</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Extract the call object if an extrinsic corresponds to `put` call</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_call_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CallObject</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::put</span> { <span class="ident">data</span>, .. } =&gt; {
-                <span class="comment">// FeedId is the first field in the extrinsic followed by compact length prefix of</span>
-                <span class="comment">// the actual data and data itself.</span>
-                <span class="comment">// `+1` corresponds to `Call::put {}` enum variant encoding.</span>
-                <span class="prelude-val">Some</span>(<span class="ident">CallObjectLocation</span> {
-                    <span class="ident">offset</span>: <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">FeedId</span><span class="op">&gt;</span>()
-                        <span class="op">+</span> <span class="ident">Compact::compact_len</span>(<span class="kw-2">&amp;</span>(<span class="ident">data</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>))
-                        <span class="op">+</span> <span class="number">1</span>,
-                    <span class="ident">size</span>: <span class="ident">data</span>.<span class="ident">len</span>(),
+            <span class="ident"><span class="self">Self</span>::put</span> { <span class="ident">object</span>, .. } =&gt; {
+                <span class="comment">// `FeedId` is the first field in the extrinsic. `1+` corresponds to `Call::put {}`</span>
+                <span class="comment">// enum variant encoding.</span>
+                <span class="prelude-val">Some</span>(<span class="ident">CallObject</span> {
+                    <span class="ident">hash</span>: <span class="ident">crypto::sha256_hash</span>(<span class="ident">object</span>),
+                    <span class="ident">offset</span>: <span class="number">1</span> <span class="op">+</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">FeedId</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span>,
                 })
             }
             <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
@@ -343,6 +362,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_feeds" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_feeds" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0-nightly (8f117a77d 2021-12-13)" ></div>
 </body></html>

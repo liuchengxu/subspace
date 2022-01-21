@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;sp-consensus-subspace&#x2F;src&#x2F;digests.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>digests.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sp_consensus_subspace/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;sp-consensus-subspace&#x2F;src&#x2F;digests.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>digests.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href='../../sp_consensus_subspace/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container rust-logo" href='../../sp_consensus_subspace/index.html'><img src='../../rust-logo.png' alt='logo'></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -186,6 +187,7 @@
 <span id="186">186</span>
 <span id="187">187</span>
 <span id="188">188</span>
+<span id="189">189</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
@@ -204,87 +206,42 @@
 
 <span class="doccomment">//! Private implementation details of Subspace consensus digests.</span>
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FarmerSignature</span>, <span class="ident">Slot</span>, <span class="ident">SubspaceEpochConfiguration</span>, <span class="ident">SUBSPACE_ENGINE_ID</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::FarmerPublicKey</span>;
-<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Codec</span>, <span class="ident">Decode</span>, <span class="ident">Encode</span>};
-<span class="kw">use</span> <span class="ident">scale_info::TypeInfo</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ConsensusLog</span>, <span class="ident">FarmerSignature</span>, <span class="ident">SubspaceBlockWeight</span>, <span class="ident">SUBSPACE_ENGINE_ID</span>};
+<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
+<span class="kw">use</span> <span class="ident">sp_consensus_slots::Slot</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime::generic::DigestItemRef</span>;
 <span class="kw">use</span> <span class="ident">sp_runtime</span>::{<span class="ident">DigestItem</span>, <span class="ident">RuntimeDebug</span>};
-<span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident">subspace_core_primitives::Randomness</span>;
-
-<span class="comment">// TODO: better documentation here</span>
-<span class="doccomment">/// Solution</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Solution</span> {
-    <span class="doccomment">/// Public key of the farmer that created solution</span>
-    <span class="kw">pub</span> <span class="ident">public_key</span>: <span class="ident">FarmerPublicKey</span>,
-    <span class="doccomment">/// Index of encoded piece</span>
-    <span class="kw">pub</span> <span class="ident">piece_index</span>: <span class="ident">u64</span>,
-    <span class="doccomment">/// Encoding</span>
-    <span class="kw">pub</span> <span class="ident">encoding</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Signature of the tag</span>
-    <span class="kw">pub</span> <span class="ident">signature</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Tag (hmac of encoding and salt)</span>
-    <span class="kw">pub</span> <span class="ident">tag</span>: [<span class="ident">u8</span>; <span class="number">8</span>],
-}
-
-<span class="kw">impl</span> <span class="ident">Solution</span> {
-    <span class="doccomment">/// Dummy solution for the genesis block</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_for_genesis</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">public_key</span>: <span class="ident">FarmerPublicKey::default</span>(),
-            <span class="ident">piece_index</span>: <span class="number">0u64</span>,
-            <span class="ident">encoding</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">signature</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">tag</span>: [<span class="number">0u8</span>; <span class="number">8</span>],
-        }
-    }
-}
+<span class="kw">use</span> <span class="ident">subspace_core_primitives</span>::{<span class="ident">Randomness</span>, <span class="ident">Salt</span>, <span class="ident">Solution</span>};
 
 <span class="doccomment">/// A Subspace pre-runtime digest. This contains all data required to validate a block and for the</span>
 <span class="doccomment">/// Subspace runtime module.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PreDigest</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Slot</span>
     <span class="kw">pub</span> <span class="ident">slot</span>: <span class="ident">Slot</span>,
     <span class="doccomment">/// Solution (includes PoR)</span>
-    <span class="kw">pub</span> <span class="ident">solution</span>: <span class="ident">Solution</span>,
+    <span class="kw">pub</span> <span class="ident">solution</span>: <span class="ident">Solution</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">PreDigest</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns the weight _added_ by this digest, not the cumulative weight</span>
     <span class="doccomment">/// of the chain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">added_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="kw">crate</span>::SubspaceBlockWeight</span> {
-        <span class="number">1</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">added_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SubspaceBlockWeight</span> {
+        <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="self">self</span>.<span class="ident">solution</span>.<span class="ident">local_challenge</span>.<span class="ident">derive_target</span>());
+        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="self">self</span>.<span class="ident">solution</span>.<span class="ident">tag</span>);
+        <span class="kw">let</span> <span class="ident">diff</span> <span class="op">=</span> <span class="ident">target</span>.<span class="ident">wrapping_sub</span>(<span class="ident">tag</span>);
+        <span class="kw">let</span> <span class="ident">diff2</span> <span class="op">=</span> <span class="ident">tag</span>.<span class="ident">wrapping_sub</span>(<span class="ident">target</span>);
+        <span class="comment">// Find smaller diff between 2 directions.</span>
+        <span class="kw">let</span> <span class="ident">bidirectional_diff</span> <span class="op">=</span> <span class="ident">diff</span>.<span class="ident">min</span>(<span class="ident">diff2</span>);
+        <span class="ident">u128::from</span>(<span class="ident">u64::MAX</span> <span class="op">-</span> <span class="ident">bidirectional_diff</span>)
     }
 }
 
-<span class="doccomment">/// Information about the next epoch. This is broadcast in the first block</span>
-<span class="doccomment">/// of the epoch.</span>
+<span class="doccomment">/// Information about the global randomness for the block.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NextEpochDescriptor</span> {
-    <span class="doccomment">/// The value of randomness to use for the slot-assignment.</span>
-    <span class="kw">pub</span> <span class="ident">randomness</span>: <span class="ident">Randomness</span>,
-}
-
-<span class="doccomment">/// Information about the next epoch config, if changed. This is broadcast in the first</span>
-<span class="doccomment">/// block of the epoch, and applies using the same rules as `NextEpochDescriptor`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">TypeInfo</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">NextConfigDescriptor</span> {
-    <span class="doccomment">/// Version 1.</span>
-    <span class="attribute">#[<span class="ident">codec</span>(<span class="ident">index</span> <span class="op">=</span> <span class="number">1</span>)]</span>
-    <span class="ident">V1</span> {
-        <span class="doccomment">/// Value of `c` in `SubspaceEpochConfiguration`.</span>
-        <span class="ident">c</span>: (<span class="ident">u64</span>, <span class="ident">u64</span>),
-    },
-}
-
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">NextConfigDescriptor</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SubspaceEpochConfiguration</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">desc</span>: <span class="ident">NextConfigDescriptor</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">desc</span> {
-            <span class="ident">NextConfigDescriptor::V1</span> { <span class="ident">c</span> } =&gt; <span class="self">Self</span> { <span class="ident">c</span> },
-        }
-    }
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GlobalRandomnessDescriptor</span> {
+    <span class="doccomment">/// Global randomness used for deriving global slot challenges.</span>
+    <span class="kw">pub</span> <span class="ident">global_randomness</span>: <span class="ident">Randomness</span>,
 }
 
 <span class="doccomment">/// Information about the solution range for the block.</span>
@@ -298,32 +255,16 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SaltDescriptor</span> {
     <span class="doccomment">/// Salt used with challenges.</span>
-    <span class="kw">pub</span> <span class="ident">salt</span>: <span class="ident">u64</span>,
-}
-
-<span class="doccomment">/// Information about the solution range, if changed. This is broadcast in the first</span>
-<span class="doccomment">/// block of the era, but only applies to the block after that.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NextSolutionRangeDescriptor</span> {
-    <span class="doccomment">/// Solution range used for challenges.</span>
-    <span class="kw">pub</span> <span class="ident">solution_range</span>: <span class="ident">u64</span>,
-}
-
-<span class="doccomment">/// Salt, if changed. This is broadcast in the each block of the eon, but only applies to the block</span>
-<span class="doccomment">/// after that.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">RuntimeDebug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NextSaltDescriptor</span> {
-    <span class="doccomment">/// Salt used with challenges.</span>
-    <span class="kw">pub</span> <span class="ident">salt</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">salt</span>: <span class="ident">Salt</span>,
 }
 
 <span class="doccomment">/// A digest item which is usable with Subspace consensus.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CompatibleDigestItem</span>: <span class="ident">Sized</span> {
     <span class="doccomment">/// Construct a digest item which contains a Subspace pre-digest.</span>
-    <span class="kw">fn</span> <span class="ident">subspace_pre_digest</span>(<span class="ident">seal</span>: <span class="ident">PreDigest</span>) -&gt; <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">pre_digest</span>: <span class="kw-2">&amp;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// If this item is an Subspace pre-digest, return it.</span>
-    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Construct a digest item which contains a Subspace seal.</span>
     <span class="kw">fn</span> <span class="ident">subspace_seal</span>(<span class="ident">signature</span>: <span class="ident">FarmerSignature</span>) -&gt; <span class="self">Self</span>;
@@ -331,50 +272,111 @@
     <span class="doccomment">/// If this item is a Subspace signature, return the signature.</span>
     <span class="kw">fn</span> <span class="ident">as_subspace_seal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FarmerSignature</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// If this item is a Subspace epoch descriptor, return it.</span>
-    <span class="kw">fn</span> <span class="ident">as_next_epoch_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NextEpochDescriptor</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Construct a digest item which contains a global randomness descriptor.</span>
+    <span class="kw">fn</span> <span class="ident">global_randomness_descriptor</span>(<span class="ident">global_randomness</span>: <span class="ident">GlobalRandomnessDescriptor</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// If this item is a Subspace config descriptor, return it.</span>
-    <span class="kw">fn</span> <span class="ident">as_next_config_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NextConfigDescriptor</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// If this item is a Subspace global randomness descriptor, return it.</span>
+    <span class="kw">fn</span> <span class="ident">as_global_randomness_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GlobalRandomnessDescriptor</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Construct a digest item which contains a solution range descriptor.</span>
+    <span class="kw">fn</span> <span class="ident">solution_range_descriptor</span>(<span class="ident">solution_range</span>: <span class="ident">SolutionRangeDescriptor</span>) -&gt; <span class="self">Self</span>;
+
+    <span class="doccomment">/// If this item is a Subspace solution range descriptor, return it.</span>
+    <span class="kw">fn</span> <span class="ident">as_solution_range_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SolutionRangeDescriptor</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Construct a digest item which contains a salt descriptor.</span>
+    <span class="kw">fn</span> <span class="ident">salt_descriptor</span>(<span class="ident">salt</span>: <span class="ident">SaltDescriptor</span>) -&gt; <span class="self">Self</span>;
+
+    <span class="doccomment">/// If this item is a Subspace salt descriptor, return it.</span>
+    <span class="kw">fn</span> <span class="ident">as_salt_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SaltDescriptor</span><span class="op">&gt;</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">CompatibleDigestItem</span> <span class="kw">for</span> <span class="ident">DigestItem</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Hash</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Codec</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-{
-    <span class="kw">fn</span> <span class="ident">subspace_pre_digest</span>(<span class="ident">digest</span>: <span class="ident">PreDigest</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">DigestItem::PreRuntime</span>(<span class="ident">SUBSPACE_ENGINE_ID</span>, <span class="ident">digest</span>.<span class="ident">encode</span>())
+<span class="kw">impl</span> <span class="ident">CompatibleDigestItem</span> <span class="kw">for</span> <span class="ident">DigestItem</span> {
+    <span class="kw">fn</span> <span class="ident">subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">pre_digest</span>: <span class="kw-2">&amp;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::PreRuntime</span>(<span class="ident">SUBSPACE_ENGINE_ID</span>, <span class="ident">pre_digest</span>.<span class="ident">encode</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">pre_runtime_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">subspace_seal</span>(<span class="ident">signature</span>: <span class="ident">FarmerSignature</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">DigestItem::Seal</span>(<span class="ident">SUBSPACE_ENGINE_ID</span>, <span class="ident">signature</span>.<span class="ident">encode</span>())
+        <span class="ident"><span class="self">Self</span>::Seal</span>(<span class="ident">SUBSPACE_ENGINE_ID</span>, <span class="ident">signature</span>.<span class="ident">encode</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">as_subspace_seal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FarmerSignature</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">seal_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">as_next_epoch_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NextEpochDescriptor</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">consensus_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span>: <span class="ident"><span class="kw">super</span>::ConsensusLog</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">x</span> {
-                <span class="ident"><span class="kw">super</span>::ConsensusLog::NextEpochData</span>(<span class="ident">n</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">n</span>),
-                <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
-            })
+    <span class="doccomment">/// Construct a digest item which contains a global randomness descriptor.</span>
+    <span class="kw">fn</span> <span class="ident">global_randomness_descriptor</span>(<span class="ident">global_randomness</span>: <span class="ident">GlobalRandomnessDescriptor</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Consensus</span>(
+            <span class="ident">SUBSPACE_ENGINE_ID</span>,
+            <span class="ident">ConsensusLog::GlobalRandomness</span>(<span class="ident">global_randomness</span>).<span class="ident">encode</span>(),
+        )
     }
 
-    <span class="kw">fn</span> <span class="ident">as_next_config_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NextConfigDescriptor</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">consensus_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span>: <span class="ident"><span class="kw">super</span>::ConsensusLog</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">x</span> {
-                <span class="ident"><span class="kw">super</span>::ConsensusLog::NextConfigData</span>(<span class="ident">n</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">n</span>),
-                <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
-            })
+    <span class="doccomment">/// If this item is a Subspace global randomness descriptor, return it.</span>
+    <span class="kw">fn</span> <span class="ident">as_global_randomness_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GlobalRandomnessDescriptor</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">consensus_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ConsensusLog::GlobalRandomness</span>(<span class="ident">global_randomness</span>) <span class="op">=</span> <span class="ident">c</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">global_randomness</span>)
+            } <span class="kw">else</span> {
+                <span class="prelude-val">None</span>
+            }
+        })
+    }
+
+    <span class="kw">fn</span> <span class="ident">solution_range_descriptor</span>(<span class="ident">solution_range</span>: <span class="ident">SolutionRangeDescriptor</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Consensus</span>(
+            <span class="ident">SUBSPACE_ENGINE_ID</span>,
+            <span class="ident">ConsensusLog::SolutionRange</span>(<span class="ident">solution_range</span>).<span class="ident">encode</span>(),
+        )
+    }
+
+    <span class="kw">fn</span> <span class="ident">as_solution_range_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SolutionRangeDescriptor</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">consensus_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ConsensusLog::SolutionRange</span>(<span class="ident">solution_range</span>) <span class="op">=</span> <span class="ident">c</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">solution_range</span>)
+            } <span class="kw">else</span> {
+                <span class="prelude-val">None</span>
+            }
+        })
+    }
+
+    <span class="kw">fn</span> <span class="ident">salt_descriptor</span>(<span class="ident">salt</span>: <span class="ident">SaltDescriptor</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Consensus</span>(<span class="ident">SUBSPACE_ENGINE_ID</span>, <span class="ident">ConsensusLog::Salt</span>(<span class="ident">salt</span>).<span class="ident">encode</span>())
+    }
+
+    <span class="kw">fn</span> <span class="ident">as_salt_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SaltDescriptor</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">consensus_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ConsensusLog::Salt</span>(<span class="ident">salt</span>) <span class="op">=</span> <span class="ident">c</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">salt</span>)
+            } <span class="kw">else</span> {
+                <span class="prelude-val">None</span>
+            }
+        })
+    }
+}
+
+<span class="doccomment">/// A digest item which is usable with Subspace consensus.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CompatibleDigestItemRef</span>: <span class="ident">Sized</span> {
+    <span class="doccomment">/// If this item is an Subspace pre-digest, return it.</span>
+    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Construct a digest item which contains a Subspace seal.</span>
+    <span class="kw">fn</span> <span class="ident">as_subspace_seal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FarmerSignature</span><span class="op">&gt;</span>;
+}
+
+<span class="kw">impl</span> <span class="ident">CompatibleDigestItemRef</span> <span class="kw">for</span> <span class="ident">DigestItemRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_subspace_pre_digest</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PreDigest</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">pre_runtime_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">as_subspace_seal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FarmerSignature</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">seal_try_to</span>(<span class="kw-2">&amp;</span><span class="ident">SUBSPACE_ENGINE_ID</span>)
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sp_consensus_subspace" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sp_consensus_subspace" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0-nightly (8f117a77d 2021-12-13)" ></div>
 </body></html>
