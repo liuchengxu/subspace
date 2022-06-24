@@ -7,6 +7,8 @@ name: Docker build
 
 on:
   workflow_dispatch:
+  push:
+    branches: debug-syncing
 
 # Incremental compilation here isn't helpful
 env:
@@ -61,8 +63,7 @@ jobs:
         with:
           file: Dockerfile-${{ matrix.image }}
           platforms: ${{ matrix.platform.arch }}
-          # Only push for releases
-          push: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
