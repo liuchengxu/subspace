@@ -8,7 +8,7 @@ name: Docker build
 on:
   workflow_dispatch:
   push:
-    branches: debug-syncing
+    tags: '*'
 
 # Incremental compilation here isn't helpful
 env:
