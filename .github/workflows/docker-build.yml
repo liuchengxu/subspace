@@ -63,7 +63,8 @@ jobs:
         with:
           file: Dockerfile-${{ matrix.image }}
           platforms: ${{ matrix.platform.arch }}
-          push: true
+          # Only push for releases
+          push: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
