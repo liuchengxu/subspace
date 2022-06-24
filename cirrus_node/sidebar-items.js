@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["service","Service and ServiceFactory implementation. Specialized wrapper over substrate service."]]});

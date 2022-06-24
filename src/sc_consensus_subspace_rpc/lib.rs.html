@@ -1,103 +1,109 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates&#x2F;sc-consensus-subspace-rpc&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href='../../sc_consensus_subspace_rpc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container rust-logo" href='../../sc_consensus_subspace_rpc/index.html'><img src='../../rust-logo.png' alt='logo'></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates/sc-consensus-subspace-rpc/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../sc_consensus_subspace_rpc/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../sc_consensus_subspace_rpc/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../sc_consensus_subspace_rpc/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -503,21 +509,6 @@
 <span id="502">502</span>
 <span id="503">503</span>
 <span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.</span>
 <span class="comment">// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0</span>
@@ -539,17 +530,20 @@
 
 <span class="attribute">#![<span class="ident">feature</span>(<span class="ident">try_blocks</span>)]</span>
 
-<span class="kw">use</span> <span class="ident">futures::task::SpawnExt</span>;
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">future</span>, <span class="ident">task::Spawn</span>, <span class="ident">FutureExt</span>, <span class="ident">SinkExt</span>, <span class="ident">StreamExt</span>};
-<span class="kw">use</span> <span class="ident">jsonrpc_core</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">RpcError</span>, <span class="ident">ErrorCode</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">RpcResult</span>};
-<span class="kw">use</span> <span class="ident">jsonrpc_derive::rpc</span>;
-<span class="kw">use</span> <span class="ident">jsonrpc_pubsub</span>::{<span class="ident">manager::SubscriptionManager</span>, <span class="ident">typed::Subscriber</span>, <span class="ident">SubscriptionId</span>};
+<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">future</span>, <span class="ident">FutureExt</span>, <span class="ident">SinkExt</span>, <span class="ident">StreamExt</span>};
+<span class="kw">use</span> <span class="ident">jsonrpsee::core</span>::{<span class="ident">async_trait</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">JsonRpseeError</span>, <span class="ident">RpcResult</span>};
+<span class="kw">use</span> <span class="ident">jsonrpsee::proc_macros::rpc</span>;
+<span class="kw">use</span> <span class="ident">jsonrpsee::PendingSubscription</span>;
 <span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">error</span>, <span class="ident">warn</span>};
 <span class="kw">use</span> <span class="ident">parity_scale_codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
 <span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
 <span class="kw">use</span> <span class="ident">sc_client_api::BlockBackend</span>;
 <span class="kw">use</span> <span class="ident">sc_consensus_subspace::notification::SubspaceNotificationStream</span>;
-<span class="kw">use</span> <span class="ident">sc_consensus_subspace</span>::{<span class="ident">ArchivedSegment</span>, <span class="ident">BlockSigningNotification</span>, <span class="ident">NewSlotNotification</span>};
+<span class="kw">use</span> <span class="ident">sc_consensus_subspace</span>::{
+    <span class="ident">ArchivedSegmentNotification</span>, <span class="ident">NewSlotNotification</span>, <span class="ident">RewardSigningNotification</span>,
+};
+<span class="kw">use</span> <span class="ident">sc_rpc::SubscriptionTaskExecutor</span>;
+<span class="kw">use</span> <span class="ident">sc_utils::mpsc::TracingUnboundedSender</span>;
 <span class="kw">use</span> <span class="ident">sp_api</span>::{<span class="ident">ApiError</span>, <span class="ident">ProvideRuntimeApi</span>};
 <span class="kw">use</span> <span class="ident">sp_blockchain::HeaderBackend</span>;
 <span class="kw">use</span> <span class="ident">sp_consensus_slots::Slot</span>;
@@ -558,109 +552,60 @@
 <span class="kw">use</span> <span class="ident">sp_core::H256</span>;
 <span class="kw">use</span> <span class="ident">sp_runtime::generic::BlockId</span>;
 <span class="kw">use</span> <span class="ident">sp_runtime::traits::Block</span> <span class="kw">as</span> <span class="ident">BlockT</span>;
+<span class="kw">use</span> <span class="ident">std::collections::hash_map::Entry</span>;
+<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
+<span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicU64</span>, <span class="ident">Ordering</span>};
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
-<span class="kw">use</span> <span class="ident">subspace_core_primitives</span>::{<span class="ident">BlockNumber</span>, <span class="ident">Solution</span>};
+<span class="kw">use</span> <span class="ident">subspace_archiving::archiver::ArchivedSegment</span>;
+<span class="kw">use</span> <span class="ident">subspace_core_primitives::Solution</span>;
 <span class="kw">use</span> <span class="ident">subspace_rpc_primitives</span>::{
-    <span class="ident">BlockSignature</span>, <span class="ident">BlockSigningInfo</span>, <span class="ident">EncodedBlockWithObjectMapping</span>, <span class="ident">FarmerMetadata</span>, <span class="ident">SlotInfo</span>,
-    <span class="ident">SolutionResponse</span>,
+    <span class="ident">FarmerMetadata</span>, <span class="ident">RewardSignatureResponse</span>, <span class="ident">RewardSigningInfo</span>, <span class="ident">SlotInfo</span>, <span class="ident">SolutionResponse</span>,
 };
 
-<span class="kw">const</span> <span class="ident">SOLUTION_TIMEOUT</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">5</span>);
-
-<span class="kw">type</span> <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">jsonrpc_core::BoxFuture</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RpcError</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">const</span> <span class="ident">SOLUTION_TIMEOUT</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">2</span>);
+<span class="kw">const</span> <span class="ident">REWARD_SIGNING_TIMEOUT</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_millis</span>(<span class="number">500</span>);
 
 <span class="doccomment">/// Provides rpc methods for interacting with Subspace.</span>
-<span class="attribute">#[<span class="ident">rpc</span>]</span>
+<span class="attribute">#[<span class="ident">rpc</span>(<span class="ident">client</span>, <span class="ident">server</span>)]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SubspaceRpcApi</span> {
-    <span class="doccomment">/// RPC metadata</span>
-    <span class="kw">type</span> <span class="ident">Metadata</span>;
-
     <span class="doccomment">/// Ger metadata necessary for farmer operation</span>
-    <span class="attribute">#[<span class="ident">rpc</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_getFarmerMetadata&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">get_farmer_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span><span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">method</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_getFarmerMetadata&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_farmer_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Get encoded block by given block number</span>
-    <span class="attribute">#[<span class="ident">rpc</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_getBlockByNumber&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">get_block_by_number</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">block_number</span>: <span class="ident">BlockNumber</span>,
-    ) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EncodedBlockWithObjectMapping</span><span class="op">&gt;</span><span class="op">&gt;</span>;
-
-    <span class="attribute">#[<span class="ident">rpc</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_submitSolutionResponse&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">submit_solution_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">solution_response</span>: <span class="ident">SolutionResponse</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">method</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_submitSolutionResponse&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">submit_solution_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">solution_response</span>: <span class="ident">SolutionResponse</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Slot info subscription</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_slot_info&quot;</span>,
-        <span class="ident">subscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeSlotInfo&quot;</span>
+    <span class="attribute">#[<span class="ident">subscription</span>(
+        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeSlotInfo&quot;</span> =&gt; <span class="string">&quot;subspace_slot_info&quot;</span>,
+        <span class="ident">unsubscribe</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeSlotInfo&quot;</span>,
+        <span class="ident">item</span> <span class="op">=</span> <span class="ident">SlotInfo</span>,
     )]</span>
-    <span class="kw">fn</span> <span class="ident">subscribe_slot_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>, <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">SlotInfo</span><span class="op">&gt;</span>);
-
-    <span class="doccomment">/// Unsubscribe from slot info subscription.</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_slot_info&quot;</span>,
-        <span class="ident">unsubscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeSlotInfo&quot;</span>
-    )]</span>
-    <span class="kw">fn</span> <span class="ident">unsubscribe_slot_info</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">subscribe_slot_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
 
     <span class="doccomment">/// Sign block subscription</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_block_signing&quot;</span>,
-        <span class="ident">subscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeBlockSigning&quot;</span>
+    <span class="attribute">#[<span class="ident">subscription</span>(
+        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeRewardSigning&quot;</span> =&gt; <span class="string">&quot;subspace_reward_signing&quot;</span>,
+        <span class="ident">unsubscribe</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeRewardSigning&quot;</span>,
+        <span class="ident">item</span> <span class="op">=</span> <span class="ident">RewardSigningInfo</span>,
     )]</span>
-    <span class="kw">fn</span> <span class="ident">subscribe_block_signing</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>,
-        <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">BlockSigningInfo</span><span class="op">&gt;</span>,
-    );
+    <span class="kw">fn</span> <span class="ident">subscribe_reward_signing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
 
-    <span class="doccomment">/// Unsubscribe from sign block subscription.</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_block_signing&quot;</span>,
-        <span class="ident">unsubscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeBlockSigning&quot;</span>
-    )]</span>
-    <span class="kw">fn</span> <span class="ident">unsubscribe_block_signing</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
-
-    <span class="attribute">#[<span class="ident">rpc</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_submitBlockSignature&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">submit_block_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block_signature</span>: <span class="ident">BlockSignature</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">method</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_submitRewardSignature&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">submit_reward_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reward_signature</span>: <span class="ident">RewardSignatureResponse</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Archived segment subscription</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_archived_segment&quot;</span>,
-        <span class="ident">subscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeArchivedSegment&quot;</span>
+    <span class="attribute">#[<span class="ident">subscription</span>(
+        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_subscribeArchivedSegment&quot;</span> =&gt; <span class="string">&quot;subspace_archived_segment&quot;</span>,
+        <span class="ident">unsubscribe</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeArchivedSegment&quot;</span>,
+        <span class="ident">item</span> <span class="op">=</span> <span class="ident">ArchivedSegment</span>,
     )]</span>
-    <span class="kw">fn</span> <span class="ident">subscribe_archived_segment</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>,
-        <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span>,
-    );
+    <span class="kw">fn</span> <span class="ident">subscribe_archived_segment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
 
-    <span class="doccomment">/// Unsubscribe from archived segment subscription.</span>
-    <span class="attribute">#[<span class="ident">pubsub</span>(
-        <span class="ident">subscription</span> <span class="op">=</span> <span class="string">&quot;subspace_archived_segment&quot;</span>,
-        <span class="ident">unsubscribe</span>,
-        <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_unsubscribeArchivedSegment&quot;</span>
-    )]</span>
-    <span class="kw">fn</span> <span class="ident">unsubscribe_archived_segment</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">method</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;subspace_acknowledgeArchivedSegment&quot;</span>)]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">acknowledge_archived_segment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">segment_index</span>: <span class="ident">u64</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
@@ -671,30 +616,38 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">struct</span> <span class="ident">BlockSignatureSenders</span> {
-    <span class="ident">current_header_hash</span>: <span class="ident">H256</span>,
-    <span class="ident">senders</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">async_oneshot::Sender</span><span class="op">&lt;</span><span class="ident">BlockSignature</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">current_hash</span>: <span class="ident">H256</span>,
+    <span class="ident">senders</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">async_oneshot::Sender</span><span class="op">&lt;</span><span class="ident">RewardSignatureResponse</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Implements the [`SubspaceRpcApi`] trait for interacting with Subspace.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SubspaceRpcHandler</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> {
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ArchivedSegmentAcknowledgementSenders</span> {
+    <span class="ident">segment_index</span>: <span class="ident">u64</span>,
+    <span class="ident">senders</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">TracingUnboundedSender</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Implements the [`SubspaceRpcApiServer`] trait for interacting with Subspace.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SubspaceRpc</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> {
     <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
-    <span class="ident">subscription_manager</span>: <span class="ident">SubscriptionManager</span>,
+    <span class="ident">executor</span>: <span class="ident">SubscriptionTaskExecutor</span>,
     <span class="ident">new_slot_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">NewSlotNotification</span><span class="op">&gt;</span>,
-    <span class="ident">block_signing_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">BlockSigningNotification</span><span class="op">&gt;</span>,
-    <span class="ident">archived_segment_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span>,
+    <span class="ident">reward_signing_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">RewardSigningNotification</span><span class="op">&gt;</span>,
+    <span class="ident">archived_segment_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">ArchivedSegmentNotification</span><span class="op">&gt;</span>,
     <span class="ident">solution_response_senders</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">SolutionResponseSenders</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">block_signature_senders</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">BlockSignatureSenders</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">reward_signature_senders</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">BlockSignatureSenders</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">archived_segment_acknowledgement_senders</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">ArchivedSegmentAcknowledgementSenders</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">next_subscription_id</span>: <span class="ident">AtomicU64</span>,
     <span class="ident">_phantom</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// [`SubspaceRpcHandler`] is used for notifying subscribers about arrival of new slots and for</span>
+<span class="doccomment">/// [`SubspaceRpc`] is used for notifying subscribers about arrival of new slots and for</span>
 <span class="doccomment">/// submission of solutions (or lack thereof).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Internally every time slot notifier emits information about new slot, notification is sent to</span>
 <span class="doccomment">/// every subscriber, after which RPC server waits for the same number of</span>
 <span class="doccomment">/// `subspace_submitSolutionResponse` requests with `SolutionResponse` in them or until</span>
 <span class="doccomment">/// timeout is exceeded. The first valid solution for a particular slot wins, others are ignored.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> <span class="ident">SubspaceRpcHandler</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> <span class="ident">SubspaceRpc</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Block</span>: <span class="ident">BlockT</span>,
     <span class="ident">Client</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
@@ -703,33 +656,35 @@
         <span class="op">+</span> <span class="ident">Send</span>
         <span class="op">+</span> <span class="ident">Sync</span>
         <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">Client::Api</span>: <span class="ident">SubspaceRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
+    <span class="ident">Client::Api</span>: <span class="ident">SubspaceRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">FarmerPublicKey</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Creates a new instance of the `SubspaceRpc` handler.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
-        <span class="ident">executor</span>: <span class="ident">E</span>,
+        <span class="ident">executor</span>: <span class="ident">SubscriptionTaskExecutor</span>,
         <span class="ident">new_slot_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">NewSlotNotification</span><span class="op">&gt;</span>,
-        <span class="ident">block_signing_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">BlockSigningNotification</span><span class="op">&gt;</span>,
-        <span class="ident">archived_segment_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">E</span>: <span class="ident">Spawn</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    {
+        <span class="ident">reward_signing_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span><span class="ident">RewardSigningNotification</span><span class="op">&gt;</span>,
+        <span class="ident">archived_segment_notification_stream</span>: <span class="ident">SubspaceNotificationStream</span><span class="op">&lt;</span>
+            <span class="ident">ArchivedSegmentNotification</span>,
+        <span class="op">&gt;</span>,
+    ) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">client</span>,
-            <span class="ident">subscription_manager</span>: <span class="ident">SubscriptionManager::new</span>(<span class="ident">Arc::new</span>(<span class="ident">executor</span>)),
+            <span class="ident">executor</span>,
             <span class="ident">new_slot_notification_stream</span>,
-            <span class="ident">block_signing_notification_stream</span>,
+            <span class="ident">reward_signing_notification_stream</span>,
             <span class="ident">archived_segment_notification_stream</span>,
             <span class="ident">solution_response_senders</span>: <span class="ident">Arc::default</span>(),
-            <span class="ident">block_signature_senders</span>: <span class="ident">Arc::default</span>(),
+            <span class="ident">reward_signature_senders</span>: <span class="ident">Arc::default</span>(),
+            <span class="ident">archived_segment_acknowledgement_senders</span>: <span class="ident">Arc::default</span>(),
+            <span class="ident">next_subscription_id</span>: <span class="ident">AtomicU64::default</span>(),
             <span class="ident">_phantom</span>: <span class="ident">PhantomData::default</span>(),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> <span class="ident">SubspaceRpcApi</span> <span class="kw">for</span> <span class="ident">SubspaceRpcHandler</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span>
+<span class="attribute">#[<span class="ident">async_trait</span>]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span> <span class="ident">SubspaceRpcApiServer</span> <span class="kw">for</span> <span class="ident">SubspaceRpc</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Client</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Block</span>: <span class="ident">BlockT</span>,
     <span class="ident">Client</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
@@ -738,98 +693,50 @@
         <span class="op">+</span> <span class="ident">Send</span>
         <span class="op">+</span> <span class="ident">Sync</span>
         <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">Client::Api</span>: <span class="ident">SubspaceRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
+    <span class="ident">Client::Api</span>: <span class="ident">SubspaceRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">FarmerPublicKey</span><span class="op">&gt;</span>,
 {
-    <span class="kw">type</span> <span class="ident">Metadata</span> <span class="op">=</span> <span class="ident">sc_rpc_api::Metadata</span>;
+    <span class="kw">fn</span> <span class="ident">get_farmer_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">best_block_id</span> <span class="op">=</span> <span class="ident">BlockId::Hash</span>(<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">info</span>().<span class="ident">best_hash</span>);
+        <span class="kw">let</span> <span class="ident">runtime_api</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">runtime_api</span>();
 
-    <span class="kw">fn</span> <span class="ident">get_farmer_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">client</span>);
-        <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
-            <span class="kw">let</span> <span class="ident">best_block_id</span> <span class="op">=</span> <span class="ident">BlockId::Hash</span>(<span class="ident">client</span>.<span class="ident">info</span>().<span class="ident">best_hash</span>);
-            <span class="kw">let</span> <span class="ident">runtime_api</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">runtime_api</span>();
+        <span class="kw">let</span> <span class="ident">farmer_metadata</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span>, <span class="ident">ApiError</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">try</span> {
+            <span class="ident">FarmerMetadata</span> {
+                <span class="ident">record_size</span>: <span class="ident">runtime_api</span>.<span class="ident">record_size</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
+                <span class="ident">recorded_history_segment_size</span>: <span class="ident">runtime_api</span>
+                    .<span class="ident">recorded_history_segment_size</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
+                <span class="ident">max_plot_size</span>: <span class="ident">runtime_api</span>.<span class="ident">max_plot_size</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
+                <span class="ident">total_pieces</span>: <span class="ident">runtime_api</span>.<span class="ident">total_pieces</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
+            }
+        };
 
-            <span class="kw">let</span> <span class="ident">farmer_metadata</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FarmerMetadata</span>, <span class="ident">ApiError</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">try</span> {
-                <span class="ident">FarmerMetadata</span> {
-                    <span class="ident">confirmation_depth_k</span>: <span class="ident">TryInto</span>::<span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="ident">::try_into</span>(
-                        <span class="ident">runtime_api</span>.<span class="ident">confirmation_depth_k</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
-                    )
-                    .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-                        <span class="macro">panic!</span>(<span class="string">&quot;Confirmation depth K can&#39;t be converted into BlockNumber&quot;</span>);
-                    }),
-                    <span class="ident">record_size</span>: <span class="ident">runtime_api</span>.<span class="ident">record_size</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
-                    <span class="ident">recorded_history_segment_size</span>: <span class="ident">runtime_api</span>
-                        .<span class="ident">recorded_history_segment_size</span>(<span class="kw-2">&amp;</span><span class="ident">best_block_id</span>)<span class="question-mark">?</span>,
-                }
-            };
-
-            <span class="ident">farmer_metadata</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">error</span><span class="op">|</span> {
-                <span class="macro">error!</span>(<span class="string">&quot;Failed to get data from runtime API: {}&quot;</span>, <span class="ident">error</span>);
-                <span class="ident">RpcError::new</span>(<span class="ident">ErrorCode::InternalError</span>)
-            })
+        <span class="ident">farmer_metadata</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">error</span><span class="op">|</span> {
+            <span class="macro">error!</span>(<span class="string">&quot;Failed to get data from runtime API: {}&quot;</span>, <span class="ident">error</span>);
+            <span class="ident">JsonRpseeError::Custom</span>(<span class="string">&quot;Internal error&quot;</span>.<span class="ident">to_string</span>())
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">get_block_by_number</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">block_number</span>: <span class="ident">BlockNumber</span>,
-    ) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EncodedBlockWithObjectMapping</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">client</span>
-            .<span class="ident">block</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Number</span>(<span class="ident">block_number</span>.<span class="ident">into</span>()))
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">error</span><span class="op">|</span> {
-                <span class="macro">error!</span>(<span class="string">&quot;Failed to get block by number: {}&quot;</span>, <span class="ident">error</span>);
-                <span class="ident">RpcError::new</span>(<span class="ident">ErrorCode::InternalError</span>)
-            })
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">block</span><span class="op">|</span> {
-                <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="ident">block</span> {
-                    <span class="kw">let</span> <span class="ident">encoded_block</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">encode</span>();
-                    <span class="kw">let</span> <span class="ident">object_mapping</span> <span class="op">=</span> <span class="self">self</span>
-                        .<span class="ident">client</span>
-                        .<span class="ident">runtime_api</span>()
-                        .<span class="ident">extract_block_object_mapping</span>(
-                            <span class="kw-2">&amp;</span><span class="ident">BlockId::Number</span>(<span class="ident">block_number</span>.<span class="ident">saturating_sub</span>(<span class="number">1</span>).<span class="ident">into</span>()),
-                            <span class="ident">block</span>.<span class="ident">block</span>,
-                        )
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">error</span><span class="op">|</span> {
-                            <span class="macro">error!</span>(<span class="string">&quot;Failed to extract object mapping: {}&quot;</span>, <span class="ident">error</span>);
-                            <span class="ident">RpcError::new</span>(<span class="ident">ErrorCode::InternalError</span>)
-                        })<span class="question-mark">?</span>;
-
-                    <span class="prelude-val">Some</span>(<span class="ident">EncodedBlockWithObjectMapping</span> {
-                        <span class="ident">block</span>: <span class="ident">encoded_block</span>,
-                        <span class="ident">object_mapping</span>,
-                    })
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">None</span>
-                })
-            });
-
-        <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> { <span class="ident">result</span> })
-    }
-
-    <span class="kw">fn</span> <span class="ident">submit_solution_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">solution_response</span>: <span class="ident">SolutionResponse</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">submit_solution_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">solution_response</span>: <span class="ident">SolutionResponse</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">solution_response_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solution_response_senders</span>.<span class="ident">clone</span>();
 
         <span class="comment">// TODO: This doesn&#39;t track what client sent a solution, allowing some clients to send</span>
         <span class="comment">//  multiple (https://github.com/paritytech/jsonrpsee/issues/452)</span>
-        <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">solution_response_senders</span> <span class="op">=</span> <span class="ident">solution_response_senders</span>.<span class="ident">lock</span>();
 
-            <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">solution_response_senders</span>.<span class="ident">current_slot</span> <span class="op">==</span> <span class="ident">solution_response</span>.<span class="ident">slot_number</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>) <span class="op">=</span> <span class="ident">solution_response_senders</span>.<span class="ident">senders</span>.<span class="ident">pop</span>() {
-                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">solution_response</span>);
-                }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">solution_response_senders</span> <span class="op">=</span> <span class="ident">solution_response_senders</span>.<span class="ident">lock</span>();
+
+        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">solution_response_senders</span>.<span class="ident">current_slot</span> <span class="op">==</span> <span class="ident">solution_response</span>.<span class="ident">slot_number</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>) <span class="op">=</span> <span class="ident">solution_response_senders</span>.<span class="ident">senders</span>.<span class="ident">pop</span>() {
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">solution_response</span>);
             }
+        }
 
-            <span class="prelude-val">Ok</span>(())
-        })
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">subscribe_slot_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>, <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">SlotInfo</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">executor</span>().<span class="ident">clone</span>();
-            <span class="kw">let</span> <span class="ident">solution_response_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solution_response_senders</span>.<span class="ident">clone</span>();
+    <span class="kw">fn</span> <span class="ident">subscribe_slot_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pending</span>: <span class="ident">PendingSubscription</span>) {
+        <span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">solution_response_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solution_response_senders</span>.<span class="ident">clone</span>();
 
+        <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span>
             <span class="self">self</span>.<span class="ident">new_slot_notification_stream</span>
                 .<span class="ident">subscribe</span>()
                 .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">new_slot_notification</span><span class="op">|</span> {
@@ -858,22 +765,18 @@
                     <span class="kw">let</span> <span class="ident">forward_solution_fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">solution_response</span>) <span class="op">=</span> <span class="ident">response_receiver</span>.<span class="kw">await</span> {
                             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">solution</span>) <span class="op">=</span> <span class="ident">solution_response</span>.<span class="ident">maybe_solution</span> {
-                                <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span>
-                                    <span class="kw">match</span> <span class="ident">FarmerPublicKey::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">solution</span>.<span class="ident">public_key</span>) {
-                                        <span class="prelude-val">Ok</span>(<span class="ident">public_key</span>) =&gt; <span class="ident">public_key</span>,
-                                        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
-                                            <span class="macro">warn!</span>(
-                                                <span class="string">&quot;Failed to convert public key: {:?}&quot;</span>,
-                                                <span class="ident">solution</span>.<span class="ident">public_key</span>
-                                            );
-                                            <span class="kw">return</span>;
-                                        }
-                                    };
+                                <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">FarmerPublicKey::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">solution</span>.<span class="ident">public_key</span>)
+                                    .<span class="ident">expect</span>(<span class="string">&quot;Always correct length; qed&quot;</span>);
+                                <span class="kw">let</span> <span class="ident">reward_address</span> <span class="op">=</span>
+                                    <span class="ident">FarmerPublicKey::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">solution</span>.<span class="ident">reward_address</span>)
+                                        .<span class="ident">expect</span>(<span class="string">&quot;Always correct length; qed&quot;</span>);
+
                                 <span class="kw">let</span> <span class="ident">solution</span> <span class="op">=</span> <span class="ident">Solution</span> {
                                     <span class="ident">public_key</span>,
+                                    <span class="ident">reward_address</span>,
                                     <span class="ident">piece_index</span>: <span class="ident">solution</span>.<span class="ident">piece_index</span>,
                                     <span class="ident">encoding</span>: <span class="ident">solution</span>.<span class="ident">encoding</span>,
-                                    <span class="ident">signature</span>: <span class="ident">solution</span>.<span class="ident">signature</span>,
+                                    <span class="ident">tag_signature</span>: <span class="ident">solution</span>.<span class="ident">tag_signature</span>,
                                     <span class="ident">local_challenge</span>: <span class="ident">solution</span>.<span class="ident">local_challenge</span>,
                                     <span class="ident">tag</span>: <span class="ident">solution</span>.<span class="ident">tag</span>,
                                 };
@@ -884,159 +787,232 @@
                     };
 
                     <span class="comment">// Run above future with timeout</span>
-                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">executor</span>.<span class="ident">spawn</span>(
+                    <span class="ident">executor</span>.<span class="ident">spawn</span>(
+                        <span class="string">&quot;subspace-slot-info-forward&quot;</span>,
+                        <span class="prelude-val">Some</span>(<span class="string">&quot;rpc&quot;</span>),
                         <span class="ident">future::select</span>(
                             <span class="ident">futures_timer::Delay::new</span>(<span class="ident">SOLUTION_TIMEOUT</span>),
                             <span class="ident">Box::pin</span>(<span class="ident">forward_solution_fut</span>),
                         )
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
+                        .<span class="ident">boxed</span>(),
                     );
 
                     <span class="comment">// This will be sent to the farmer</span>
-                    <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">SlotInfo</span> {
+                    <span class="ident">SlotInfo</span> {
                         <span class="ident">slot_number</span>: <span class="ident">new_slot_info</span>.<span class="ident">slot</span>.<span class="ident">into</span>(),
                         <span class="ident">global_challenge</span>: <span class="ident">new_slot_info</span>.<span class="ident">global_challenge</span>,
                         <span class="ident">salt</span>: <span class="ident">new_slot_info</span>.<span class="ident">salt</span>,
                         <span class="ident">next_salt</span>: <span class="ident">new_slot_info</span>.<span class="ident">next_salt</span>,
                         <span class="ident">solution_range</span>: <span class="ident">new_slot_info</span>.<span class="ident">solution_range</span>,
-                    }))
-                })
-                .<span class="ident">forward</span>(<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">warn!</span>(<span class="string">&quot;Error sending notifications: {:?}&quot;</span>, <span class="ident">e</span>)))
-                .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-        });
+                        <span class="ident">voting_solution_range</span>: <span class="ident">new_slot_info</span>.<span class="ident">voting_solution_range</span>,
+                    }
+                });
+
+        <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sink</span>) <span class="op">=</span> <span class="ident">pending</span>.<span class="ident">accept</span>() {
+                <span class="ident">sink</span>.<span class="ident">pipe_from_stream</span>(<span class="ident">stream</span>).<span class="kw">await</span>;
+            }
+        };
+
+        <span class="self">self</span>.<span class="ident">executor</span>
+            .<span class="ident">spawn</span>(<span class="string">&quot;subspace-slot-info-subscription&quot;</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;rpc&quot;</span>), <span class="ident">fut</span>.<span class="ident">boxed</span>());
     }
 
-    <span class="kw">fn</span> <span class="ident">unsubscribe_slot_info</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">cancel</span>(<span class="ident">id</span>))
-    }
+    <span class="kw">fn</span> <span class="ident">subscribe_reward_signing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pending</span>: <span class="ident">PendingSubscription</span>) {
+        <span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">reward_signature_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reward_signature_senders</span>.<span class="ident">clone</span>();
 
-    <span class="kw">fn</span> <span class="ident">subscribe_block_signing</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>,
-        <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">BlockSigningInfo</span><span class="op">&gt;</span>,
-    ) {
-        <span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">executor</span>().<span class="ident">clone</span>();
-            <span class="kw">let</span> <span class="ident">block_signature_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">block_signature_senders</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reward_signing_notification_stream</span>.<span class="ident">subscribe</span>().<span class="ident">map</span>(
+            <span class="kw">move</span> <span class="op">|</span><span class="ident">reward_signing_notification</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">RewardSigningNotification</span> {
+                    <span class="ident">hash</span>,
+                    <span class="ident">public_key</span>,
+                    <span class="kw-2">mut</span> <span class="ident">signature_sender</span>,
+                } <span class="op">=</span> <span class="ident">reward_signing_notification</span>;
 
-            <span class="self">self</span>.<span class="ident">block_signing_notification_stream</span>
-                .<span class="ident">subscribe</span>()
-                .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">block_signing_notification</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">BlockSigningNotification</span> {
-                        <span class="ident">header_hash</span>,
-                        <span class="kw-2">mut</span> <span class="ident">signature_sender</span>,
-                    } <span class="op">=</span> <span class="ident">block_signing_notification</span>;
+                <span class="kw">let</span> (<span class="ident">response_sender</span>, <span class="ident">response_receiver</span>) <span class="op">=</span> <span class="ident">async_oneshot::oneshot</span>();
 
-                    <span class="kw">let</span> (<span class="ident">response_sender</span>, <span class="ident">response_receiver</span>) <span class="op">=</span> <span class="ident">async_oneshot::oneshot</span>();
+                <span class="comment">// Store signature sender so that we can retrieve it when solution comes from</span>
+                <span class="comment">// the farmer</span>
+                {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reward_signature_senders</span> <span class="op">=</span> <span class="ident">reward_signature_senders</span>.<span class="ident">lock</span>();
 
-                    <span class="comment">// Store signature sender so that we can retrieve it when solution comes from</span>
-                    <span class="comment">// the farmer</span>
-                    {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block_signature_senders</span> <span class="op">=</span> <span class="ident">block_signature_senders</span>.<span class="ident">lock</span>();
-
-                        <span class="kw">if</span> <span class="ident">block_signature_senders</span>.<span class="ident">current_header_hash</span> <span class="op">!</span><span class="op">=</span> <span class="ident">header_hash</span> {
-                            <span class="ident">block_signature_senders</span>.<span class="ident">current_header_hash</span> <span class="op">=</span> <span class="ident">header_hash</span>;
-                            <span class="ident">block_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">clear</span>();
-                        }
-
-                        <span class="ident">block_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">push</span>(<span class="ident">response_sender</span>);
+                    <span class="kw">if</span> <span class="ident">reward_signature_senders</span>.<span class="ident">current_hash</span> <span class="op">!</span><span class="op">=</span> <span class="ident">hash</span> {
+                        <span class="ident">reward_signature_senders</span>.<span class="ident">current_hash</span> <span class="op">=</span> <span class="ident">hash</span>;
+                        <span class="ident">reward_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">clear</span>();
                     }
 
-                    <span class="comment">// Wait for solutions and transform proposed proof of space solutions into</span>
-                    <span class="comment">// data structure `sc-consensus-subspace` expects</span>
-                    <span class="kw">let</span> <span class="ident">forward_signature_fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">block_signature</span>) <span class="op">=</span> <span class="ident">response_receiver</span>.<span class="kw">await</span> {
-                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">signature</span>) <span class="op">=</span> <span class="ident">block_signature</span>.<span class="ident">signature</span> {
-                                <span class="kw">match</span> <span class="ident">FarmerSignature::decode</span>(<span class="kw-2">&amp;mut</span> <span class="ident">signature</span>.<span class="ident">encode</span>().<span class="ident">as_ref</span>()) {
-                                    <span class="prelude-val">Ok</span>(<span class="ident">signature</span>) =&gt; {
-                                        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">signature_sender</span>.<span class="ident">send</span>(<span class="ident">signature</span>).<span class="kw">await</span>;
-                                    }
-                                    <span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
-                                        <span class="macro">warn!</span>(
-                                            <span class="string">&quot;Failed to convert signature of length {}: {}&quot;</span>,
-                                            <span class="ident">signature</span>.<span class="ident">len</span>(),
-                                            <span class="ident">error</span>
-                                        );
-                                    }
+                    <span class="ident">reward_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">push</span>(<span class="ident">response_sender</span>);
+                }
+
+                <span class="comment">// Wait for solutions and transform proposed proof of space solutions into</span>
+                <span class="comment">// data structure `sc-consensus-subspace` expects</span>
+                <span class="kw">let</span> <span class="ident">forward_signature_fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">reward_signature</span>) <span class="op">=</span> <span class="ident">response_receiver</span>.<span class="kw">await</span> {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">signature</span>) <span class="op">=</span> <span class="ident">reward_signature</span>.<span class="ident">signature</span> {
+                            <span class="kw">match</span> <span class="ident">FarmerSignature::decode</span>(<span class="kw-2">&amp;mut</span> <span class="ident">signature</span>.<span class="ident">encode</span>().<span class="ident">as_ref</span>()) {
+                                <span class="prelude-val">Ok</span>(<span class="ident">signature</span>) =&gt; {
+                                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">signature_sender</span>.<span class="ident">send</span>(<span class="ident">signature</span>).<span class="kw">await</span>;
+                                }
+                                <span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
+                                    <span class="macro">warn!</span>(
+                                        <span class="string">&quot;Failed to convert signature of length {}: {}&quot;</span>,
+                                        <span class="ident">signature</span>.<span class="ident">len</span>(),
+                                        <span class="ident">error</span>
+                                    );
                                 }
                             }
                         }
-                    };
+                    }
+                };
 
-                    <span class="comment">// Run above future with timeout</span>
-                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">executor</span>.<span class="ident">spawn</span>(
-                        <span class="ident">future::select</span>(
-                            <span class="ident">futures_timer::Delay::new</span>(<span class="ident">SOLUTION_TIMEOUT</span>),
-                            <span class="ident">Box::pin</span>(<span class="ident">forward_signature_fut</span>),
-                        )
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
-                    );
+                <span class="comment">// Run above future with timeout</span>
+                <span class="ident">executor</span>.<span class="ident">spawn</span>(
+                    <span class="string">&quot;subspace-block-signing-forward&quot;</span>,
+                    <span class="prelude-val">Some</span>(<span class="string">&quot;rpc&quot;</span>),
+                    <span class="ident">future::select</span>(
+                        <span class="ident">futures_timer::Delay::new</span>(<span class="ident">REWARD_SIGNING_TIMEOUT</span>),
+                        <span class="ident">Box::pin</span>(<span class="ident">forward_signature_fut</span>),
+                    )
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
+                    .<span class="ident">boxed</span>(),
+                );
 
-                    <span class="comment">// This will be sent to the farmer</span>
-                    <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">BlockSigningInfo</span> {
-                        <span class="ident">header_hash</span>: <span class="ident">header_hash</span>.<span class="ident">into</span>(),
-                    }))
-                })
-                .<span class="ident">forward</span>(<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">warn!</span>(<span class="string">&quot;Error sending notifications: {:?}&quot;</span>, <span class="ident">e</span>)))
-                .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-        });
+                <span class="comment">// This will be sent to the farmer</span>
+                <span class="ident">RewardSigningInfo</span> {
+                    <span class="ident">hash</span>: <span class="ident">hash</span>.<span class="ident">into</span>(),
+                    <span class="ident">public_key</span>: <span class="ident">public_key</span>
+                        .<span class="ident">as_slice</span>()
+                        .<span class="ident">try_into</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;Public key is always 32 bytes; qed&quot;</span>),
+                }
+            },
+        );
+
+        <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sink</span>) <span class="op">=</span> <span class="ident">pending</span>.<span class="ident">accept</span>() {
+                <span class="ident">sink</span>.<span class="ident">pipe_from_stream</span>(<span class="ident">stream</span>).<span class="kw">await</span>;
+            }
+        };
+
+        <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">spawn</span>(
+            <span class="string">&quot;subspace-block-signing-subscription&quot;</span>,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;rpc&quot;</span>),
+            <span class="ident">fut</span>.<span class="ident">boxed</span>(),
+        );
     }
 
-    <span class="kw">fn</span> <span class="ident">unsubscribe_block_signing</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">cancel</span>(<span class="ident">id</span>))
-    }
-
-    <span class="kw">fn</span> <span class="ident">submit_block_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block_signature</span>: <span class="ident">BlockSignature</span>) -&gt; <span class="ident">FutureResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">block_signature_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">block_signature_senders</span>.<span class="ident">clone</span>();
+    <span class="kw">fn</span> <span class="ident">submit_reward_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reward_signature</span>: <span class="ident">RewardSignatureResponse</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">reward_signature_senders</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reward_signature_senders</span>.<span class="ident">clone</span>();
 
         <span class="comment">// TODO: This doesn&#39;t track what client sent a solution, allowing some clients to send</span>
         <span class="comment">//  multiple (https://github.com/paritytech/jsonrpsee/issues/452)</span>
-        <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block_signature_senders</span> <span class="op">=</span> <span class="ident">block_signature_senders</span>.<span class="ident">lock</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reward_signature_senders</span> <span class="op">=</span> <span class="ident">reward_signature_senders</span>.<span class="ident">lock</span>();
 
-            <span class="kw">if</span> <span class="ident">block_signature_senders</span>.<span class="ident">current_header_hash</span> <span class="op">==</span> <span class="ident">block_signature</span>.<span class="ident">header_hash</span>.<span class="ident">into</span>() {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>) <span class="op">=</span> <span class="ident">block_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">pop</span>() {
-                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">block_signature</span>);
+        <span class="kw">if</span> <span class="ident">reward_signature_senders</span>.<span class="ident">current_hash</span> <span class="op">==</span> <span class="ident">reward_signature</span>.<span class="ident">hash</span>.<span class="ident">into</span>() {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>) <span class="op">=</span> <span class="ident">reward_signature_senders</span>.<span class="ident">senders</span>.<span class="ident">pop</span>() {
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">reward_signature</span>);
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">subscribe_archived_segment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pending</span>: <span class="ident">PendingSubscription</span>) {
+        <span class="kw">let</span> <span class="ident">archived_segment_acknowledgement_senders</span> <span class="op">=</span>
+            <span class="self">self</span>.<span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">clone</span>();
+
+        <span class="kw">let</span> <span class="ident">subscription_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_subscription_id</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering::Relaxed</span>);
+
+        <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">archived_segment_notification_stream</span>
+            .<span class="ident">subscribe</span>()
+            .<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">archived_segment_notification</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">ArchivedSegmentNotification</span> {
+                    <span class="ident">archived_segment</span>,
+                    <span class="ident">acknowledgement_sender</span>,
+                } <span class="op">=</span> <span class="ident">archived_segment_notification</span>;
+
+                <span class="kw">let</span> <span class="ident">segment_index</span> <span class="op">=</span> <span class="ident">archived_segment</span>.<span class="ident">root_block</span>.<span class="ident">segment_index</span>();
+
+                <span class="comment">// Store acknowledgment sender so that we can retrieve it when acknowledgement</span>
+                <span class="comment">// comes from the farmer</span>
+                {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archived_segment_acknowledgement_senders</span> <span class="op">=</span>
+                        <span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">lock</span>();
+
+                    <span class="kw">if</span> <span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">segment_index</span> <span class="op">!</span><span class="op">=</span> <span class="ident">segment_index</span> {
+                        <span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">segment_index</span> <span class="op">=</span> <span class="ident">segment_index</span>;
+                        <span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">senders</span>.<span class="ident">clear</span>();
+                    }
+
+                    <span class="kw">let</span> <span class="ident">maybe_archived_segment</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">archived_segment_acknowledgement_senders</span>
+                        .<span class="ident">senders</span>
+                        .<span class="ident">entry</span>(<span class="ident">subscription_id</span>)
+                    {
+                        <span class="ident">Entry::Occupied</span>(<span class="kw">_</span>) =&gt; {
+                            <span class="comment">// No need to do anything, farmer is processing request</span>
+                            <span class="prelude-val">None</span>
+                        }
+                        <span class="ident">Entry::Vacant</span>(<span class="ident">entry</span>) =&gt; {
+                            <span class="ident">entry</span>.<span class="ident">insert</span>(<span class="ident">acknowledgement_sender</span>);
+
+                            <span class="comment">// This will be sent to the farmer</span>
+                            <span class="prelude-val">Some</span>(<span class="ident">archived_segment</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>())
+                        }
+                    };
+
+                    <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> { <span class="ident">maybe_archived_segment</span> })
+                }
+            });
+
+        <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sink</span>) <span class="op">=</span> <span class="ident">pending</span>.<span class="ident">accept</span>() {
+                <span class="ident">sink</span>.<span class="ident">pipe_from_stream</span>(<span class="ident">stream</span>).<span class="kw">await</span>;
+            }
+        };
+
+        <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">spawn</span>(
+            <span class="string">&quot;subspace-archived-segment-subscription&quot;</span>,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;rpc&quot;</span>),
+            <span class="ident">fut</span>.<span class="ident">boxed</span>(),
+        );
+    }
+
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">acknowledge_archived_segment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">segment_index</span>: <span class="ident">u64</span>) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">archived_segment_acknowledgement_senders</span> <span class="op">=</span>
+            <span class="self">self</span>.<span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">clone</span>();
+
+        <span class="kw">let</span> <span class="ident">maybe_sender</span> <span class="op">=</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">archived_segment_acknowledgement_senders_guard</span> <span class="op">=</span>
+                <span class="ident">archived_segment_acknowledgement_senders</span>.<span class="ident">lock</span>();
+
+            (<span class="ident">archived_segment_acknowledgement_senders_guard</span>.<span class="ident">segment_index</span> <span class="op">==</span> <span class="ident">segment_index</span>)
+                .<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span> {
+                    <span class="kw">let</span> <span class="ident">last_key</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">archived_segment_acknowledgement_senders_guard</span>
+                        .<span class="ident">senders</span>
+                        .<span class="ident">keys</span>()
+                        .<span class="ident">next</span>()<span class="question-mark">?</span>;
+
+                    <span class="ident">archived_segment_acknowledgement_senders_guard</span>
+                        .<span class="ident">senders</span>
+                        .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">last_key</span>)
+                })
+                .<span class="ident">flatten</span>()
+        };
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>) <span class="op">=</span> <span class="ident">maybe_sender</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(()).<span class="kw">await</span> {
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">error</span>.<span class="ident">is_disconnected</span>() {
+                    <span class="macro">warn!</span>(<span class="string">&quot;Failed to acknowledge archived segment: {error}&quot;</span>);
                 }
             }
+        }
 
-            <span class="prelude-val">Ok</span>(())
-        })
-    }
-
-    <span class="kw">fn</span> <span class="ident">subscribe_archived_segment</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_metadata</span>: <span class="ident"><span class="self">Self</span>::Metadata</span>,
-        <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">ArchivedSegment</span><span class="op">&gt;</span>,
-    ) {
-        <span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-            <span class="self">self</span>.<span class="ident">archived_segment_notification_stream</span>
-                .<span class="ident">subscribe</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">archived_segment_notification</span><span class="op">|</span> {
-                    <span class="comment">// This will be sent to the farmer</span>
-                    <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">archived_segment_notification</span>))
-                })
-                .<span class="ident">forward</span>(<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">warn!</span>(<span class="string">&quot;Error sending notifications: {:?}&quot;</span>, <span class="ident">e</span>)))
-                .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-        });
-    }
-
-    <span class="kw">fn</span> <span class="ident">unsubscribe_archived_segment</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Metadata</span><span class="op">&gt;</span>,
-        <span class="ident">id</span>: <span class="ident">SubscriptionId</span>,
-    ) -&gt; <span class="ident">RpcResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">subscription_manager</span>.<span class="ident">cancel</span>(<span class="ident">id</span>))
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_consensus_subspace_rpc" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0-nightly (8f117a77d 2021-12-13)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_consensus_subspace_rpc" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (42e1761c7 2022-05-15)" ></div>
 </body></html>
