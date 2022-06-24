@@ -1,8 +1,6 @@
-# This action enables building container images and executables for farmer and node, can be triggered manually or by
-# release creation.
+# This action enables building container images for farmer and node, can be triggered manually or by release creation.
 #
-# Container images are only pushed to GitHub Container Registry for releases.
-# Executables are built both for releases and for manually triggered runs, uploaded to artifacts and assets.
+# Container images are only pushed to GitHub Container Registry.
 name: Docker build
 
 on:
@@ -51,7 +49,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/${{ github.repository_owner }}/${{ subspace-matrix.image }}
+            ghcr.io/${{ github.repository_owner }}/subspace-${{ matrix.image }}
           tags: |
             type=ref,event=tag
           flavor: |
