@@ -153,6 +153,7 @@ pub async fn run_validator_node(
     key: Sr25519Keyring,
     boot_nodes: Vec<MultiaddrWithPeerId>,
     run_farmer: bool,
+    run_executor: bool,
 ) -> (PrimaryTestNode, NetworkStarter) {
     let primary_chain_config = node_config(tokio_handle, key, boot_nodes, run_farmer);
     let multiaddr = primary_chain_config.network.listen_addresses[0].clone();
@@ -174,6 +175,7 @@ pub async fn run_validator_node(
             base: primary_chain_config,
             force_new_slot_notifications: true,
             dsn_config: None,
+            executor_enabled: run_executor,
         };
 
         subspace_service::new_full::<subspace_test_runtime::RuntimeApi, TestExecutorDispatch>(

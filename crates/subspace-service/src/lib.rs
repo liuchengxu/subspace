@@ -121,6 +121,9 @@ pub struct SubspaceConfiguration {
     pub force_new_slot_notifications: bool,
     /// Subspace networking configuration (for DSN). Will not be started if set to `None`.
     pub dsn_config: Option<subspace_networking::Config>,
+    /// Whether the executor node is enabled, if true, the block import won't complete until the
+    /// executor suceeds in processing this block.
+    pub executor_enabled: bool,
 }
 
 impl From<Configuration> for SubspaceConfiguration {
@@ -129,6 +132,7 @@ impl From<Configuration> for SubspaceConfiguration {
             base,
             force_new_slot_notifications: false,
             dsn_config: None,
+            executor_enabled: false,
         }
     }
 }
@@ -137,6 +141,7 @@ impl From<Configuration> for SubspaceConfiguration {
 #[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, ExecutorDispatch>(
     config: &Configuration,
+    executor_enabled: bool,
 ) -> Result<
     PartialComponents<
         FullClient<RuntimeApi, ExecutorDispatch>,
@@ -260,6 +265,7 @@ where
                 }
             }
         },
+        executor_enabled,
     )?;
 
     sc_consensus_subspace::start_subspace_archiver(
@@ -376,7 +382,7 @@ where
         select_chain,
         transaction_pool,
         other: (block_import, subspace_link, mut telemetry),
-    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config)?;
+    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config, config.executor_enabled)?;
 
     if let Some(dsn_config) = config.dsn_config.clone() {
         start_dsn_node(

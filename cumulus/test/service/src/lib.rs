@@ -119,6 +119,7 @@ async fn run_executor(
             // Always enable the slot notification.
             force_new_slot_notifications: true,
             dsn_config: None,
+            executor_enabled: true,
         };
 
         subspace_service::new_full::<
@@ -135,37 +136,41 @@ async fn run_executor(
         })?
     };
 
-    let secondary_chain_node =
-        cirrus_node::service::new_full::<
-            _,
-            _,
-            _,
-            _,
-            _,
-            cirrus_test_runtime::RuntimeApi,
-            RuntimeExecutor,
-        >(
-            secondary_chain_config,
-            primary_chain_full_node.client.clone(),
-            primary_chain_full_node.network.clone(),
-            &primary_chain_full_node.select_chain,
-            primary_chain_full_node
-                .imported_block_notification_stream
-                .subscribe()
-                .then(|imported_block_notification| async move {
-                    imported_block_notification.block_number
-                }),
-            primary_chain_full_node
-                .new_slot_notification_stream
-                .subscribe()
-                .then(|slot_notification| async move {
-                    (
-                        slot_notification.new_slot_info.slot,
-                        slot_notification.new_slot_info.global_challenge,
-                    )
-                }),
-        )
-        .await?;
+    let secondary_chain_node = cirrus_node::service::new_full::<
+        _,
+        _,
+        _,
+        _,
+        _,
+        cirrus_test_runtime::RuntimeApi,
+        RuntimeExecutor,
+    >(
+        secondary_chain_config,
+        primary_chain_full_node.client.clone(),
+        primary_chain_full_node.network.clone(),
+        &primary_chain_full_node.select_chain,
+        primary_chain_full_node
+            .imported_block_notification_stream
+            .subscribe()
+            .then(|imported_block_notification| async move {
+                (
+                    imported_block_notification.block_number,
+                    imported_block_notification
+                        .maybe_block_processed_signal_sender
+                        .expect("Signal sender must exist if executor is enabled; qed"),
+                )
+            }),
+        primary_chain_full_node
+            .new_slot_notification_stream
+            .subscribe()
+            .then(|slot_notification| async move {
+                (
+                    slot_notification.new_slot_info.slot,
+                    slot_notification.new_slot_info.global_challenge,
+                )
+            }),
+    )
+    .await?;
 
     let cirrus_node::service::NewFull {
         mut task_manager,
@@ -523,7 +528,7 @@ pub fn construct_extrinsic(
     )
 }
 
-/// Run a primary-chain validator node.
+/// Run a primary-chain validator node without the executor functionality.
 ///
 /// This is essentially a wrapper around
 /// [`run_validator_node`](subspace_test_service::run_validator_node).
@@ -532,5 +537,5 @@ pub async fn run_primary_chain_validator_node(
     key: Sr25519Keyring,
     boot_nodes: Vec<MultiaddrWithPeerId>,
 ) -> (subspace_test_service::PrimaryTestNode, NetworkStarter) {
-    subspace_test_service::run_validator_node(tokio_handle, key, boot_nodes, true).await
+    subspace_test_service::run_validator_node(tokio_handle, key, boot_nodes, true, false).await
 }
