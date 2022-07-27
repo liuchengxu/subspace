@@ -337,12 +337,12 @@ mod tests {
 
         // start alice
         let (alice, alice_network_starter) =
-            run_validator_node(tokio_handle.clone(), Alice, vec![], true).await;
+            run_validator_node(tokio_handle.clone(), Alice, vec![], true, false).await;
 
         alice_network_starter.start_network();
 
         let (bob, bob_network_starter) =
-            run_validator_node(tokio_handle.clone(), Bob, vec![alice.addr], false).await;
+            run_validator_node(tokio_handle.clone(), Bob, vec![alice.addr], false, false).await;
 
         bob_network_starter.start_network();
 
