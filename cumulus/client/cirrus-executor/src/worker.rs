@@ -127,14 +127,6 @@ pub(super) async fn start_worker<
                         .clone()
                         .process_bundles(primary_hash, bundles, shuffling_seed, maybe_new_runtime)
                         .instrument(span.clone())
-                        .unwrap_or_else(move |error| {
-                            tracing::error!(
-                                target: LOG_TARGET,
-                                relay_parent = ?primary_hash,
-                                error = ?error,
-                                "Error at processing bundles.",
-                            );
-                        })
                         .boxed()
                 }
             },
@@ -234,7 +226,7 @@ async fn handle_block_import_notifications<
             Vec<OpaqueBundle>,
             Randomness,
             Option<Cow<'static, [u8]>>,
-        ) -> Pin<Box<dyn Future<Output = ()> + Send>>
+        ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
     SecondaryHash: Encode + Decode,
@@ -348,7 +340,7 @@ where
             Vec<OpaqueBundle>,
             Randomness,
             Option<Cow<'static, [u8]>>,
-        ) -> Pin<Box<dyn Future<Output = ()> + Send>>
+        ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
     SecondaryHash: Encode + Decode,
@@ -377,10 +369,8 @@ where
             let _ = block_processed_signal_sender.send(()).await;
         }
         Err(error) => {
-            tracing::error!(
-                target: LOG_TARGET,
-                "Collation generation processing error: {error}"
-            );
+            // TODO: better strategy to handle the error?
+            panic!("Error at processing bundles for primary block {block_info:?}: {error}");
         }
     }
 
@@ -405,7 +395,7 @@ where
             Vec<OpaqueBundle>,
             Randomness,
             Option<Cow<'static, [u8]>>,
-        ) -> Pin<Box<dyn Future<Output = ()> + Send>>
+        ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
     SecondaryHash: Encode + Decode,
@@ -472,7 +462,7 @@ where
         shuffling_seed,
         maybe_new_runtime,
     )
-    .await;
+    .await?;
 
     Ok(())
 }
