@@ -357,22 +357,15 @@ where
         debug_assert_eq!(block_info.number.saturating_sub(One::one()), number);
     }
 
-    match process_primary_block(
+    process_primary_block(
         primary_chain_client,
         processor,
         (block_info.hash, block_info.number),
     )
-    .await
-    {
-        Ok(_) => {
-            let mut block_processed_signal_sender = block_processed_signal_sender;
-            let _ = block_processed_signal_sender.send(()).await;
-        }
-        Err(error) => {
-            // TODO: better strategy to handle the error?
-            panic!("Error at processing bundles for primary block {block_info:?}: {error}");
-        }
-    }
+    .await?;
+
+    let mut block_processed_signal_sender = block_processed_signal_sender;
+    let _ = block_processed_signal_sender.send(()).await;
 
     Ok(())
 }
