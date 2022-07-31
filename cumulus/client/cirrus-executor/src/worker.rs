@@ -17,6 +17,7 @@
 use crate::{BundleProcessor, BundleProducer, TransactionFor};
 use cirrus_primitives::{AccountId, SecondaryApi};
 use codec::{Decode, Encode};
+use futures::channel::mpsc;
 use futures::{future, FutureExt, Stream, StreamExt, TryFutureExt};
 use sc_client_api::{AuxStore, BlockBackend};
 use sc_consensus::BlockImport;
@@ -87,7 +88,7 @@ pub(super) async fn start_worker<
     imported_block_notification_stream: IBNS,
     new_slot_notification_stream: NSNS,
     active_leaves: Vec<BlockInfo<PBlock>>,
-    block_processed_signal_receiver: futures::channel::mpsc::Receiver<()>,
+    block_import_throttling_receiver: mpsc::Receiver<()>,
 ) where
     Block: BlockT,
     PBlock: BlockT,
@@ -141,7 +142,7 @@ pub(super) async fn start_worker<
                 )
                 .collect(),
             Box::pin(imported_block_notification_stream),
-            block_processed_signal_receiver,
+            block_import_throttling_receiver,
         );
     let handle_slot_notifications_fut = handle_slot_notifications(
         primary_chain_client.as_ref(),
@@ -217,7 +218,7 @@ async fn handle_block_import_notifications<
     processor: ProcessorFn,
     mut leaves: Vec<(PBlock::Hash, NumberFor<PBlock>)>,
     mut block_imports: BlockImports,
-    mut block_processed_signal_receiver: futures::channel::mpsc::Receiver<()>,
+    mut block_import_throttling_receiver: mpsc::Receiver<()>,
 ) where
     Block: BlockT,
     PBlock: BlockT,
@@ -277,7 +278,7 @@ async fn handle_block_import_notifications<
         {
             Ok(()) => {
                 // Notify the block import that a primary block has been processed.
-                match block_processed_signal_receiver.try_next() {
+                match block_import_throttling_receiver.try_next() {
                     Ok(Some(_)) => {}
                     res => {
                         tracing::error!(

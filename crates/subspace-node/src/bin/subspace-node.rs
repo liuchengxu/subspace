@@ -486,8 +486,8 @@ fn main() -> Result<(), Error> {
                                 )
                             }),
                         primary_chain_node
-                            .block_processed_signal_receiver
-                            .expect("Signal must exist for executor"),
+                            .maybe_block_import_throttling_receiver
+                            .expect("Block import throttling must exist for executor"),
                     );
 
                     let secondary_chain_node = secondary_chain_node_fut.await?;

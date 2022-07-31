@@ -141,7 +141,7 @@ impl From<Configuration> for SubspaceConfiguration {
 #[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, ExecutorDispatch>(
     config: &Configuration,
-    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
+    maybe_block_import_throttling_sender: Option<mpsc::Sender<()>>,
 ) -> Result<
     PartialComponents<
         FullClient<RuntimeApi, ExecutorDispatch>,
@@ -265,7 +265,7 @@ where
                 }
             }
         },
-        maybe_block_processed_signal_sender,
+        maybe_block_import_throttling_sender,
     )?;
 
     sc_consensus_subspace::start_subspace_archiver(
@@ -342,10 +342,10 @@ where
     pub network_starter: NetworkStarter,
     /// Transaction pool.
     pub transaction_pool: Arc<FullPool<Block, Client, Verifier>>,
-    /// Optional controller of subspace block import.
+    /// Optional throttle of subspace block import for executor.
     ///
     /// The block import will be blocked if the channel is full.
-    pub block_processed_signal_receiver: Option<mpsc::Receiver<()>>,
+    pub maybe_block_import_throttling_receiver: Option<mpsc::Receiver<()>>,
 }
 
 type FullNode<RuntimeApi, ExecutorDispatch> = NewFull<
@@ -377,7 +377,7 @@ where
         + TransactionPaymentApi<Block, Balance>,
     ExecutorDispatch: NativeExecutionDispatch + 'static,
 {
-    let (maybe_block_processed_signal_sender, maybe_block_processed_signal_receiver) =
+    let (maybe_block_import_throttling_sender, maybe_block_import_throttling_receiver) =
         if config.executor_enabled {
             let channel_size = match config.base.keep_blocks {
                 KeepBlocks::All => 128, // TODO: Keeping all the blocks is not recommaned?
@@ -398,7 +398,7 @@ where
         select_chain,
         transaction_pool,
         other: (block_import, subspace_link, mut telemetry),
-    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config, maybe_block_processed_signal_sender)?;
+    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config, maybe_block_import_throttling_sender)?;
 
     if let Some(dsn_config) = config.dsn_config.clone() {
         start_dsn_node(
@@ -551,6 +551,6 @@ where
         archived_segment_notification_stream,
         network_starter,
         transaction_pool,
-        block_processed_signal_receiver: maybe_block_processed_signal_receiver,
+        maybe_block_import_throttling_receiver,
     })
 }

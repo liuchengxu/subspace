@@ -815,7 +815,7 @@ pub struct SubspaceBlockImport<Block: BlockT, Client, I, CAW, CIDP> {
     subspace_link: SubspaceLink<Block>,
     can_author_with: CAW,
     create_inherent_data_providers: CIDP,
-    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
+    maybe_block_import_throttling_sender: Option<mpsc::Sender<()>>,
 }
 
 impl<Block, I, Client, CAW, CIDP> Clone for SubspaceBlockImport<Block, Client, I, CAW, CIDP>
@@ -833,7 +833,7 @@ where
             subspace_link: self.subspace_link.clone(),
             can_author_with: self.can_author_with.clone(),
             create_inherent_data_providers: self.create_inherent_data_providers.clone(),
-            maybe_block_processed_signal_sender: self.maybe_block_processed_signal_sender.clone(),
+            maybe_block_import_throttling_sender: self.maybe_block_import_throttling_sender.clone(),
         }
     }
 }
@@ -855,7 +855,7 @@ where
         subspace_link: SubspaceLink<Block>,
         can_author_with: CAW,
         create_inherent_data_providers: CIDP,
-        maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
+        maybe_block_import_throttling_sender: Option<mpsc::Sender<()>>,
     ) -> Self {
         SubspaceBlockImport {
             client,
@@ -864,7 +864,7 @@ where
             subspace_link,
             can_author_with,
             create_inherent_data_providers,
-            maybe_block_processed_signal_sender,
+            maybe_block_import_throttling_sender,
         }
     }
 
@@ -1326,8 +1326,9 @@ where
                 .put(block_number + One::one(), root_blocks);
         }
 
-        if let Some(block_processed_signal_sender) = &mut self.maybe_block_processed_signal_sender {
-            block_processed_signal_sender
+        if let Some(block_import_throttling_sender) = &mut self.maybe_block_import_throttling_sender
+        {
+            block_import_throttling_sender
                 .feed(())
                 .await
                 .map_err(|e| ConsensusError::Other(Box::new(e)))?;
@@ -1355,7 +1356,7 @@ pub fn block_import<Client, Block, I, CAW, CIDP>(
     client: Arc<Client>,
     can_author_with: CAW,
     create_inherent_data_providers: CIDP,
-    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
+    maybe_block_import_throttling_sender: Option<mpsc::Sender<()>>,
 ) -> ClientResult<(
     SubspaceBlockImport<Block, Client, I, CAW, CIDP>,
     SubspaceLink<Block>,
@@ -1411,7 +1412,7 @@ where
         link.clone(),
         can_author_with,
         create_inherent_data_providers,
-        maybe_block_processed_signal_sender,
+        maybe_block_import_throttling_sender,
     );
 
     Ok((import, link))

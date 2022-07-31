@@ -166,8 +166,8 @@ async fn run_executor(
                     )
                 }),
             primary_chain_full_node
-                .block_processed_signal_receiver
-                .expect("Signal must exist for executor"),
+                .maybe_block_import_throttling_receiver
+                .expect("Block import throttling must exist for executor"),
         )
         .await?;
 
