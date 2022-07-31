@@ -276,12 +276,15 @@ async fn handle_block_import_notifications<
         .await
         {
             Ok(()) => {
+                // Notify the block import that a primary block has been processed.
                 match block_processed_signal_receiver.try_next() {
-                    Ok(Some(_)) => {
-                        // Notify the block import that a block has been processed.
-                    }
-                    _ => {
-                        tracing::error!(target: LOG_TARGET, "Unexpected error");
+                    Ok(Some(_)) => {}
+                    res => {
+                        tracing::error!(
+                            target: LOG_TARGET,
+                            ?res,
+                            "Channel of signifying the block has been processed must not be empty"
+                        );
                         break;
                     }
                 }
