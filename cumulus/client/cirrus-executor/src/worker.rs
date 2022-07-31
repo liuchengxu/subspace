@@ -17,8 +17,7 @@
 use crate::{BundleProcessor, BundleProducer, TransactionFor};
 use cirrus_primitives::{AccountId, SecondaryApi};
 use codec::{Decode, Encode};
-use futures::channel::mpsc;
-use futures::{future, FutureExt, SinkExt, Stream, StreamExt, TryFutureExt};
+use futures::{future, FutureExt, Stream, StreamExt, TryFutureExt};
 use sc_client_api::{AuxStore, BlockBackend};
 use sc_consensus::BlockImport;
 use sp_api::{ApiError, BlockT, ProvideRuntimeApi};
@@ -88,6 +87,7 @@ pub(super) async fn start_worker<
     imported_block_notification_stream: IBNS,
     new_slot_notification_stream: NSNS,
     active_leaves: Vec<BlockInfo<PBlock>>,
+    block_processed_signal_receiver: futures::channel::mpsc::Receiver<()>,
 ) where
     Block: BlockT,
     PBlock: BlockT,
@@ -108,7 +108,7 @@ pub(super) async fn start_worker<
     PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     TransactionPool: sc_transaction_pool_api::TransactionPool<Block = Block> + 'static,
     Backend: sc_client_api::Backend<Block> + 'static,
-    IBNS: Stream<Item = (NumberFor<PBlock>, mpsc::Sender<()>)> + Send + 'static,
+    IBNS: Stream<Item = NumberFor<PBlock>> + Send + 'static,
     NSNS: Stream<Item = (Slot, Sha256Hash)> + Send + 'static,
     TransactionFor<Backend, Block>: sp_trie::HashDBT<HashFor<Block>, sp_trie::DBValue>,
     E: CodeExecutor,
@@ -141,6 +141,7 @@ pub(super) async fn start_worker<
                 )
                 .collect(),
             Box::pin(imported_block_notification_stream),
+            block_processed_signal_receiver,
         );
     let handle_slot_notifications_fut = handle_slot_notifications(
         primary_chain_client.as_ref(),
@@ -216,6 +217,7 @@ async fn handle_block_import_notifications<
     processor: ProcessorFn,
     mut leaves: Vec<(PBlock::Hash, NumberFor<PBlock>)>,
     mut block_imports: BlockImports,
+    mut block_processed_signal_receiver: futures::channel::mpsc::Receiver<()>,
 ) where
     Block: BlockT,
     PBlock: BlockT,
@@ -230,7 +232,7 @@ async fn handle_block_import_notifications<
         + Send
         + Sync,
     SecondaryHash: Encode + Decode,
-    BlockImports: Stream<Item = (NumberFor<PBlock>, mpsc::Sender<()>)> + Unpin,
+    BlockImports: Stream<Item = NumberFor<PBlock>> + Unpin,
 {
     let mut active_leaves = HashMap::with_capacity(leaves.len());
 
@@ -254,7 +256,7 @@ async fn handle_block_import_notifications<
         }
     }
 
-    while let Some((block_number, block_processed_signal_sender)) = block_imports.next().await {
+    while let Some(block_number) = block_imports.next().await {
         let header = primary_chain_client
             .header(BlockId::Number(block_number))
             .expect("Header of imported block must exist; qed")
@@ -265,21 +267,34 @@ async fn handle_block_import_notifications<
             number: *header.number(),
         };
 
-        if let Err(error) = block_imported(
+        match block_imported(
             primary_chain_client,
             &processor,
             &mut active_leaves,
             block_info,
-            block_processed_signal_sender,
         )
         .await
         {
-            tracing::error!(
-                target: LOG_TARGET,
-                error = ?error,
-                "Failed to process primary block"
-            );
-            break;
+            Ok(()) => {
+                match block_processed_signal_receiver.try_next() {
+                    Ok(Some(_)) => {
+                        // Notify the block import that a block has been processed.
+                    }
+                    _ => {
+                        tracing::error!(target: LOG_TARGET, "Unexpected error");
+                        break;
+                    }
+                }
+            }
+            Err(error) => {
+                tracing::error!(
+                    target: LOG_TARGET,
+                    error = ?error,
+                    "Failed to process primary block"
+                );
+                // TODO: Bundles processor would fail as an essential task, the program exits.
+                break;
+            }
         }
     }
 }
@@ -329,7 +344,6 @@ async fn block_imported<PBlock, PClient, ProcessorFn, SecondaryHash>(
     processor: &ProcessorFn,
     active_leaves: &mut HashMap<PBlock::Hash, NumberFor<PBlock>>,
     block_info: BlockInfo<PBlock>,
-    block_processed_signal_sender: mpsc::Sender<()>,
 ) -> Result<(), ApiError>
 where
     PBlock: BlockT,
@@ -363,9 +377,6 @@ where
         (block_info.hash, block_info.number),
     )
     .await?;
-
-    let mut block_processed_signal_sender = block_processed_signal_sender;
-    let _ = block_processed_signal_sender.send(()).await;
 
     Ok(())
 }

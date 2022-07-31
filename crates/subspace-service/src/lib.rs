@@ -141,7 +141,7 @@ impl From<Configuration> for SubspaceConfiguration {
 #[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, ExecutorDispatch>(
     config: &Configuration,
-    executor_enabled: bool,
+    maybe_block_processed_signal_sender: Option<futures::channel::mpsc::Sender<()>>,
 ) -> Result<
     PartialComponents<
         FullClient<RuntimeApi, ExecutorDispatch>,
@@ -265,7 +265,7 @@ where
                 }
             }
         },
-        executor_enabled,
+        maybe_block_processed_signal_sender,
     )?;
 
     sc_consensus_subspace::start_subspace_archiver(
@@ -342,6 +342,8 @@ where
     pub network_starter: NetworkStarter,
     /// Transaction pool.
     pub transaction_pool: Arc<FullPool<Block, Client, Verifier>>,
+
+    pub block_processed_signal_receiver: Option<futures::channel::mpsc::Receiver<()>>,
 }
 
 type FullNode<RuntimeApi, ExecutorDispatch> = NewFull<
@@ -373,6 +375,15 @@ where
         + TransactionPaymentApi<Block, Balance>,
     ExecutorDispatch: NativeExecutionDispatch + 'static,
 {
+    let (maybe_block_processed_signal_sender, maybe_block_processed_signal_receiver) =
+        if config.executor_enabled {
+            // TODO: ensure the channel size
+            let (signal_sender, signal_receiver) = futures::channel::mpsc::channel::<()>(128);
+            (Some(signal_sender), Some(signal_receiver))
+        } else {
+            (None, None)
+        };
+
     let PartialComponents {
         client,
         backend,
@@ -382,7 +393,7 @@ where
         select_chain,
         transaction_pool,
         other: (block_import, subspace_link, mut telemetry),
-    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config, config.executor_enabled)?;
+    } = new_partial::<RuntimeApi, ExecutorDispatch>(&config, maybe_block_processed_signal_sender)?;
 
     if let Some(dsn_config) = config.dsn_config.clone() {
         start_dsn_node(
@@ -535,5 +546,6 @@ where
         archived_segment_notification_stream,
         network_starter,
         transaction_pool,
+        block_processed_signal_receiver: maybe_block_processed_signal_receiver,
     })
 }

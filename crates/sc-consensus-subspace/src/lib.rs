@@ -33,7 +33,7 @@ use crate::slot_worker::SubspaceSlotWorker;
 pub use archiver::start_subspace_archiver;
 use codec::Encode;
 use futures::channel::mpsc;
-use futures::StreamExt;
+use futures::{SinkExt, StreamExt};
 use log::{debug, info, trace, warn};
 use lru::LruCache;
 use parking_lot::Mutex;
@@ -153,8 +153,6 @@ where
     pub block_number: NumberFor<Block>,
     /// Sender for archived root blocks
     pub root_block_sender: mpsc::Sender<RootBlock>,
-    /// Sender for signalling the block has been processed by executor.
-    pub maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
 }
 
 /// Errors encountered by the Subspace authorship task.
@@ -817,7 +815,7 @@ pub struct SubspaceBlockImport<Block: BlockT, Client, I, CAW, CIDP> {
     subspace_link: SubspaceLink<Block>,
     can_author_with: CAW,
     create_inherent_data_providers: CIDP,
-    executor_enabled: bool,
+    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
 }
 
 impl<Block, I, Client, CAW, CIDP> Clone for SubspaceBlockImport<Block, Client, I, CAW, CIDP>
@@ -835,7 +833,7 @@ where
             subspace_link: self.subspace_link.clone(),
             can_author_with: self.can_author_with.clone(),
             create_inherent_data_providers: self.create_inherent_data_providers.clone(),
-            executor_enabled: self.executor_enabled,
+            maybe_block_processed_signal_sender: self.maybe_block_processed_signal_sender.clone(),
         }
     }
 }
@@ -857,7 +855,7 @@ where
         subspace_link: SubspaceLink<Block>,
         can_author_with: CAW,
         create_inherent_data_providers: CIDP,
-        executor_enabled: bool,
+        maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
     ) -> Self {
         SubspaceBlockImport {
             client,
@@ -866,7 +864,7 @@ where
             subspace_link,
             can_author_with,
             create_inherent_data_providers,
-            executor_enabled,
+            maybe_block_processed_signal_sender,
         }
     }
 
@@ -1313,25 +1311,19 @@ where
         let import_result = self.inner.import_block(block, new_cache).await?;
         let (root_block_sender, root_block_receiver) = mpsc::channel(0);
 
-        let (maybe_block_processed_signal_sender, maybe_block_processed_signal_receiver) =
-            if self.executor_enabled {
-                let (signal_sender, signal_receiver) = mpsc::channel::<()>(0);
-                (Some(signal_sender), Some(signal_receiver))
-            } else {
-                (None, None)
-            };
-
         self.imported_block_notification_sender
             .notify(move || ImportedBlockNotification {
                 block_number,
                 root_block_sender,
-                maybe_block_processed_signal_sender,
             });
 
         let root_blocks: Vec<RootBlock> = root_block_receiver.collect().await;
 
-        if let Some(block_processed_signal_receiver) = maybe_block_processed_signal_receiver {
-            block_processed_signal_receiver.collect::<()>().await;
+        if let Some(block_processed_signal_sender) = &mut self.maybe_block_processed_signal_sender {
+            block_processed_signal_sender
+                .feed(())
+                .await
+                .map_err(|e| ConsensusError::Other(Box::new(e)))?;
         }
 
         if !root_blocks.is_empty() {
@@ -1363,7 +1355,7 @@ pub fn block_import<Client, Block, I, CAW, CIDP>(
     client: Arc<Client>,
     can_author_with: CAW,
     create_inherent_data_providers: CIDP,
-    executor_enabled: bool,
+    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
 ) -> ClientResult<(
     SubspaceBlockImport<Block, Client, I, CAW, CIDP>,
     SubspaceLink<Block>,
@@ -1419,7 +1411,7 @@ where
         link.clone(),
         can_author_with,
         create_inherent_data_providers,
-        executor_enabled,
+        maybe_block_processed_signal_sender,
     );
 
     Ok((import, link))

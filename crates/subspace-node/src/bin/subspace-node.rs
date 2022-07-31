@@ -114,7 +114,7 @@ fn main() -> Result<(), Error> {
                     import_queue,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, import_queue).map_err(Error::SubstrateCli),
                     task_manager,
@@ -129,7 +129,7 @@ fn main() -> Result<(), Error> {
                     client,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, config.database)
                         .map_err(Error::SubstrateCli),
@@ -145,7 +145,7 @@ fn main() -> Result<(), Error> {
                     client,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, config.chain_spec)
                         .map_err(Error::SubstrateCli),
@@ -162,7 +162,7 @@ fn main() -> Result<(), Error> {
                     import_queue,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, import_queue).map_err(Error::SubstrateCli),
                     task_manager,
@@ -178,7 +178,7 @@ fn main() -> Result<(), Error> {
                     import_queue,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, import_queue).map_err(Error::SubstrateCli),
                     task_manager,
@@ -266,7 +266,7 @@ fn main() -> Result<(), Error> {
                     backend,
                     task_manager,
                     ..
-                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, false)?;
+                } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(&config, None)?;
                 Ok((
                     cmd.run(client, backend, None).map_err(Error::SubstrateCli),
                     task_manager,
@@ -298,7 +298,7 @@ fn main() -> Result<(), Error> {
                     BenchmarkCmd::Block(cmd) => {
                         let PartialComponents { client, .. } =
                             subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(
-                                &config, false,
+                                &config, None,
                             )?;
 
                         cmd.run(client)
@@ -307,7 +307,7 @@ fn main() -> Result<(), Error> {
                         let PartialComponents {
                             client, backend, ..
                         } = subspace_service::new_partial::<RuntimeApi, ExecutorDispatch>(
-                            &config, false,
+                            &config, None,
                         )?;
                         let db = backend.expose_db();
                         let storage = backend.expose_storage();
@@ -474,14 +474,7 @@ fn main() -> Result<(), Error> {
                             .imported_block_notification_stream
                             .subscribe()
                             .then(|imported_block_notification| async move {
-                                (
-                                    imported_block_notification.block_number,
-                                    imported_block_notification
-                                        .maybe_block_processed_signal_sender
-                                        .expect(
-                                            "Signal sender must exist if executor is enabled; qed",
-                                        ),
-                                )
+                                imported_block_notification.block_number
                             }),
                         primary_chain_node
                             .new_slot_notification_stream
@@ -492,6 +485,9 @@ fn main() -> Result<(), Error> {
                                     slot_notification.new_slot_info.global_challenge,
                                 )
                             }),
+                        primary_chain_node
+                            .block_processed_signal_receiver
+                            .expect("Signal must exist for executor"),
                     );
 
                     let secondary_chain_node = secondary_chain_node_fut.await?;

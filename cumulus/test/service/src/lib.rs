@@ -136,41 +136,40 @@ async fn run_executor(
         })?
     };
 
-    let secondary_chain_node = cirrus_node::service::new_full::<
-        _,
-        _,
-        _,
-        _,
-        _,
-        cirrus_test_runtime::RuntimeApi,
-        RuntimeExecutor,
-    >(
-        secondary_chain_config,
-        primary_chain_full_node.client.clone(),
-        primary_chain_full_node.network.clone(),
-        &primary_chain_full_node.select_chain,
-        primary_chain_full_node
-            .imported_block_notification_stream
-            .subscribe()
-            .then(|imported_block_notification| async move {
-                (
-                    imported_block_notification.block_number,
-                    imported_block_notification
-                        .maybe_block_processed_signal_sender
-                        .expect("Signal sender must exist if executor is enabled; qed"),
-                )
-            }),
-        primary_chain_full_node
-            .new_slot_notification_stream
-            .subscribe()
-            .then(|slot_notification| async move {
-                (
-                    slot_notification.new_slot_info.slot,
-                    slot_notification.new_slot_info.global_challenge,
-                )
-            }),
-    )
-    .await?;
+    let secondary_chain_node =
+        cirrus_node::service::new_full::<
+            _,
+            _,
+            _,
+            _,
+            _,
+            cirrus_test_runtime::RuntimeApi,
+            RuntimeExecutor,
+        >(
+            secondary_chain_config,
+            primary_chain_full_node.client.clone(),
+            primary_chain_full_node.network.clone(),
+            &primary_chain_full_node.select_chain,
+            primary_chain_full_node
+                .imported_block_notification_stream
+                .subscribe()
+                .then(|imported_block_notification| async move {
+                    imported_block_notification.block_number
+                }),
+            primary_chain_full_node
+                .new_slot_notification_stream
+                .subscribe()
+                .then(|slot_notification| async move {
+                    (
+                        slot_notification.new_slot_info.slot,
+                        slot_notification.new_slot_info.global_challenge,
+                    )
+                }),
+            primary_chain_full_node
+                .block_processed_signal_receiver
+                .expect("Signal must exist for executor"),
+        )
+        .await?;
 
     let cirrus_node::service::NewFull {
         mut task_manager,

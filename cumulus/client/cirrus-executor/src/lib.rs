@@ -76,7 +76,6 @@ use crate::worker::BlockInfo;
 use cirrus_client_executor_gossip::{Action, GossipMessageHandler};
 use cirrus_primitives::{AccountId, SecondaryApi};
 use codec::{Decode, Encode};
-use futures::channel::mpsc;
 use futures::{FutureExt, Stream};
 use sc_client_api::{AuxStore, BlockBackend};
 use sc_network::NetworkService;
@@ -199,11 +198,12 @@ where
         code_executor: Arc<E>,
         is_authority: bool,
         keystore: SyncCryptoStorePtr,
+        block_processed_signal_receiver: futures::channel::mpsc::Receiver<()>,
     ) -> Result<Self, sp_consensus::Error>
     where
         SE: SpawnEssentialNamed,
         SC: SelectChain<PBlock>,
-        IBNS: Stream<Item = (NumberFor<PBlock>, mpsc::Sender<()>)> + Send + 'static,
+        IBNS: Stream<Item = NumberFor<PBlock>> + Send + 'static,
         NSNS: Stream<Item = (Slot, Sha256Hash)> + Send + 'static,
     {
         let active_leaves = active_leaves(primary_chain_client.as_ref(), select_chain).await?;
@@ -247,6 +247,7 @@ where
                 imported_block_notification_stream,
                 new_slot_notification_stream,
                 active_leaves,
+                block_processed_signal_receiver,
             )
             .boxed(),
         );
