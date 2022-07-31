@@ -1319,18 +1319,18 @@ where
 
         let root_blocks: Vec<RootBlock> = root_block_receiver.collect().await;
 
-        if let Some(block_processed_signal_sender) = &mut self.maybe_block_processed_signal_sender {
-            block_processed_signal_sender
-                .feed(())
-                .await
-                .map_err(|e| ConsensusError::Other(Box::new(e)))?;
-        }
-
         if !root_blocks.is_empty() {
             self.subspace_link
                 .root_blocks
                 .lock()
                 .put(block_number + One::one(), root_blocks);
+        }
+
+        if let Some(block_processed_signal_sender) = &mut self.maybe_block_processed_signal_sender {
+            block_processed_signal_sender
+                .feed(())
+                .await
+                .map_err(|e| ConsensusError::Other(Box::new(e)))?;
         }
 
         Ok(import_result)

@@ -25,6 +25,7 @@ use cirrus_primitives::Hash as SecondaryHash;
 use derive_more::{Deref, DerefMut, Into};
 use dsn::start_dsn_node;
 use frame_system_rpc_runtime_api::AccountNonceApi;
+use futures::channel::mpsc;
 use jsonrpsee::RpcModule;
 use pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi;
 use sc_basic_authorship::ProposerFactory;
@@ -39,8 +40,8 @@ use sc_consensus_subspace::{
 use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch};
 use sc_service::error::Error as ServiceError;
 use sc_service::{
-    Configuration, NetworkStarter, PartialComponents, SpawnTaskHandle, SpawnTasksParams,
-    TaskManager,
+    Configuration, KeepBlocks, NetworkStarter, PartialComponents, SpawnTaskHandle,
+    SpawnTasksParams, TaskManager,
 };
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_api::{ApiExt, ConstructRuntimeApi, Metadata, ProvideRuntimeApi, TransactionFor};
@@ -121,8 +122,7 @@ pub struct SubspaceConfiguration {
     pub force_new_slot_notifications: bool,
     /// Subspace networking configuration (for DSN). Will not be started if set to `None`.
     pub dsn_config: Option<subspace_networking::Config>,
-    /// Whether the executor node is enabled, if true, the block import won't complete until the
-    /// executor suceeds in processing this block.
+    /// Whether the executor feature is enabled.
     pub executor_enabled: bool,
 }
 
@@ -141,7 +141,7 @@ impl From<Configuration> for SubspaceConfiguration {
 #[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, ExecutorDispatch>(
     config: &Configuration,
-    maybe_block_processed_signal_sender: Option<futures::channel::mpsc::Sender<()>>,
+    maybe_block_processed_signal_sender: Option<mpsc::Sender<()>>,
 ) -> Result<
     PartialComponents<
         FullClient<RuntimeApi, ExecutorDispatch>,
@@ -342,8 +342,10 @@ where
     pub network_starter: NetworkStarter,
     /// Transaction pool.
     pub transaction_pool: Arc<FullPool<Block, Client, Verifier>>,
-
-    pub block_processed_signal_receiver: Option<futures::channel::mpsc::Receiver<()>>,
+    /// Optional controller of subspace block import.
+    ///
+    /// The block import will be blocked if the channel is full.
+    pub block_processed_signal_receiver: Option<mpsc::Receiver<()>>,
 }
 
 type FullNode<RuntimeApi, ExecutorDispatch> = NewFull<
@@ -377,8 +379,11 @@ where
 {
     let (maybe_block_processed_signal_sender, maybe_block_processed_signal_receiver) =
         if config.executor_enabled {
-            // TODO: ensure the channel size
-            let (signal_sender, signal_receiver) = futures::channel::mpsc::channel::<()>(128);
+            let channel_size = match config.base.keep_blocks {
+                KeepBlocks::All => 128, // TODO: Keeping all the blocks is not recommaned?
+                KeepBlocks::Some(n) => n,
+            };
+            let (signal_sender, signal_receiver) = mpsc::channel::<()>(channel_size as usize);
             (Some(signal_sender), Some(signal_receiver))
         } else {
             (None, None)
