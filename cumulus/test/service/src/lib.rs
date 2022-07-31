@@ -116,8 +116,6 @@ async fn run_executor(
 
         let primary_chain_config = subspace_service::SubspaceConfiguration {
             base: primary_chain_config,
-            // Always enable the slot notification.
-            force_new_slot_notifications: true,
             dsn_config: None,
             executor_enabled: true,
         };
