@@ -13,10 +13,10 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 parity-scale-codec = { version = "3.1.5", default-features = false, features = ["derive"] }
-sp-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
-sp-core = { version = "6.0.0", default-features = false, git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
-sp-runtime = { version = "6.0.0", default-features = false, git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
-sp-std = { version = "4.0.0-dev", default-features = false, git = "https://github.com/subspace/substrate", rev = "6b8553511112afd5ae7e8e6877dc2f467850f155" }
+sp-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/subspace/substrate", rev = "73c8b9bf8027f04d2b5213ab56700017d139d1d9" }
+sp-core = { version = "6.0.0", default-features = false, git = "https://github.com/subspace/substrate", rev = "73c8b9bf8027f04d2b5213ab56700017d139d1d9" }
+sp-runtime = { version = "6.0.0", default-features = false, git = "https://github.com/subspace/substrate", rev = "73c8b9bf8027f04d2b5213ab56700017d139d1d9" }
+sp-std = { version = "4.0.0-dev", default-features = false, git = "https://github.com/subspace/substrate", rev = "73c8b9bf8027f04d2b5213ab56700017d139d1d9" }
 
 [features]
 default = ["std"]
