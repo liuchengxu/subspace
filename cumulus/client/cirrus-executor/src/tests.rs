@@ -81,7 +81,7 @@ async fn fraud_proof_verification_in_tx_pool_should_work() {
         .build(Role::Authority, false, false)
         .await;
 
-    alice.wait_for_blocks(3).await;
+    alice.wait_for_blocks(10).await;
 
     let header = alice.client.header(&BlockId::Number(1)).unwrap().unwrap();
     let parent_header = alice
