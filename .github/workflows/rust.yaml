@@ -20,142 +20,142 @@ env:
   RUST_LOG: txpool=debug,sync=debug
 
 jobs:
-  cargo-fmt:
-    runs-on: ubuntu-22.04
+  # cargo-fmt:
+    # runs-on: ubuntu-22.04
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    # steps:
+      # - name: Checkout
+        # uses: actions/checkout@v2
 
-      # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "14.0"
+      # # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
+      # - name: Install LLVM and Clang
+        # uses: KyleMayes/install-llvm-action@v1
+        # with:
+          # version: "14.0"
 
-      - name: Rust toolchain
-        uses: actions-rs/toolchain@v1
-        # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
-        with:
-          toolchain: nightly-2022-08-12
-          target: wasm32-unknown-unknown
-          override: true
-          components: rustfmt, clippy
+      # - name: Rust toolchain
+        # uses: actions-rs/toolchain@v1
+        # # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
+        # with:
+          # toolchain: nightly-2022-08-12
+          # target: wasm32-unknown-unknown
+          # override: true
+          # components: rustfmt, clippy
 
-      - name: Configure cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      # - name: Configure cache
+        # uses: actions/cache@v2
+        # with:
+          # path: |
+            # ~/.cargo/registry
+            # ~/.cargo/git
+          # key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
-      - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      # - name: cargo fmt
+        # uses: actions-rs/cargo@v1
+        # with:
+          # command: fmt
+          # args: --all -- --check
 
-  cargo-clippy:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-22.04
-          - macos-12
-          - windows-2022
+  # cargo-clippy:
+    # strategy:
+      # matrix:
+        # os:
+          # - ubuntu-22.04
+          # - macos-12
+          # - windows-2022
 
-    runs-on: ${{ matrix.os }}
+    # runs-on: ${{ matrix.os }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    # steps:
+      # - name: Checkout
+        # uses: actions/checkout@v2
 
-      # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "14.0"
+      # # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
+      # - name: Install LLVM and Clang
+        # uses: KyleMayes/install-llvm-action@v1
+        # with:
+          # version: "14.0"
 
-      - name: Rust toolchain
-        uses: actions-rs/toolchain@v1
-        # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
-        with:
-          toolchain: nightly-2022-08-12
-          target: wasm32-unknown-unknown
-          override: true
-          components: rustfmt, clippy
+      # - name: Rust toolchain
+        # uses: actions-rs/toolchain@v1
+        # # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
+        # with:
+          # toolchain: nightly-2022-08-12
+          # target: wasm32-unknown-unknown
+          # override: true
+          # components: rustfmt, clippy
 
-      # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
-      - name: Remove msys64
-        run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
-        if: runner.os == 'Windows'
+      # # Workaround to resolve link error with C:\msys64\mingw64\bin\libclang.dll
+      # - name: Remove msys64
+        # run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+        # if: runner.os == 'Windows'
 
-      - name: CUDA toolchain
-        uses: Jimver/cuda-toolkit@v0.2.6
-        if: runner.os != 'macOS'
+      # - name: CUDA toolchain
+        # uses: Jimver/cuda-toolkit@v0.2.6
+        # if: runner.os != 'macOS'
 
-      - name: Configure cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      # - name: Configure cache
+        # uses: actions/cache@v2
+        # with:
+          # path: |
+            # ~/.cargo/registry
+            # ~/.cargo/git
+          # key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
-      - name: cargo clippy (Linux or Windows with CUDA)
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --features=subspace-farmer/opencl --all-targets -- -D warnings
-        if: runner.os != 'macOS'
+      # - name: cargo clippy (Linux or Windows with CUDA)
+        # uses: actions-rs/clippy-check@v1
+        # with:
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          # args: --features=subspace-farmer/opencl --all-targets -- -D warnings
+        # if: runner.os != 'macOS'
 
-      - name: cargo clippy (macOS)
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-targets -- -D warnings
-        if: runner.os == 'macOS'
+      # - name: cargo clippy (macOS)
+        # uses: actions-rs/clippy-check@v1
+        # with:
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          # args: --all-targets -- -D warnings
+        # if: runner.os == 'macOS'
 
-  cargo-docs:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # cargo-docs:
+    # runs-on: ubuntu-22.04
+    # steps:
+      # - name: Checkout
+        # uses: actions/checkout@v2
 
-      # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "14.0"
+      # # For sloth256-189 Wasm support we need `llvm-ar`, which is not available by default
+      # - name: Install LLVM and Clang
+        # uses: KyleMayes/install-llvm-action@v1
+        # with:
+          # version: "14.0"
 
-      - name: Rust toolchain
-        uses: actions-rs/toolchain@v1
-        # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
-        with:
-          toolchain: nightly-2022-08-12
-          target: wasm32-unknown-unknown
-          override: true
+      # - name: Rust toolchain
+        # uses: actions-rs/toolchain@v1
+        # # TODO: Below can be removed when https://github.com/actions-rs/toolchain/issues/126 is resolved
+        # with:
+          # toolchain: nightly-2022-08-12
+          # target: wasm32-unknown-unknown
+          # override: true
 
-      - name: Configure cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      # - name: Configure cache
+        # uses: actions/cache@v2
+        # with:
+          # path: |
+            # ~/.cargo/registry
+            # ~/.cargo/git
+          # key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
-      - name: Check Documentation
-        run: cargo doc --all --no-deps --lib
-        env:
-          RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
+      # - name: Check Documentation
+        # run: cargo doc --all --no-deps --lib
+        # env:
+          # RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
 
   cargo-test:
     strategy:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-12
-          - windows-2022
+          # - macos-12
+          # - windows-2022
 
     runs-on: ${{ matrix.os }}
 
@@ -195,3 +195,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: tx_pool
