@@ -439,6 +439,8 @@ mod pallet {
                 Call::submit_execution_receipt {
                     signed_execution_receipt,
                 } => {
+                    #[cfg(feature = "std")]
+                    println!("================================= Validating execution receipt: {:?}", signed_execution_receipt);
                     if let Err(e) = Self::validate_execution_receipt(signed_execution_receipt) {
                         log::error!(
                             target: "runtime::subspace::executor",
@@ -622,6 +624,8 @@ impl<T: Config> Pallet<T> {
             to_prove >= OldestReceiptNumber::<T>::get(),
             FraudProofError::ExecutionReceiptPruned
         );
+        #[cfg(feature = "std")]
+        println!("================= to_prove: {:?}, Best number: {:?}", to_prove, ExecutionChainBestNumber::<T>::get());
         ensure!(
             to_prove <= ExecutionChainBestNumber::<T>::get(),
             FraudProofError::ExecutionReceiptInFuture
