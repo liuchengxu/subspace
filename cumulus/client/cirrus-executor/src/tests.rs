@@ -78,7 +78,7 @@ async fn fraud_proof_verification_in_tx_pool_should_work() {
     // Run Alice (a secondary chain authority node)
     let alice = cirrus_test_service::TestNodeBuilder::new(tokio_handle.clone(), Alice)
         .connect_to_primary_chain_node(&ferdie)
-        .build(Role::Authority, false, false)
+        .build(Role::Authority, false, true)
         .await;
 
     alice.wait_for_blocks(10).await;
