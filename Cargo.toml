@@ -103,6 +103,7 @@ sc-network = { git = "https://github.com/subspace//substrate", branch = "debug-t
 sc-network-common = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sc-network-gossip = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sc-offchain = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
+sc-peerset = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sc-rpc = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sc-rpc-api = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sc-service = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
@@ -120,6 +121,7 @@ sp-consensus = { git = "https://github.com/subspace//substrate", branch = "debug
 sp-consensus-slots = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sp-core = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sp-externalities = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
+sp-finality-grandpa = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sp-inherents = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sp-io = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }
 sp-keystore = { git = "https://github.com/subspace//substrate", branch = "debug-tx-pool-test" }

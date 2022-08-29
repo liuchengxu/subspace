@@ -4601,7 +4601,7 @@ dependencies = [
  "serde",
  "sp-application-crypto",
  "sp-core",
- "sp-finality-grandpa 4.0.0-dev (git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9)",
+ "sp-finality-grandpa",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -6292,7 +6292,7 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-network-common",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sc-peerset",
  "sc-utils 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
  "serde",
  "serde_json",
@@ -6322,10 +6322,10 @@ dependencies = [
  "parity-scale-codec",
  "prost-build",
  "sc-consensus",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sc-peerset",
  "smallvec",
  "sp-consensus",
- "sp-finality-grandpa 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sp-finality-grandpa",
  "sp-runtime",
  "thiserror",
 ]
@@ -6362,7 +6362,7 @@ dependencies = [
  "prost-build",
  "sc-client-api",
  "sc-network-common",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sc-peerset",
  "sp-blockchain",
  "sp-core",
  "sp-runtime",
@@ -6383,7 +6383,7 @@ dependencies = [
  "prost-build",
  "sc-client-api",
  "sc-network-common",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9)",
+ "sc-peerset",
  "sp-blockchain",
  "sp-core",
  "sp-runtime",
@@ -6407,13 +6407,13 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-network-common",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sc-peerset",
  "smallvec",
  "sp-arithmetic",
  "sp-blockchain",
  "sp-consensus",
  "sp-core",
- "sp-finality-grandpa 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
+ "sp-finality-grandpa",
  "sp-runtime",
  "thiserror",
 ]
@@ -6435,13 +6435,13 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-network-common",
- "sc-peerset 4.0.0-dev (git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9)",
+ "sc-peerset",
  "smallvec",
  "sp-arithmetic",
  "sp-blockchain",
  "sp-consensus",
  "sp-core",
- "sp-finality-grandpa 4.0.0-dev (git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9)",
+ "sp-finality-grandpa",
  "sp-runtime",
  "thiserror",
 ]
@@ -6513,19 +6513,6 @@ dependencies = [
  "libp2p",
  "log",
  "sc-utils 4.0.0-dev (git+https://github.com/subspace//substrate?branch=debug-tx-pool-test)",
- "serde_json",
- "wasm-timer",
-]
-
-[[package]]
-name = "sc-peerset"
-version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9#73c8b9bf8027f04d2b5213ab56700017d139d1d9"
-dependencies = [
- "futures 0.3.21",
- "libp2p",
- "log",
- "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9)",
  "serde_json",
  "wasm-timer",
 ]
@@ -7575,24 +7562,6 @@ dependencies = [
 name = "sp-finality-grandpa"
 version = "4.0.0-dev"
 source = "git+https://github.com/subspace//substrate?branch=debug-tx-pool-test#2b76e9f574a101768156085b305897c758124c9f"
-dependencies = [
- "finality-grandpa",
- "log",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-api",
- "sp-application-crypto",
- "sp-core",
- "sp-keystore",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "sp-finality-grandpa"
-version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=73c8b9bf8027f04d2b5213ab56700017d139d1d9#73c8b9bf8027f04d2b5213ab56700017d139d1d9"
 dependencies = [
  "finality-grandpa",
  "log",
