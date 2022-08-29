@@ -393,7 +393,7 @@ mod pallet {
     impl<T: Config> ValidateUnsigned for Pallet<T> {
         type Call = Call<T>;
         fn pre_dispatch(call: &Self::Call) -> Result<(), TransactionValidityError> {
-            match call {
+            let res = match call {
                 Call::submit_execution_receipt {
                     signed_execution_receipt,
                 } => {
@@ -431,7 +431,14 @@ mod pallet {
                 Call::submit_bundle_equivocation_proof { .. } => Ok(()),
                 Call::submit_invalid_transaction_proof { .. } => Ok(()),
                 _ => Err(InvalidTransaction::Call.into()),
-            }
+            };
+
+            log::debug!(
+                target: "runtime::subspace::executor",
+                "===================== pre_dispatch result: {:?} for call: {:?}",
+                res, call
+            );
+            res
         }
 
         fn validate_unsigned(_source: TransactionSource, call: &Self::Call) -> TransactionValidity {
