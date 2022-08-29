@@ -435,7 +435,7 @@ mod pallet {
         }
 
         fn validate_unsigned(_source: TransactionSource, call: &Self::Call) -> TransactionValidity {
-            match call {
+            let res = match call {
                 Call::submit_execution_receipt {
                     signed_execution_receipt,
                 } => {
@@ -538,7 +538,10 @@ mod pallet {
                 }
 
                 _ => InvalidTransaction::Call.into(),
-            }
+            };
+            #[cfg(feature = "std")]
+            println!("================================= Validating result: {:?}", res);
+            res
         }
     }
 }
