@@ -142,7 +142,29 @@ async fn fraud_proof_verification_in_tx_pool_should_work() {
         .into(),
     );
 
+    let ready_txs = || {
+        ferdie
+            .transaction_pool
+            .pool()
+            .validated_pool()
+            .ready()
+            .map(|tx| tx.hash)
+            .collect::<Vec<_>>()
+    };
+
+    let future_txs = || {
+        ferdie
+            .transaction_pool
+            .pool()
+            .validated_pool()
+            .futures()
+            .into_iter()
+            .map(|(tx_hash, _)| tx_hash)
+            .collect::<HashSet<_>>()
+    };
+
     let expected_tx_hash = tx.using_encoded(BlakeTwo256::hash);
+    println!("===================== Before submitting valid fraud proof, ready: {:?}, future: {:?}", ready_txs(), future_txs());
     let tx_hash = ferdie
         .transaction_pool
         .pool()
