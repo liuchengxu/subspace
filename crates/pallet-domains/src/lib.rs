@@ -398,6 +398,15 @@ mod pallet {
                         }
                     }
 
+                    ValidTransaction::with_tag_prefix("SubspaceSubmitBundle")
+                        .priority(TransactionPriority::MAX)
+                        .longevity(T::ConfirmationDepthK::get().try_into().unwrap_or_else(|_| {
+                            panic!("Block number always fits in TransactionLongevity; qed")
+                        }))
+                        .propagate(true)
+                        .build()
+
+                    /* No provides and requires tag
                     let mut builder = ValidTransaction::with_tag_prefix("SubspaceSubmitBundle")
                         .priority(TransactionPriority::MAX)
                         .longevity(T::ConfirmationDepthK::get().try_into().unwrap_or_else(|_| {
@@ -460,6 +469,7 @@ mod pallet {
                             .and_requires(first_primary_number - One::one())
                             .build()
                     }
+                    */
                 }
                 Call::submit_fraud_proof { fraud_proof } => {
                     if let Err(e) = Self::validate_fraud_proof(fraud_proof) {

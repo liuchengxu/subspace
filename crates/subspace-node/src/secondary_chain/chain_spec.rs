@@ -119,6 +119,10 @@ pub fn x_net_config() -> ExecutionChainSpec<GenesisConfig> {
                     // Same with the Sudo account on primary chain.
                     AccountId::from_ss58check("5CXTmJEusve5ixyJufqHThmy4qUrrm6FyLCR7QfE4bbyMTNC")
                         .expect("Wrong root account address"),
+                    get_account_id_from_seed("Alice"),
+                    get_account_id_from_seed("Bob"),
+                    get_account_id_from_seed("Alice//stash"),
+                    get_account_id_from_seed("Bob//stash"),
                 ],
                 vec![(
                     get_account_id_from_seed("Alice"),

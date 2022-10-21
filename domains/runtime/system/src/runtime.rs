@@ -252,7 +252,7 @@ parameter_types! {
     pub const MinExecutors: u32 = 1;
     pub const MaxExecutors: u32 = 10;
     // One hour in blocks.
-    pub const EpochDuration: BlockNumber = 10;
+    pub const EpochDuration: BlockNumber = 1;
     pub const MaxWithdrawals: u32 = 1;
     // One day in blocks.
     pub const WithdrawalDuration: BlockNumber = 3600 * 24 / 6;

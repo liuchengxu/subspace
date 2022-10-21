@@ -249,6 +249,7 @@ where
 
         let transcript_data = make_local_randomness_transcript_data(&global_challenge);
 
+        tracing::info!(target: LOG_TARGET, "============== [solve_bundle_election_challenge] authorities:{authorities:?}");
         for (authority_id, stake_weight) in authorities {
             if let Ok(Some(vrf_signature)) = SyncCryptoStore::sr25519_vrf_sign(
                 &*self.keystore,
@@ -256,7 +257,7 @@ where
                 authority_id.as_ref(),
                 transcript_data.clone(),
             ) {
-                tracing::info!(target: LOG_TARGET, stake_weight, total_stake_weight, "========================================================= Calculating the election solution, authority_id:{authority_id:?}");
+                tracing::info!(target: LOG_TARGET, stake_weight, total_stake_weight, "============= [solve_bundle_election_challenge] Calculating the election solution, authority_id:{authority_id:?}");
                 // TODO: specify domain_id properly.
                 const SYSTEM_DOMAIN_ID: u64 = 0;
 

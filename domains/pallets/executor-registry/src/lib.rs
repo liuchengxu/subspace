@@ -681,6 +681,7 @@ mod pallet {
                     })
                     .collect::<Vec<_>>();
 
+                log::debug!(target: "runtime::executor-registry", "Begin a new epoch, authorities: {authorities:?}, total_stake_weight: {total_stake_weight:?}");
                 let bounded_authorities = BoundedVec::<_, T::MaxExecutors>::try_from(authorities)
                     .expect(
                         "T::MaxExecutors bound is ensured while registering a new executor; qed",
