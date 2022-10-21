@@ -173,7 +173,10 @@ mod pallet {
             primary_hash: T::Hash,
         },
         /// A transaction bundle was included.
-        TransactionBundleStored { bundle_hash: H256 },
+        TransactionBundleStored {
+            bundle_hash: H256,
+            bundle_author: sp_domains::ExecutorPublicKey,
+        },
         /// A fraud proof was processed.
         FraudProofProcessed,
         /// A bundle equivocation proof was processed.
@@ -198,12 +201,18 @@ mod pallet {
                 signed_opaque_bundle
             );
 
+            let bundle_author = signed_opaque_bundle
+                .proof_of_election
+                .executor_public_key
+                .clone();
+
             for receipt in &signed_opaque_bundle.bundle.receipts {
                 Self::apply_execution_receipt(receipt);
             }
 
             Self::deposit_event(Event::TransactionBundleStored {
                 bundle_hash: signed_opaque_bundle.hash(),
+                bundle_author,
             });
 
             Ok(())
@@ -319,6 +328,13 @@ mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn receipt_head)]
     pub(super) type ReceiptHead<T: Config> = StorageValue<_, (T::Hash, T::BlockNumber), ValueQuery>;
+
+    /// Mapping for tracking the receipt votes.
+    ///
+    /// (secondary_block_hash, state_root)
+    #[pallet::storage]
+    pub(super) type StateRoots<T: Config> =
+        StorageMap<_, Twox64Concat, T::SecondaryHash, T::SecondaryHash, OptionQuery>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {

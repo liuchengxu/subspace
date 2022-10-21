@@ -176,6 +176,7 @@ where
 
         let best_hash = self.client.info().best_hash;
 
+        tracing::info!(target: LOG_TARGET, "========================================================= Claiming bundle at slot {slot}");
         if let Some(proof_of_election) =
             self.solve_bundle_election_challenge(best_hash, global_challenge)?
         {
@@ -216,6 +217,7 @@ where
                 )))),
             }
         } else {
+            tracing::info!(target: LOG_TARGET, "========================================================= Bundle election solution not found at slot {slot}");
             Ok(None)
         }
     }
@@ -254,6 +256,7 @@ where
                 authority_id.as_ref(),
                 transcript_data.clone(),
             ) {
+                tracing::info!(target: LOG_TARGET, stake_weight, total_stake_weight, "========================================================= Calculating the election solution, authority_id:{authority_id:?}");
                 // TODO: specify domain_id properly.
                 const SYSTEM_DOMAIN_ID: u64 = 0;
 

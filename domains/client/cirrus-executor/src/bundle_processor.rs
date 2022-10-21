@@ -19,6 +19,7 @@ use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT, One};
 use std::borrow::Cow;
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, VecDeque};
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -77,6 +78,19 @@ fn shuffle_extrinsics<Extrinsic: Debug>(
     );
 
     shuffled_extrinsics
+}
+
+#[derive(Debug, thiserror::Error)]
+enum BundleProcessorError {
+    /// Error from importing the block.
+    #[error("Import failed: {0}")]
+    ImportBlock(String),
+    #[error(transparent)]
+    Blockchain(#[from] sp_blockchain::Error),
+    #[error(transparent)]
+    Consensus(#[from] sp_consensus::Error),
+    #[error(transparent)]
+    RuntimeApi(#[from] sp_api::ApiError),
 }
 
 pub(crate) struct BundleProcessor<Block, PBlock, Client, PClient, Backend, E>
@@ -183,11 +197,22 @@ where
             .try_into()
             .unwrap_or_else(|_| panic!("Primary number must fit into u32; qed"));
 
-        assert_eq!(
-            Into::<NumberFor<Block>>::into(primary_number),
-            parent_number + One::one(),
-            "New secondary best number must be equal to the primary number"
-        );
+        match Into::<NumberFor<Block>>::into(primary_number).cmp(&(parent_number + One::one())) {
+            Ordering::Greater => {
+                tracing::debug!(target: LOG_TARGET, "Some missing primary block unprocessed");
+                // TODO: return error
+                return Ok(());
+            }
+            Ordering::Equal => {}
+            Ordering::Less => {
+                tracing::debug!(
+                    target: LOG_TARGET,
+                    primary_number,
+                    "This primary block has been processed already"
+                );
+                return Ok(());
+            }
+        }
 
         let mut extrinsics = self.bundles_to_extrinsics(parent_hash, bundles, shuffling_seed)?;
 
@@ -254,8 +279,7 @@ where
             ImportResult::MissingState => {
                 return Err(sp_consensus::Error::ClientImport(format!(
                     "Parent state of block #{header_number}({header_hash:?}) is missing, parent: {parent_hash:?}"
-                ))
-                .into());
+                )).into());
             }
         }
 

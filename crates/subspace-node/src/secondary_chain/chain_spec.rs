@@ -157,7 +157,7 @@ fn testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, 1_000 * SSC))
+                .map(|k| (k, 100_000_000 * SSC))
                 .collect(),
         },
         executor_registry: ExecutorRegistryConfig {
