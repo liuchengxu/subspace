@@ -248,7 +248,7 @@ impl cirrus_pallet_executive::Config for Runtime {
 parameter_types! {
     // TODO: proper parameters
     pub const MinExecutorStake: Balance = 10 * SSC;
-    pub const MaxExecutorStake: Balance = 1000 * SSC;
+    pub const MaxExecutorStake: Balance = 10_000_000 * SSC;
     pub const MinExecutors: u32 = 1;
     pub const MaxExecutors: u32 = 10;
     // One hour in blocks.

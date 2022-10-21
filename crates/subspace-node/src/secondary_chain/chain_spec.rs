@@ -46,7 +46,7 @@ pub fn development_config() -> ExecutionChainSpec<GenesisConfig> {
                 ],
                 vec![(
                     get_account_id_from_seed("Alice"),
-                    1_000 * SSC,
+                    100 * SSC,
                     get_account_id_from_seed("Alice"),
                     get_public_key_from_seed::<ExecutorPublicKey>("Alice"),
                 )],
@@ -86,7 +86,7 @@ pub fn local_testnet_config() -> ExecutionChainSpec<GenesisConfig> {
                 ],
                 vec![(
                     get_account_id_from_seed("Alice"),
-                    1_000 * SSC,
+                    100 * SSC,
                     get_account_id_from_seed("Alice"),
                     get_public_key_from_seed::<ExecutorPublicKey>("Alice"),
                 )],
@@ -126,7 +126,7 @@ pub fn x_net_config() -> ExecutionChainSpec<GenesisConfig> {
                 ],
                 vec![(
                     get_account_id_from_seed("Alice"),
-                    1_000 * SSC,
+                    100 * SSC,
                     get_account_id_from_seed("Alice"),
                     get_public_key_from_seed::<ExecutorPublicKey>("Alice"),
                 )],
