@@ -52,6 +52,7 @@ mod pallet {
     };
     use sp_runtime::SaturatedConversion;
     use sp_std::fmt::Debug;
+    use sp_std::vec::Vec;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -398,91 +399,21 @@ mod pallet {
                         }
                     }
 
+                    let receipt_numbers = signed_opaque_bundle
+                        .bundle
+                        .receipts
+                        .iter()
+                        .map(|r| r.primary_number)
+                        .collect::<Vec<_>>();
+
                     ValidTransaction::with_tag_prefix("SubspaceSubmitBundle")
                         .priority(TransactionPriority::MAX)
                         .longevity(T::ConfirmationDepthK::get().try_into().unwrap_or_else(|_| {
                             panic!("Block number always fits in TransactionLongevity; qed")
                         }))
+                        .and_provides(receipt_numbers)
                         .propagate(true)
                         .build()
-
-                    /* No provides and requires tag
-                    let mut builder = ValidTransaction::with_tag_prefix("SubspaceSubmitBundle")
-                        .priority(TransactionPriority::MAX)
-                        .longevity(T::ConfirmationDepthK::get().try_into().unwrap_or_else(|_| {
-                            panic!("Block number always fits in TransactionLongevity; qed")
-                        }))
-                        .propagate(true);
-
-                    for receipt in &signed_opaque_bundle.bundle.receipts {
-                        builder = builder.and_provides(receipt.primary_number);
-                    }
-
-                    let current_block_number = frame_system::Pallet::<T>::current_block_number();
-                    if current_block_number == One::one() {
-                        return builder.build();
-                    }
-
-                    // The receipt for a certain block can only exist in one bundle each time.
-                    //
-                    // TODO: Proper priority for `submit_transaction_bundle`.
-                    //
-                    // Consider this scenario: when a primary node is at #2, its tx pool has an
-                    // unsigned extrinsic `submit_transaction_bundle` with receipts {1} in it.
-                    // When this primary node proceeds to #3, this unsigned extrinsic remains,
-                    // but a new one with receipts {1, 2} is received too, at this point, due to
-                    // these two extrinsics provides the same tag (`1`), the tx pool will check
-                    // if the latter one need to replace the previous one, if we don't set a higher
-                    // priority for the extrinsic with receipts {1, 2}, it will be simply rejected
-                    // as too low priority. However, it makes more sense to replace the previous
-                    // one in this case or to have a better way of handling these extrinsics.
-                    //
-                    // #2: `submit_transaction_bundle` with receipts {1}
-                    // #3: `submit_transaction_bundle` with receipts {1, 2}
-                    //
-                    // Now the unthoughtful priority is caculated based on the assumption that an extrinsic
-                    // providing more receipts has a higher priority.
-                    let additional_priority = signed_opaque_bundle
-                        .bundle
-                        .receipts
-                        .iter()
-                        .map(|r| r.primary_number.saturated_into::<TransactionPriority>())
-                        .sum::<TransactionPriority>();
-                    builder = builder.priority(TransactionPriority::MAX / 2 + additional_priority);
-
-                    let first_primary_number = signed_opaque_bundle
-                        .bundle
-                        .receipts
-                        .get(0)
-                        .expect("Receipts in a bundle after Block #1 must be non-empty as checked above; qed")
-                        .primary_number;
-
-                    // primary_number is ensured to be larger than the best execution chain chain
-                    // number above.
-                    //
-                    // No requires if it's the next expected execution chain number.
-                    let (_, best_number) = <ReceiptHead<T>>::get();
-                    if first_primary_number == best_number + One::one() {
-                        builder.build()
-                    } else {
-                        builder
-                            .and_requires(first_primary_number - One::one())
-                            .build()
-                    }
-                    */
-                }
-                Call::submit_fraud_proof { fraud_proof } => {
-                    if let Err(e) = Self::validate_fraud_proof(fraud_proof) {
-                        log::error!(
-                            target: "runtime::subspace::executor",
-                            "Invalid fraud proof: {:?}, error: {:?}",
-                            fraud_proof, e
-                        );
-                        return InvalidTransactionCode::FraudProof.into();
-                    }
-
-                    // TODO: proper tag value.
-                    unsigned_validity("SubspaceSubmitFraudProof", fraud_proof)
                 }
                 Call::submit_bundle_equivocation_proof {
                     bundle_equivocation_proof,
