@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["RpcClient","Abstraction of the Remote Procedure Call Client"]],"type":[["Error","To become error type agnostic"]]};
