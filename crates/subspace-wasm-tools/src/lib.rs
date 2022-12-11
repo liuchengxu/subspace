@@ -61,3 +61,47 @@ pub fn create_runtime_bundle_inclusion_file(
         panic!("Must be able to write to {target_file_name}: {error}");
     });
 }
+
+/// Creates a `target_file_name` in `OUT_DIR` that will contain constant `bundle_const_name` with
+/// runtime of `runtime_crate_name` stored in it.
+///
+/// Must be called before Substrate's WASM builder.
+pub fn create_runtime_bundle_section_contents_file(
+    runtime_crate_name: &str,
+    bundle_section_contents_const_name: &str,
+    target_file_name: &str,
+) {
+    // Create a file that will include execution runtime into consensus runtime
+    let execution_wasm_bundle_path = env::var("SUBSPACE_WASM_BUNDLE_PATH").unwrap_or_else(|_| {
+        env::var(format!(
+            "DEP_{}_WASM_FILE",
+            runtime_crate_name.replace('-', "_").to_ascii_uppercase()
+        ))
+        .expect("Must be set by dependency")
+    });
+
+    env::set_var("SUBSPACE_WASM_BUNDLE_PATH", &execution_wasm_bundle_path);
+
+    let execution_wasm_bundle_rs_path =
+        env::var("OUT_DIR").expect("Set by cargo; qed") + "/" + target_file_name;
+
+    let wasm_bundle_content = std::fs::read(&execution_wasm_bundle_path).unwrap_or_else(|e| {
+        panic!("Failed to read wasm bundle from {execution_wasm_bundle_path:?}: {e}",)
+    });
+
+    let wasm_bundle_size = wasm_bundle_content.len();
+
+    let execution_wasm_bundle_rs_contents = format!(
+        r"
+            pub const {bundle_section_contents_const_name}: [u8; {wasm_bundle_size}] = {wasm_bundle_content:?};
+        ",
+    );
+
+    fs::write(
+        execution_wasm_bundle_rs_path,
+        execution_wasm_bundle_rs_contents,
+    )
+    .unwrap_or_else(|error| {
+        panic!("Must be able to write to {target_file_name}: {error}");
+    });
+}

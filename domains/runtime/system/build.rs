@@ -5,6 +5,12 @@ fn main() {
         "core_payments_wasm_bundle.rs",
     );
 
+    subspace_wasm_tools::create_runtime_bundle_section_contents_file(
+        "core-payments-domain-runtime",
+        "CORE_PAYMENTS_WASM_BUNDLE_SECTION_CONTENTS",
+        "core_payments_wasm_bundle_section_contents.rs",
+    );
+
     #[cfg(feature = "std")]
     {
         substrate_wasm_builder::WasmBuilder::new()
