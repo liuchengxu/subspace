@@ -1,4 +1,6 @@
-use crate::utils::{to_number_primitive, BlockInfo, DomainBundles, ExecutorSlotInfo};
+use crate::utils::{
+    read_core_domain_runtime_blob, to_number_primitive, BlockInfo, DomainBundles, ExecutorSlotInfo,
+};
 use codec::{Decode, Encode};
 use futures::channel::mpsc;
 use futures::{SinkExt, Stream, StreamExt};
@@ -248,7 +250,7 @@ async fn process_primary_block<Block, PBlock, PClient, ProcessorFn>(
     primary_chain_client: &PClient,
     processor: &ProcessorFn,
     (block_hash, block_number, fork_choice): (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-) -> Result<(), ApiError>
+) -> sp_blockchain::Result<()>
 where
     Block: BlockT,
     PBlock: BlockT,
@@ -295,11 +297,25 @@ where
         .iter()
         .any(|item| *item == DigestItem::RuntimeEnvironmentUpdated)
     {
-        Some(
-            primary_chain_client
-                .runtime_api()
-                .execution_wasm_bundle(&block_id)?,
-        )
+        let system_domain_runtime = primary_chain_client
+            .runtime_api()
+            .execution_wasm_bundle(&block_id)?;
+
+        let new_runtime = match domain_id {
+            DomainId::SYSTEM => system_domain_runtime,
+            DomainId::CORE_PAYMENTS => {
+                read_core_domain_runtime_blob(system_domain_runtime.as_ref(), domain_id)
+                    .map_err(|err| sp_blockchain::Error::Application(Box::new(err)))?
+                    .into()
+            }
+            _ => {
+                return Err(sp_blockchain::Error::RuntimeCode(
+                    "Can not retrieve new domain runtime code",
+                ))
+            }
+        };
+
+        Some(new_runtime)
     } else {
         None
     };

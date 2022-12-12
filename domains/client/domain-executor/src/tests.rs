@@ -1,3 +1,4 @@
+use crate::utils::read_core_domain_runtime_blob;
 use codec::{Decode, Encode};
 use domain_runtime_primitives::{DomainCoreApi, Hash};
 use domain_test_service::run_primary_chain_validator_node;
@@ -330,7 +331,7 @@ async fn extract_core_domain_wasm_bundle_should_work() {
     let tokio_handle = tokio::runtime::Handle::current();
 
     // Start Ferdie
-    let (ferdie, ferdie_network_starter) = run_primary_chain_validator_node(
+    let (ferdie, _ferdie_network_starter) = run_primary_chain_validator_node(
         tokio_handle.clone(),
         Ferdie,
         vec![],
@@ -344,14 +345,11 @@ async fn extract_core_domain_wasm_bundle_should_work() {
         .execution_wasm_bundle(&BlockId::Hash(ferdie.client.info().best_hash))
         .unwrap();
 
-    let system_runtime_blob = RuntimeBlob::new(system_domain_bundle.as_ref()).unwrap();
+    let core_payments_runtime_blob =
+        read_core_domain_runtime_blob(system_domain_bundle.as_ref(), DomainId::CORE_PAYMENTS)
+            .unwrap();
 
-    let core_payments_blob = RuntimeBlob::new(
-        system_runtime_blob
-            .custom_section_contents("core_payments_runtime_blob")
-            .expect("`core_payments_runtime_blob` does not exist"),
-    )
-    .unwrap();
+    let core_payments_blob = RuntimeBlob::new(&core_payments_runtime_blob).unwrap();
 
     let core_payments_version = sc_executor::read_embedded_version(&core_payments_blob)
         .unwrap()
