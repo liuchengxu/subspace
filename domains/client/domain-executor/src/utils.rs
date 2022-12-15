@@ -125,22 +125,14 @@ pub(crate) fn read_core_domain_runtime_blob(
     system_domain_bundle: &[u8],
     core_domain_id: DomainId,
 ) -> Result<Vec<u8>, WasmError> {
-    let section_contents_name = match core_domain_id {
-        DomainId::CORE_PAYMENTS => "core_payments_runtime_blob",
-        _ => {
-            return Err(WasmError::Other(format!(
-                "Unsupported domain: {core_domain_id:?}"
-            )))
-        }
-    };
-
     let system_runtime_blob = RuntimeBlob::new(system_domain_bundle)?;
 
+    let section_contents_name = core_domain_id.link_section_name();
     let embedded_runtime_blob = system_runtime_blob
-        .custom_section_contents(section_contents_name)
-        .ok_or(WasmError::Other(format!(
-            "Custom section {section_contents_name} not found"
-        )))?;
+        .custom_section_contents(&section_contents_name)
+        .ok_or_else(|| {
+            WasmError::Other(format!("Custom section {section_contents_name} not found"))
+        })?;
 
     Ok(embedded_runtime_blob.to_vec())
 }

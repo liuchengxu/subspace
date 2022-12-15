@@ -34,20 +34,6 @@ use subspace_runtime_primitives::{SHANNON, SSC};
 // Make core-payments WASM runtime available.
 include!(concat!(env!("OUT_DIR"), "/core_payments_wasm_bundle.rs"));
 
-// Make core-payments WASM runtime available.
-include!(concat!(
-    env!("OUT_DIR"),
-    "/core_payments_wasm_bundle_section_contents.rs"
-));
-
-// TODO: embed this into wasm_bundle_section_contents.rs
-const _: () = {
-    #[cfg(not(feature = "std"))]
-    #[link_section = "core_payments_runtime_blob"]
-    static SECTION_CONTENTS: [u8; CORE_PAYMENTS_WASM_BUNDLE.len()] =
-        CORE_PAYMENTS_WASM_BUNDLE_SECTION_CONTENTS;
-};
-
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 
