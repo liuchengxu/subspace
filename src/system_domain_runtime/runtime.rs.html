@@ -659,15 +659,16 @@
 <a href="#659" id="659">659</a>
 <a href="#660" id="660">660</a>
 <a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
 </pre><pre class="rust"><code><span class="kw">use </span>domain_runtime_primitives::{opaque, RelayerId};
 <span class="kw">pub use </span>domain_runtime_primitives::{
     AccountId, Address, Balance, BlockNumber, Hash, Index, Signature,
 };
 <span class="kw">use </span>frame_support::dispatch::DispatchClass;
 <span class="kw">use </span>frame_support::traits::{ConstU16, ConstU32, Everything};
-<span class="kw">use </span>frame_support::weights::constants::{
-    BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND,
-};
+<span class="kw">use </span>frame_support::weights::constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 <span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee, Weight};
 <span class="kw">use </span>frame_support::{construct_runtime, parameter_types};
 <span class="kw">use </span>frame_system::limits::{BlockLength, BlockWeights};
@@ -676,6 +677,7 @@
 <span class="kw">use </span>sp_core::crypto::KeyTypeId;
 <span class="kw">use </span>sp_core::OpaqueMetadata;
 <span class="kw">use </span>sp_domains::bundle_election::BundleElectionParams;
+<span class="kw">use </span>sp_domains::fraud_proof::FraudProof;
 <span class="kw">use </span>sp_domains::{DomainId, ExecutorPublicKey, SignedOpaqueBundle};
 <span class="kw">use </span>sp_messenger::endpoint::{Endpoint, EndpointHandler <span class="kw">as </span>EndpointHandlerT, EndpointId};
 <span class="kw">use </span>sp_messenger::messages::{CrossDomainMessage, MessageId, RelayerMessagesWithStorageKey};
@@ -748,7 +750,7 @@
     spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace-system-domain&quot;</span>),
     impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace-system-domain&quot;</span>),
     authoring_version: <span class="number">0</span>,
-    spec_version: <span class="number">1</span>,
+    spec_version: <span class="number">0</span>,
     impl_version: <span class="number">0</span>,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: <span class="number">0</span>,
@@ -766,8 +768,8 @@
 /// `Operational` extrinsics.
 </span><span class="kw">const </span>NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(<span class="number">75</span>);
 
-<span class="doccomment">/// We allow for 0.5 of a second of compute with a 12 second average block time.
-</span><span class="kw">const </span>MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.div(<span class="number">2</span>).set_proof_size(u64::MAX);
+<span class="doccomment">/// TODO: Proper max block weight
+</span><span class="kw">const </span>MAXIMUM_BLOCK_WEIGHT: Weight = Weight::MAX;
 
 <span class="doccomment">/// The version information used to identify this runtime when compiled natively.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
@@ -1236,6 +1238,10 @@
 
         <span class="kw">fn </span>maximum_receipt_drift() -&gt; NumberFor&lt;Block&gt; {
             MaximumReceiptDrift::get()
+        }
+
+        <span class="kw">fn </span>submit_fraud_proof_unsigned(fraud_proof: FraudProof) {
+            DomainRegistry::submit_fraud_proof_unsigned(fraud_proof)
         }
     }
 

@@ -843,6 +843,10 @@
 <a href="#843" id="843">843</a>
 <a href="#844" id="844">844</a>
 <a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -871,8 +875,8 @@
 <span class="kw">mod </span>signed_extensions;
 <span class="kw">mod </span>weights;
 
-<span class="comment">// Make execution WASM runtime available.
-</span><span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/execution_wasm_bundle.rs&quot;</span>));
+<span class="comment">// Make system domain WASM runtime available.
+</span><span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/system_domain_wasm_bundle.rs&quot;</span>));
 
 <span class="comment">// Make the WASM binary available.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
@@ -890,8 +894,8 @@
 <span class="kw">use </span>core::num::NonZeroU64;
 <span class="kw">use </span>core::time::Duration;
 <span class="kw">use </span>frame_support::traits::{ConstU16, ConstU32, ConstU64, ConstU8, Contains, Get};
-<span class="kw">use </span>frame_support::weights::constants::{RocksDbWeight, WEIGHT_PER_SECOND};
-<span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee};
+<span class="kw">use </span>frame_support::weights::constants::{RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND};
+<span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee, Weight};
 <span class="kw">use </span>frame_support::{construct_runtime, parameter_types};
 <span class="kw">use </span>frame_system::limits::{BlockLength, BlockWeights};
 <span class="kw">use </span>frame_system::EnsureNever;
@@ -936,7 +940,7 @@
     spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace&quot;</span>),
     impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace&quot;</span>),
     authoring_version: <span class="number">0</span>,
-    spec_version: <span class="number">1</span>,
+    spec_version: <span class="number">0</span>,
     impl_version: <span class="number">0</span>,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: <span class="number">0</span>,
@@ -1006,7 +1010,7 @@
     <span class="kw">pub const </span>Version: RuntimeVersion = VERSION;
     <span class="kw">pub const </span>BlockHashCount: BlockNumber = <span class="number">2400</span>;
     <span class="doccomment">/// We allow for 2 seconds of compute with a 6 second average block time.
-    </span><span class="kw">pub </span>SubspaceBlockWeights: BlockWeights = BlockWeights::with_sensible_defaults(WEIGHT_PER_SECOND.saturating_mul(<span class="number">2</span>).set_proof_size(u64::MAX), NORMAL_DISPATCH_RATIO);
+    </span><span class="kw">pub </span>SubspaceBlockWeights: BlockWeights = BlockWeights::with_sensible_defaults(Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND.saturating_mul(<span class="number">2</span>), u64::MAX), NORMAL_DISPATCH_RATIO);
     <span class="doccomment">/// We allow for 3.75 MiB for `Normal` extrinsic with 5 MiB maximum block length.
     </span><span class="kw">pub </span>SubspaceBlockLength: BlockLength = BlockLength::max_with_normal_ratio(MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
 }
@@ -1540,13 +1544,17 @@
     }
 
     <span class="kw">impl </span>sp_domains::transaction::PreValidationObjectApi&lt;Block, domain_runtime_primitives::Hash&gt; <span class="kw">for </span>Runtime {
-        <span class="kw">fn </span>extract_pre_validation_object(extrinsic: &lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic) -&gt; sp_domains::transaction::PreValidationObject&lt;Block, domain_runtime_primitives::Hash&gt; {
+        <span class="kw">fn </span>extract_pre_validation_object(
+            extrinsic: &lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic,
+        ) -&gt; sp_domains::transaction::PreValidationObject&lt;Block, domain_runtime_primitives::Hash&gt; {
             <span class="kw">crate</span>::domains::extract_pre_validation_object(extrinsic)
         }
     }
 
     <span class="kw">impl </span>sp_domains::ExecutorApi&lt;Block, domain_runtime_primitives::Hash&gt; <span class="kw">for </span>Runtime {
-        <span class="kw">fn </span>submit_bundle_unsigned(opaque_bundle: SignedOpaqueBundle&lt;NumberFor&lt;Block&gt;, &lt;Block <span class="kw">as </span>BlockT&gt;::Hash, domain_runtime_primitives::Hash&gt;) {
+        <span class="kw">fn </span>submit_bundle_unsigned(
+            opaque_bundle: SignedOpaqueBundle&lt;NumberFor&lt;Block&gt;, &lt;Block <span class="kw">as </span>BlockT&gt;::Hash, domain_runtime_primitives::Hash&gt;,
+        ) {
             Domains::submit_bundle_unsigned(opaque_bundle)
         }
 
@@ -1589,16 +1597,16 @@
             <span class="kw">crate</span>::domains::extract_receipts(extrinsics, domain_id)
         }
 
-        <span class="kw">fn </span>extract_fraud_proofs(extrinsics: Vec&lt;&lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic&gt;) -&gt; Vec&lt;FraudProof&gt; {
-            <span class="kw">crate</span>::domains::extract_fraud_proofs(extrinsics)
+        <span class="kw">fn </span>extract_fraud_proofs(extrinsics: Vec&lt;&lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic&gt;, domain_id: DomainId) -&gt; Vec&lt;FraudProof&gt; {
+            <span class="kw">crate</span>::domains::extract_fraud_proofs(extrinsics, domain_id)
         }
 
         <span class="kw">fn </span>extrinsics_shuffling_seed(header: &lt;Block <span class="kw">as </span>BlockT&gt;::Header) -&gt; Randomness {
             <span class="kw">crate</span>::domains::extrinsics_shuffling_seed::&lt;Block&gt;(header)
         }
 
-        <span class="kw">fn </span>execution_wasm_bundle() -&gt; Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt; {
-            EXECUTION_WASM_BUNDLE.into()
+        <span class="kw">fn </span>system_domain_wasm_bundle() -&gt; Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt; {
+            SYSTEM_DOMAIN_WASM_BUNDLE.into()
         }
 
         <span class="kw">fn </span>head_receipt_number() -&gt; NumberFor&lt;Block&gt; {

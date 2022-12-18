@@ -1207,6 +1207,21 @@
 <a href="#1207" id="1207">1207</a>
 <a href="#1208" id="1208">1208</a>
 <a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Subspace Labs, Inc.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -1228,8 +1243,8 @@
 </span><span class="comment">// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 </span><span class="attr">#![recursion_limit = <span class="string">&quot;256&quot;</span>]
 
-</span><span class="comment">// Make execution WASM runtime available.
-</span><span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/execution_wasm_bundle.rs&quot;</span>));
+</span><span class="comment">// Make `domain-test-runtime` WASM runtime available.
+</span><span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/test_domain_wasm_bundle.rs&quot;</span>));
 
 <span class="comment">// Make the WASM binary available.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
@@ -1242,8 +1257,8 @@
     ConstU128, ConstU16, ConstU32, ConstU64, ConstU8, Currency, ExistenceRequirement, Get,
     Imbalance, WithdrawReasons,
 };
-<span class="kw">use </span>frame_support::weights::constants::{RocksDbWeight, WEIGHT_PER_SECOND};
-<span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee};
+<span class="kw">use </span>frame_support::weights::constants::{RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND};
+<span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee, Weight};
 <span class="kw">use </span>frame_support::{construct_runtime, parameter_types};
 <span class="kw">use </span>frame_system::limits::{BlockLength, BlockWeights};
 <span class="kw">use </span>frame_system::EnsureNever;
@@ -1377,7 +1392,7 @@
     <span class="kw">pub const </span>Version: RuntimeVersion = VERSION;
     <span class="kw">pub const </span>BlockHashCount: BlockNumber = <span class="number">2400</span>;
     <span class="doccomment">/// We allow for 2 seconds of compute with a 6 second average block time.
-    </span><span class="kw">pub </span>SubspaceBlockWeights: BlockWeights = BlockWeights::with_sensible_defaults(WEIGHT_PER_SECOND.saturating_mul(<span class="number">2</span>).set_proof_size(u64::MAX), NORMAL_DISPATCH_RATIO);
+    </span><span class="kw">pub </span>SubspaceBlockWeights: BlockWeights = BlockWeights::with_sensible_defaults(Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND.saturating_mul(<span class="number">2</span>), u64::MAX), NORMAL_DISPATCH_RATIO);
     <span class="doccomment">/// We allow for 3.75 MiB for `Normal` extrinsic with 5 MiB maximum block length.
     </span><span class="kw">pub </span>SubspaceBlockLength: BlockLength = BlockLength::max_with_normal_ratio(MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
 }
@@ -1953,6 +1968,15 @@
                 successful_calls,
             );
         }
+        pallet_utility::Call::with_weight { call, .. } =&gt; {
+            extract_call_block_object_mapping(
+                base_offset,
+                objects,
+                call.as_ref(),
+                recursion_depth_left,
+                successful_calls,
+            );
+        }
         pallet_utility::Call::__Ignore(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
             <span class="comment">// Ignore.
         </span>}
@@ -2087,17 +2111,19 @@
         .collect()
 }
 
-<span class="kw">fn </span>extract_fraud_proofs(extrinsics: Vec&lt;UncheckedExtrinsic&gt;) -&gt; Vec&lt;FraudProof&gt; {
+<span class="kw">fn </span>extract_fraud_proofs(
+    extrinsics: Vec&lt;UncheckedExtrinsic&gt;,
+    domain_id: DomainId,
+) -&gt; Vec&lt;FraudProof&gt; {
     extrinsics
         .into_iter()
-        .filter_map(|uxt| {
-            <span class="kw">if let </span>RuntimeCall::Domains(pallet_domains::Call::submit_fraud_proof { fraud_proof }) =
-                uxt.function
+        .filter_map(|uxt| <span class="kw">match </span>uxt.function {
+            RuntimeCall::Domains(pallet_domains::Call::submit_fraud_proof { fraud_proof })
+                <span class="kw">if </span>fraud_proof.domain_id == domain_id =&gt;
             {
                 <span class="prelude-val">Some</span>(fraud_proof)
-            } <span class="kw">else </span>{
-                <span class="prelude-val">None
-            </span>}
+            }
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         })
         .collect()
 }
@@ -2309,13 +2335,17 @@
     }
 
     <span class="kw">impl </span>sp_domains::transaction::PreValidationObjectApi&lt;Block, domain_runtime_primitives::Hash&gt; <span class="kw">for </span>Runtime {
-        <span class="kw">fn </span>extract_pre_validation_object(extrinsic: &lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic)-&gt; sp_domains::transaction::PreValidationObject&lt;Block, domain_runtime_primitives::Hash&gt; {
+        <span class="kw">fn </span>extract_pre_validation_object(
+            extrinsic: &lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic,
+        )-&gt; sp_domains::transaction::PreValidationObject&lt;Block, domain_runtime_primitives::Hash&gt; {
             extract_pre_validation_object(extrinsic)
         }
     }
 
     <span class="kw">impl </span>sp_domains::ExecutorApi&lt;Block, domain_runtime_primitives::Hash&gt; <span class="kw">for </span>Runtime {
-        <span class="kw">fn </span>submit_bundle_unsigned(opaque_bundle: SignedOpaqueBundle&lt;NumberFor&lt;Block&gt;, &lt;Block <span class="kw">as </span>BlockT&gt;::Hash, domain_runtime_primitives::Hash&gt;) {
+        <span class="kw">fn </span>submit_bundle_unsigned(
+            opaque_bundle: SignedOpaqueBundle&lt;NumberFor&lt;Block&gt;, &lt;Block <span class="kw">as </span>BlockT&gt;::Hash, domain_runtime_primitives::Hash&gt;,
+        ) {
             Domains::submit_bundle_unsigned(opaque_bundle)
         }
 
@@ -2358,16 +2388,16 @@
             extract_receipts(extrinsics, domain_id)
         }
 
-        <span class="kw">fn </span>extract_fraud_proofs(extrinsics: Vec&lt;&lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic&gt;) -&gt; Vec&lt;FraudProof&gt; {
-            extract_fraud_proofs(extrinsics)
+        <span class="kw">fn </span>extract_fraud_proofs(extrinsics: Vec&lt;&lt;Block <span class="kw">as </span>BlockT&gt;::Extrinsic&gt;, domain_id: DomainId) -&gt; Vec&lt;FraudProof&gt; {
+            extract_fraud_proofs(extrinsics, domain_id)
         }
 
         <span class="kw">fn </span>extrinsics_shuffling_seed(header: &lt;Block <span class="kw">as </span>BlockT&gt;::Header) -&gt; Randomness {
             extrinsics_shuffling_seed::&lt;Block&gt;(header)
         }
 
-        <span class="kw">fn </span>execution_wasm_bundle() -&gt; Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt; {
-            EXECUTION_WASM_BUNDLE.into()
+        <span class="kw">fn </span>system_domain_wasm_bundle() -&gt; Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt; {
+            TEST_DOMAIN_WASM_BUNDLE.into()
         }
 
         <span class="kw">fn </span>head_receipt_number() -&gt; NumberFor&lt;Block&gt; {

@@ -584,6 +584,31 @@
 <a href="#584" id="584">584</a>
 <a href="#585" id="585">585</a>
 <a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
 </pre><pre class="rust"><code><span class="kw">use </span>domain_runtime_primitives::RelayerId;
 <span class="kw">pub use </span>domain_runtime_primitives::{
     AccountId, Address, Balance, BlockNumber, Hash, Index, Signature,
@@ -591,7 +616,7 @@
 <span class="kw">use </span>frame_support::dispatch::DispatchClass;
 <span class="kw">use </span>frame_support::traits::{ConstU16, ConstU32, Everything};
 <span class="kw">use </span>frame_support::weights::constants::{
-    BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND,
+    BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND,
 };
 <span class="kw">use </span>frame_support::weights::{ConstantMultiplier, IdentityFee, Weight};
 <span class="kw">use </span>frame_support::{construct_runtime, parameter_types};
@@ -600,6 +625,7 @@
 <span class="kw">use </span>sp_core::crypto::KeyTypeId;
 <span class="kw">use </span>sp_core::OpaqueMetadata;
 <span class="kw">use </span>sp_domains::bundle_election::BundleElectionParams;
+<span class="kw">use </span>sp_domains::fraud_proof::FraudProof;
 <span class="kw">use </span>sp_domains::{DomainId, ExecutorPublicKey, SignedOpaqueBundle};
 <span class="kw">use </span>sp_messenger::endpoint::{Endpoint, EndpointHandler};
 <span class="kw">use </span>sp_messenger::messages::{CrossDomainMessage, MessageId, RelayerMessagesWithStorageKey};
@@ -615,6 +641,9 @@
 
 <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">pub use </span>sp_runtime::BuildStorage;
+
+<span class="comment">// Make core-payments WASM runtime available.
+</span><span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/core_payments_wasm_bundle.rs&quot;</span>));
 
 <span class="doccomment">/// Block header type as expected by this runtime.
 </span><span class="kw">pub type </span>Header = generic::Header&lt;BlockNumber, BlakeTwo256&gt;;
@@ -690,12 +719,12 @@
 </span><span class="kw">pub const </span>VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace-executor&quot;</span>),
     impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;subspace-executor&quot;</span>),
-    authoring_version: <span class="number">1</span>,
-    spec_version: <span class="number">1</span>,
+    authoring_version: <span class="number">0</span>,
+    spec_version: <span class="number">0</span>,
     impl_version: <span class="number">0</span>,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: <span class="number">1</span>,
-    state_version: <span class="number">1</span>,
+    transaction_version: <span class="number">0</span>,
+    state_version: <span class="number">0</span>,
 };
 
 <span class="doccomment">/// The existential deposit. Same with the one on primary chain.
@@ -710,7 +739,8 @@
 </span><span class="kw">const </span>NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(<span class="number">75</span>);
 
 <span class="doccomment">/// We allow for 0.5 of a second of compute with a 12 second average block time.
-</span><span class="kw">const </span>MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.div(<span class="number">2</span>).set_proof_size(u64::MAX);
+</span><span class="kw">const </span>MAXIMUM_BLOCK_WEIGHT: Weight =
+    Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND.saturating_div(<span class="number">2</span>), u64::MAX);
 
 <span class="doccomment">/// The version information used to identify this runtime when compiled natively.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
@@ -1099,12 +1129,28 @@
                 .collect()
         }
 
-        <span class="kw">fn </span>bundle_elections_params(_domain_id: DomainId) -&gt; BundleElectionParams {
-            <span class="comment">// TODO: support all kinds of domains.
-            </span>BundleElectionParams {
-                authorities: ExecutorRegistry::authorities().into(),
-                total_stake_weight: ExecutorRegistry::total_stake_weight(),
-                slot_probability: ExecutorRegistry::slot_probability(),
+        <span class="kw">fn </span>bundle_elections_params(domain_id: DomainId) -&gt; BundleElectionParams {
+            <span class="kw">if </span>domain_id.is_system() {
+                BundleElectionParams {
+                    authorities: ExecutorRegistry::authorities().into(),
+                    total_stake_weight: ExecutorRegistry::total_stake_weight(),
+                    slot_probability: ExecutorRegistry::slot_probability(),
+                }
+            } <span class="kw">else </span>{
+                <span class="kw">match </span>(
+                    DomainRegistry::domain_authorities(domain_id),
+                    DomainRegistry::domain_total_stake_weight(domain_id),
+                    DomainRegistry::domain_slot_probability(domain_id),
+                ) {
+                    (authorities, <span class="prelude-val">Some</span>(total_stake_weight), <span class="prelude-val">Some</span>(slot_probability)) =&gt; {
+                        BundleElectionParams {
+                            authorities,
+                            total_stake_weight,
+                            slot_probability,
+                        }
+                    }
+                    <span class="kw">_ </span>=&gt; BundleElectionParams::empty(),
+                }
             }
         }
 
@@ -1128,6 +1174,10 @@
 
         <span class="kw">fn </span>maximum_receipt_drift() -&gt; NumberFor&lt;Block&gt; {
             MaximumReceiptDrift::get()
+        }
+
+        <span class="kw">fn </span>submit_fraud_proof_unsigned(fraud_proof: FraudProof) {
+            DomainRegistry::submit_fraud_proof_unsigned(fraud_proof)
         }
     }
 
