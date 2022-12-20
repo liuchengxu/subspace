@@ -856,10 +856,18 @@ impl<T: Config> Pallet<T> {
                 new_best_number += One::one();
             // Missing receipt.
             } else {
+                log::error!(
+                    target: "runtime::domain-registry",
+                    "[pre_dispatch_submit_core_bundle] Missing parent receipt, head_receipt_number: {:?}, expected: {:?}, got: {:?}", head_receipt_number, new_best_number + One::one(), receipt.primary_number
+                );
                 return Err(Error::<T>::Receipt(ReceiptError::MissingParent));
             }
 
             if BlockHash::<T>::get(domain_id, receipt.primary_number) != receipt.primary_hash {
+                log::error!(
+                    target: "runtime::domain-registry",
+                    "[pre_dispatch_submit_core_bundle] Unknown block, expected: {:?}, got: {:?}", BlockHash::<T>::get(domain_id, receipt.primary_number), receipt.primary_hash
+                );
                 return Err(Error::<T>::Receipt(ReceiptError::UnknownBlock));
             }
 

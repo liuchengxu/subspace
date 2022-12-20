@@ -175,6 +175,12 @@ where
         digests: Digest,
     ) -> Result<DomainBlockResult<Block, PBlock>, sp_blockchain::Error> {
         let primary_number = to_number_primitive(primary_number);
+        tracing::debug!(
+            "(primary_hash, primary_number): {:?}, (parent_hash, parent_number): {:?}, fork_choice: {:?}",
+            (primary_hash, primary_number),
+            (parent_hash, parent_number),
+            fork_choice
+        );
 
         let (header_hash, header_number, state_root) = self
             .build_and_import_block(

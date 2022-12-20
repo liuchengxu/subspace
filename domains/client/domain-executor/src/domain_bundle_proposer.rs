@@ -173,11 +173,14 @@ where
 
             let mut to_send = head_receipt_number + 1;
             let mut receipts = Vec::with_capacity((max_allowed - to_send + 1) as usize);
+            tracing::debug!("Pushing receipts in [{to_send:?}, {max_allowed}]");
             while to_send <= max_allowed {
                 let block_hash = self.client.hash(to_send.into())?.ok_or_else(|| {
                     sp_blockchain::Error::Backend(format!("Hash for Block {to_send:?} not found"))
                 })?;
+                tracing::debug!("Pushing receipt of block {to_send}#{block_hash:?}");
                 receipts.push(load_receipt(block_hash)?);
+                tracing::debug!("Pushed receipt, receipts:{:?}", receipts.iter().map(|r| r.primary_number).collect::<Vec<_>>());
                 to_send += 1;
             }
             receipts

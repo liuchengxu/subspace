@@ -599,6 +599,8 @@ impl<T: Config> Pallet<T> {
                 })
             });
 
+            log::debug!(target: "runtime::domains", "[validate_system_bundle_solution] (block_number, block_hash): {:?}, value in state: {:?}", (block_number, block_hash), StateRoots::<T>::get(block_number, block_hash));
+
             let expected_state_root = match maybe_state_root {
                 Some(v) => v,
                 None => StateRoots::<T>::get(block_number, block_hash)
@@ -684,6 +686,14 @@ impl<T: Config> Pallet<T> {
                 if !point_to_parent_block
                     && BlockHash::<T>::get(primary_number) != execution_receipt.primary_hash
                 {
+                    log::error!(
+                        target: "runtime::domains",
+                        "[validate_bundle] point_to_parent_block: {:?}, primary_number: {:?}, BlockHash::get(): {:?}, receipt.primary_hash: {:?}",
+                        point_to_parent_block,
+                        primary_number,
+                        BlockHash::<T>::get(primary_number),
+                        execution_receipt.primary_hash
+                    );
                     return Err(BundleError::Receipt(ExecutionReceiptError::UnknownBlock));
                 }
 
