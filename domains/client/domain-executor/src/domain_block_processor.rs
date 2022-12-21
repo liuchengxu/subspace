@@ -142,6 +142,8 @@ where
         let retracted = route.retracted();
         let enacted = route.enacted();
 
+        tracing::debug!("best_block: #{}, {best_hash:?}, route: {route:?}, retracted: {retracted:?}, enacted: {enacted:?}", self.client.info().best_number);
+
         let parent_block_info = match (retracted.is_empty(), enacted.is_empty()) {
             (true, false) => {
                 // New tip, A -> B
@@ -212,7 +214,10 @@ where
             (false, true) => {
                 // Block import notification is sent only when synced to the tip
                 // or re-org is triggered.
-                unreachable!("This must not happen as re-org never occurs on a lower fork.");
+                return Err(sp_blockchain::Error::Application(Box::from(format!(
+                    "This is a lower fork? best_block: #{}, {best_hash:?}, route: {route:?}, retracted: {retracted:?}, enacted: {enacted:?}",
+                    self.client.info().best_number,
+                ))));
             }
         };
 
