@@ -10,7 +10,7 @@ use futures::{FutureExt, Stream};
 use sc_client_api::{AuxStore, BlockBackend, ProofProvider, StateBackendFor};
 use sc_consensus::ForkChoiceStrategy;
 use sp_api::ProvideRuntimeApi;
-use sp_blockchain::HeaderBackend;
+use sp_blockchain::{HeaderBackend, HeaderMetadata};
 use sp_consensus::SelectChain;
 use sp_consensus_slots::Slot;
 use sp_core::traits::{CodeExecutor, SpawnEssentialNamed, SpawnNamed};
@@ -74,6 +74,7 @@ where
         Error = sp_consensus::Error,
     >,
     PClient: HeaderBackend<PBlock>
+        + HeaderMetadata<PBlock, Error = sp_blockchain::Error>
         + BlockBackend<PBlock>
         + ProvideRuntimeApi<PBlock>
         + Send

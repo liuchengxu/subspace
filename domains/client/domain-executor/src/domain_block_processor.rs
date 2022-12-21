@@ -10,15 +10,16 @@ use sc_consensus::{
 };
 use sc_network::NetworkService;
 use sp_api::{NumberFor, ProvideRuntimeApi};
-use sp_blockchain::HeaderBackend;
+use sp_blockchain::{HeaderBackend, HeaderMetadata};
 use sp_consensus::{BlockOrigin, SyncOracle};
 use sp_core::traits::CodeExecutor;
 use sp_domains::fraud_proof::FraudProof;
 use sp_domains::{DomainId, ExecutionReceipt, ExecutorApi, OpaqueBundles};
 use sp_runtime::generic::BlockId;
-use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT};
+use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT, One};
 use sp_runtime::Digest;
 use std::borrow::Cow;
+use std::cmp::Ordering;
 use std::sync::Arc;
 use subspace_core_primitives::Randomness;
 
@@ -77,7 +78,11 @@ where
         Transaction = sp_api::TransactionFor<Client, Block>,
         Error = sp_consensus::Error,
     >,
-    PClient: HeaderBackend<PBlock> + BlockBackend<PBlock> + ProvideRuntimeApi<PBlock> + 'static,
+    PClient: HeaderBackend<PBlock>
+        + HeaderMetadata<PBlock, Error = sp_blockchain::Error>
+        + BlockBackend<PBlock>
+        + ProvideRuntimeApi<PBlock>
+        + 'static,
     PClient::Api: ExecutorApi<PBlock, Block::Hash> + 'static,
     Backend: sc_client_api::Backend<Block> + 'static,
     TransactionFor<Backend, Block>: sp_trie::HashDBT<HashFor<Block>, sp_trie::DBValue>,
@@ -99,6 +104,119 @@ where
             backend,
             fraud_proof_generator,
         }
+    }
+
+    /// Returns the parent domain block info which will be used to build new domain block whose
+    /// content is derived from the incoming primary block.
+    pub(crate) fn find_fork_aware_parent_block(
+        &self,
+        primary_hash: PBlock::Hash,
+        primary_number: NumberFor<PBlock>,
+    ) -> sp_blockchain::Result<(Block::Hash, NumberFor<Block>)> {
+        if primary_number == One::one() {
+            return Ok((self.client.info().best_hash, self.client.info().best_number));
+        }
+
+        let best_hash = self.client.info().best_hash;
+        let best_receipt = crate::aux_schema::load_execution_receipt::<
+            _,
+            Block::Hash,
+            NumberFor<PBlock>,
+            PBlock::Hash,
+        >(&*self.client, best_hash)?
+        .ok_or_else(|| {
+            sp_blockchain::Error::Backend(format!("Execution receipt not found for {best_hash:?}"))
+        })?;
+
+        let from = best_receipt.primary_hash;
+        let to = primary_hash;
+
+        if from == to {
+            return Err(sp_blockchain::Error::Application(Box::from(
+                "Primary block {primary_hash:?} has already been processed.",
+            )));
+        }
+
+        let route = sp_blockchain::tree_route(&*self.primary_chain_client, from, to)?;
+
+        let retracted = route.retracted();
+        let enacted = route.enacted();
+
+        let parent_block_info = match (retracted.is_empty(), enacted.is_empty()) {
+            (true, false) => {
+                // New tip, A -> B
+                if enacted.len() == 1 {
+                    (self.client.info().best_hash, self.client.info().best_number)
+                } else {
+                    return Err(sp_blockchain::Error::Application(Box::from(
+                        "Block import notification is sent only when synced to the tip or re-org is triggerd.".to_string()
+                    )));
+                }
+            }
+            (true, true) => {
+                unreachable!("Tree route must not be empty as `from` and `to` in tree_route() must not be the same.");
+            }
+            (false, false) => {
+                match retracted.len().cmp(&enacted.len()) {
+                    Ordering::Less => {
+                        // Assuming the latest primary block processed by executor is A, now the primary
+                        // chain switches to a fork the tip C, the primary block import notification stream
+                        // should be [A, A1, B, C].
+                        //
+                        // From A to B, the common block is C, [retracted] = [A], [enacted] = [A1, B]
+                        //
+                        //    A1 -> B
+                        //   /
+                        //  C
+                        //   \
+                        //    A
+                        return Err(sp_blockchain::Error::Application(Box::from(
+                            "It's possible to re-org to a higher fork in the real world, in which case the new \
+                            imported block notification still starts from the common ancestor to the new tip \
+                            because the parent block needs to be built for building a new block.".to_string()
+                        )));
+                    }
+                    Ordering::Equal => {
+                        // From A to A1, the common block is C, [retracted] = [A], [enacted] = [A1]
+                        //
+                        //    A1
+                        //   /
+                        //  C
+                        //   \
+                        //    A
+                        //
+                        // Trigger re-org to a fork on the same height.
+                        if enacted.len() == 1 {
+                            let best_header = self
+                                .client
+                                .header(BlockId::Hash(best_receipt.domain_hash))?
+                                .expect("Best domain header must exist");
+                            let parent_header = self
+                                .client
+                                .header(BlockId::Hash(*best_header.parent_hash()))?
+                                .expect("Best domain header must exist");
+                            (parent_header.hash(), *parent_header.number())
+                        } else {
+                            return Err(sp_blockchain::Error::Application(Box::from(
+                                "Block import notification still starts from the common block when re-org occurs.".to_string()
+                            )));
+                        }
+                    }
+                    Ordering::Greater => {
+                        unreachable!(
+                            "This must not happen as re-org never occurs on a lower fork."
+                        );
+                    }
+                }
+            }
+            (false, true) => {
+                // Block import notification is sent only when synced to the tip
+                // or re-org is triggered.
+                unreachable!("This must not happen as re-org never occurs on a lower fork.");
+            }
+        };
+
+        Ok(parent_block_info)
     }
 
     pub(crate) fn compile_own_domain_bundles(

@@ -6,7 +6,7 @@ use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use sc_client_api::{AuxStore, BlockBackend, StateBackendFor};
 use sc_consensus::{BlockImport, ForkChoiceStrategy};
 use sp_api::{NumberFor, ProvideRuntimeApi};
-use sp_blockchain::HeaderBackend;
+use sp_blockchain::{HeaderBackend, HeaderMetadata};
 use sp_core::traits::CodeExecutor;
 use sp_domain_digests::AsPredigest;
 use sp_domain_tracker::StateRootUpdate;
@@ -79,7 +79,11 @@ where
     SClient: HeaderBackend<SBlock> + ProvideRuntimeApi<SBlock> + 'static,
     SClient::Api:
         DomainCoreApi<SBlock, AccountId> + SystemDomainApi<SBlock, NumberFor<PBlock>, PBlock::Hash>,
-    PClient: HeaderBackend<PBlock> + BlockBackend<PBlock> + ProvideRuntimeApi<PBlock> + 'static,
+    PClient: HeaderMetadata<PBlock, Error = sp_blockchain::Error>
+        + HeaderBackend<PBlock>
+        + BlockBackend<PBlock>
+        + ProvideRuntimeApi<PBlock>
+        + 'static,
     PClient::Api: ExecutorApi<PBlock, Block::Hash> + 'static,
     Backend: sc_client_api::Backend<Block> + 'static,
     TransactionFor<Backend, Block>: sp_trie::HashDBT<HashFor<Block>, sp_trie::DBValue>,
@@ -114,17 +118,18 @@ where
     // TODO: Handle the returned error properly, ref to https://github.com/subspace/subspace/pull/695#discussion_r926721185
     pub(crate) async fn process_bundles(
         self,
-        (primary_hash, primary_number, fork_choice): (
-            PBlock::Hash,
-            NumberFor<PBlock>,
-            ForkChoiceStrategy,
-        ),
+        primary_info: (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
         bundles: DomainBundles<Block, PBlock>,
         shuffling_seed: Randomness,
         maybe_new_runtime: Option<Cow<'static, [u8]>>,
     ) -> Result<(), sp_blockchain::Error> {
-        let parent_hash = self.client.info().best_hash;
-        let parent_number = self.client.info().best_number;
+        tracing::debug!("Processing bundles on imported primary block {primary_info:?}");
+
+        let (primary_hash, primary_number, fork_choice) = primary_info;
+
+        let (parent_hash, parent_number) = self
+            .domain_block_processor
+            .find_fork_aware_parent_block(primary_hash, primary_number)?;
 
         let extrinsics = self.bundles_to_extrinsics(parent_hash, bundles, shuffling_seed)?;
 

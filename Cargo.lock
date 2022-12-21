@@ -2153,7 +2153,7 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-executor",
- "sc-executor-common 0.10.0-dev (git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809)",
+ "sc-executor-common",
  "sc-network",
  "sc-service",
  "sc-transaction-pool",
@@ -7204,18 +7204,7 @@ version = "4.1.0-dev"
 dependencies = [
  "log",
  "sp-core",
- "sp-wasm-interface 7.0.0",
- "thiserror",
-]
-
-[[package]]
-name = "sc-allocator"
-version = "4.1.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809#4682b676af9087e8b5c946c383f75d74633d6809"
-dependencies = [
- "log",
- "sp-core",
- "sp-wasm-interface 7.0.0 (git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809)",
+ "sp-wasm-interface",
  "thiserror",
 ]
 
@@ -7517,7 +7506,7 @@ dependencies = [
  "lru 0.8.1",
  "parity-scale-codec",
  "parking_lot 0.12.1",
- "sc-executor-common 0.10.0-dev",
+ "sc-executor-common",
  "sc-executor-wasmi",
  "sc-executor-wasmtime",
  "sp-api",
@@ -7528,7 +7517,7 @@ dependencies = [
  "sp-runtime-interface",
  "sp-trie",
  "sp-version",
- "sp-wasm-interface 7.0.0",
+ "sp-wasm-interface",
  "tracing",
  "wasmi",
 ]
@@ -7537,22 +7526,9 @@ dependencies = [
 name = "sc-executor-common"
 version = "0.10.0-dev"
 dependencies = [
- "sc-allocator 4.1.0-dev",
+ "sc-allocator",
  "sp-maybe-compressed-blob 4.1.0-dev",
- "sp-wasm-interface 7.0.0",
- "thiserror",
- "wasm-instrument",
- "wasmi",
-]
-
-[[package]]
-name = "sc-executor-common"
-version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809#4682b676af9087e8b5c946c383f75d74633d6809"
-dependencies = [
- "sc-allocator 4.1.0-dev (git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809)",
- "sp-maybe-compressed-blob 4.1.0-dev (git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809)",
- "sp-wasm-interface 7.0.0 (git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809)",
+ "sp-wasm-interface",
  "thiserror",
  "wasm-instrument",
  "wasmi",
@@ -7563,10 +7539,10 @@ name = "sc-executor-wasmi"
 version = "0.10.0-dev"
 dependencies = [
  "log",
- "sc-allocator 4.1.0-dev",
- "sc-executor-common 0.10.0-dev",
+ "sc-allocator",
+ "sc-executor-common",
  "sp-runtime-interface",
- "sp-wasm-interface 7.0.0",
+ "sp-wasm-interface",
  "wasmi",
 ]
 
@@ -7579,10 +7555,10 @@ dependencies = [
  "log",
  "once_cell",
  "rustix 0.35.13",
- "sc-allocator 4.1.0-dev",
- "sc-executor-common 0.10.0-dev",
+ "sc-allocator",
+ "sc-executor-common",
  "sp-runtime-interface",
- "sp-wasm-interface 7.0.0",
+ "sp-wasm-interface",
  "wasmtime",
 ]
 
@@ -9078,7 +9054,7 @@ dependencies = [
  "sp-std",
  "sp-tracing",
  "sp-trie",
- "sp-wasm-interface 7.0.0",
+ "sp-wasm-interface",
  "tracing",
  "tracing-core",
 ]
@@ -9235,7 +9211,7 @@ dependencies = [
  "sp-std",
  "sp-storage",
  "sp-tracing",
- "sp-wasm-interface 7.0.0",
+ "sp-wasm-interface",
  "static_assertions",
 ]
 
@@ -9411,19 +9387,6 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "7.0.0"
-dependencies = [
- "impl-trait-for-tuples",
- "log",
- "parity-scale-codec",
- "sp-std",
- "wasmi",
- "wasmtime",
-]
-
-[[package]]
-name = "sp-wasm-interface"
-version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=4682b676af9087e8b5c946c383f75d74633d6809#4682b676af9087e8b5c946c383f75d74633d6809"
 dependencies = [
  "impl-trait-for-tuples",
  "log",

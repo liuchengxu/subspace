@@ -180,7 +180,13 @@ where
                 })?;
                 tracing::debug!("Pushing receipt of block {to_send}#{block_hash:?}");
                 receipts.push(load_receipt(block_hash)?);
-                tracing::debug!("Pushed receipt, receipts:{:?}", receipts.iter().map(|r| r.primary_number).collect::<Vec<_>>());
+                tracing::debug!(
+                    "Pushed receipt, receipts:{:?}",
+                    receipts
+                        .iter()
+                        .map(|r| r.primary_number)
+                        .collect::<Vec<_>>()
+                );
                 to_send += 1;
             }
             receipts

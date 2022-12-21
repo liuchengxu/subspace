@@ -116,6 +116,8 @@ pub(super) fn write_execution_receipt<Backend: AuxStore, Block: BlockT, PBlock: 
 }
 
 /// Load the execution receipt associated with a block.
+///
+/// domain_block_hash => primary_block_hash
 pub(super) fn load_execution_receipt<Backend, Hash, Number, PHash>(
     backend: &Backend,
     block_hash: Hash,
