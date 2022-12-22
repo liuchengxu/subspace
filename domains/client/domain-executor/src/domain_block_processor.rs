@@ -10,13 +10,13 @@ use sc_consensus::{
 };
 use sc_network::NetworkService;
 use sp_api::{NumberFor, ProvideRuntimeApi};
-use sp_blockchain::{HeaderBackend, HeaderMetadata};
+use sp_blockchain::{HashAndNumber, HeaderBackend, HeaderMetadata};
 use sp_consensus::{BlockOrigin, SyncOracle};
 use sp_core::traits::CodeExecutor;
 use sp_domains::fraud_proof::FraudProof;
 use sp_domains::{DomainId, ExecutionReceipt, ExecutorApi, OpaqueBundles};
 use sp_runtime::generic::BlockId;
-use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT, One};
+use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT, One, Zero};
 use sp_runtime::Digest;
 use std::borrow::Cow;
 use std::cmp::Ordering;
@@ -63,6 +63,14 @@ where
     }
 }
 
+#[derive(Debug)]
+pub(crate) struct ForkAwareBlockImports<Block: BlockT, PBlock: BlockT> {
+    /// Base block used to build new domain blocks derived from the enacted primary blocks.
+    pub initial_parent: HashAndNumber<Block>,
+    /// Pending primary blocks that need to be processed sequentially.
+    pub enacted: Vec<HashAndNumber<PBlock>>,
+}
+
 impl<Block, PBlock, Client, PClient, Backend, E>
     DomainBlockProcessor<Block, PBlock, Client, PClient, Backend, E>
 where
@@ -106,18 +114,26 @@ where
         }
     }
 
-    /// Returns the parent domain block info which will be used to build new domain block whose
-    /// content is derived from the incoming primary block.
-    pub(crate) fn find_fork_aware_parent_block(
+    pub(crate) fn fork_aware_block_imports(
         &self,
         primary_hash: PBlock::Hash,
         primary_number: NumberFor<PBlock>,
-    ) -> sp_blockchain::Result<(Block::Hash, NumberFor<Block>)> {
+    ) -> sp_blockchain::Result<ForkAwareBlockImports<Block, PBlock>> {
         if primary_number == One::one() {
-            return Ok((self.client.info().best_hash, self.client.info().best_number));
+            return Ok(ForkAwareBlockImports {
+                initial_parent: HashAndNumber {
+                    hash: self.client.info().genesis_hash,
+                    number: Zero::zero(),
+                },
+                enacted: vec![HashAndNumber {
+                    hash: primary_hash,
+                    number: primary_number,
+                }],
+            });
         }
 
         let best_hash = self.client.info().best_hash;
+        let best_number = self.client.info().best_number;
         let best_receipt = crate::aux_schema::load_execution_receipt::<
             _,
             Block::Hash,
@@ -128,42 +144,67 @@ where
             sp_blockchain::Error::Backend(format!("Execution receipt not found for {best_hash:?}"))
         })?;
 
-        let from = best_receipt.primary_hash;
-        let to = primary_hash;
+        let primary_from = best_receipt.primary_hash;
+        let primary_to = primary_hash;
 
-        if from == to {
+        if primary_from == primary_to {
             return Err(sp_blockchain::Error::Application(Box::from(
                 "Primary block {primary_hash:?} has already been processed.",
             )));
         }
 
-        let route = sp_blockchain::tree_route(&*self.primary_chain_client, from, to)?;
+        let route =
+            sp_blockchain::tree_route(&*self.primary_chain_client, primary_from, primary_to)?;
 
         let retracted = route.retracted();
         let enacted = route.enacted();
 
-        tracing::debug!("best_block: #{}, {best_hash:?}, route: {route:?}, retracted: {retracted:?}, enacted: {enacted:?}", self.client.info().best_number);
+        tracing::debug!(
+            ?best_number,
+            ?best_hash,
+            ?route,
+            ?retracted,
+            ?enacted,
+            common_block = ?route.common_block(),
+            "Calculating ForkAwareBlockImports"
+        );
 
-        let parent_block_info = match (retracted.is_empty(), enacted.is_empty()) {
+        match (retracted.is_empty(), enacted.is_empty()) {
             (true, false) => {
                 // New tip, A -> B
-                if enacted.len() == 1 {
-                    (self.client.info().best_hash, self.client.info().best_number)
-                } else {
-                    return Err(sp_blockchain::Error::Application(Box::from(
-                        "Block import notification is sent only when synced to the tip or re-org is triggerd.".to_string()
-                    )));
-                }
+                Ok(ForkAwareBlockImports {
+                    initial_parent: HashAndNumber {
+                        hash: self.client.info().best_hash,
+                        number: self.client.info().best_number,
+                    },
+                    enacted: enacted.to_vec(),
+                })
+            }
+            (false, true) => {
+                let common_block_number =
+                    crate::utils::translate_number_type(route.common_block().number);
+                let parent_header = self
+                    .client
+                    .header(BlockId::Number(common_block_number))?
+                    .expect("Best domain header must exist");
+
+                Ok(ForkAwareBlockImports {
+                    initial_parent: HashAndNumber {
+                        hash: parent_header.hash(),
+                        number: *parent_header.number(),
+                    },
+                    enacted: retracted.to_vec().into_iter().rev().collect::<Vec<_>>(),
+                })
             }
             (true, true) => {
                 unreachable!("Tree route must not be empty as `from` and `to` in tree_route() must not be the same.");
             }
             (false, false) => {
                 match retracted.len().cmp(&enacted.len()) {
-                    Ordering::Less => {
-                        // Assuming the latest primary block processed by executor is A, now the primary
-                        // chain switches to a fork the tip C, the primary block import notification stream
-                        // should be [A, A1, B, C].
+                    Ordering::Less | Ordering::Equal => {
+                        // Assuming the latest primary block processed by executor is A, the primary
+                        // chain switches to a fork [C, A1, B], the incoming block import
+                        // notification is B.
                         //
                         // From A to B, the common block is C, [retracted] = [A], [enacted] = [A1, B]
                         //
@@ -172,13 +213,9 @@ where
                         //  C
                         //   \
                         //    A
-                        return Err(sp_blockchain::Error::Application(Box::from(
-                            "It's possible to re-org to a higher fork in the real world, in which case the new \
-                            imported block notification still starts from the common ancestor to the new tip \
-                            because the parent block needs to be built for building a new block.".to_string()
-                        )));
-                    }
-                    Ordering::Equal => {
+                        //
+                        // It's also possible to trigger re-org to a fork on the same height,
+                        //
                         // From A to A1, the common block is C, [retracted] = [A], [enacted] = [A1]
                         //
                         //    A1
@@ -186,23 +223,20 @@ where
                         //  C
                         //   \
                         //    A
-                        //
-                        // Trigger re-org to a fork on the same height.
-                        if enacted.len() == 1 {
-                            let best_header = self
-                                .client
-                                .header(BlockId::Hash(best_receipt.domain_hash))?
-                                .expect("Best domain header must exist");
-                            let parent_header = self
-                                .client
-                                .header(BlockId::Hash(*best_header.parent_hash()))?
-                                .expect("Best domain header must exist");
-                            (parent_header.hash(), *parent_header.number())
-                        } else {
-                            return Err(sp_blockchain::Error::Application(Box::from(
-                                "Block import notification still starts from the common block when re-org occurs.".to_string()
-                            )));
-                        }
+                        let common_block_number =
+                            crate::utils::translate_number_type(route.common_block().number);
+                        let parent_header = self
+                            .client
+                            .header(BlockId::Number(common_block_number))?
+                            .expect("Best domain header must exist");
+
+                        Ok(ForkAwareBlockImports {
+                            initial_parent: HashAndNumber {
+                                hash: parent_header.hash(),
+                                number: *parent_header.number(),
+                            },
+                            enacted: enacted.to_vec(),
+                        })
                     }
                     Ordering::Greater => {
                         unreachable!(
@@ -211,17 +245,7 @@ where
                     }
                 }
             }
-            (false, true) => {
-                // Block import notification is sent only when synced to the tip
-                // or re-org is triggered.
-                return Err(sp_blockchain::Error::Application(Box::from(format!(
-                    "This is a lower fork? best_block: #{}, {best_hash:?}, route: {route:?}, retracted: {retracted:?}, enacted: {enacted:?}",
-                    self.client.info().best_number,
-                ))));
-            }
-        };
-
-        Ok(parent_block_info)
+        }
     }
 
     pub(crate) fn compile_own_domain_bundles(
@@ -305,6 +329,12 @@ where
             fork_choice
         );
 
+        if to_number_primitive(parent_number) + 1 != to_number_primitive(primary_number) {
+            return Err(sp_blockchain::Error::Application(Box::from(format!(
+                "Incorrect parent domain block number, parent_number:{parent_number:?}, primary_number: {primary_number:?}",
+            ))));
+        }
+
         let (header_hash, header_number, state_root) = self
             .build_and_import_block(
                 parent_hash,
@@ -337,7 +367,7 @@ where
             })
             .collect();
 
-        tracing::debug!(
+        tracing::trace!(
             ?trace,
             ?trace_root,
             "Trace root calculated for #{header_hash}"
