@@ -68,7 +68,7 @@ pub(crate) struct ForkAwareBlockImports<Block: BlockT, PBlock: BlockT> {
     /// Base block used to build new domain blocks derived from the enacted primary blocks.
     pub initial_parent: HashAndNumber<Block>,
     /// Pending primary blocks that need to be processed sequentially.
-    pub enacted: Vec<HashAndNumber<PBlock>>,
+    pub primary_imports: Vec<HashAndNumber<PBlock>>,
 }
 
 impl<Block, PBlock, Client, PClient, Backend, E>
@@ -125,7 +125,7 @@ where
                     hash: self.client.info().genesis_hash,
                     number: Zero::zero(),
                 },
-                enacted: vec![HashAndNumber {
+                primary_imports: vec![HashAndNumber {
                     hash: primary_hash,
                     number: primary_number,
                 }],
@@ -177,7 +177,7 @@ where
                         hash: self.client.info().best_hash,
                         number: self.client.info().best_number,
                     },
-                    enacted: enacted.to_vec(),
+                    primary_imports: enacted.to_vec(),
                 })
             }
             (false, true) => {
@@ -193,7 +193,7 @@ where
                         hash: parent_header.hash(),
                         number: *parent_header.number(),
                     },
-                    enacted: retracted.to_vec().into_iter().rev().collect::<Vec<_>>(),
+                    primary_imports: retracted.iter().cloned().rev().collect::<Vec<_>>(),
                 })
             }
             (true, true) => {
@@ -235,7 +235,7 @@ where
                                 hash: parent_header.hash(),
                                 number: *parent_header.number(),
                             },
-                            enacted: enacted.to_vec(),
+                            primary_imports: enacted.to_vec(),
                         })
                     }
                     Ordering::Greater => {

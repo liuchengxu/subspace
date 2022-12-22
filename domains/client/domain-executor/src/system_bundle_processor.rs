@@ -103,23 +103,23 @@ where
 
         let ForkAwareBlockImports {
             initial_parent,
-            enacted,
+            primary_imports,
         } = self
             .domain_block_processor
             .fork_aware_block_imports(primary_hash, primary_number)?;
 
         tracing::debug!(
             initial_parent = ?initial_parent,
-            enacted = ?enacted,
+            ?primary_imports,
             "Processing ForkAwareBlockImports"
         );
 
         let mut domain_parent = (initial_parent.hash, initial_parent.number);
 
-        for (i, primary_info) in enacted.iter().enumerate() {
+        for (i, primary_info) in primary_imports.iter().enumerate() {
             // Use the origin fork_choice for the target primary block, the intermediate ones use
             // `Custom(false)`.
-            let fork_choice = if i == enacted.len() - 1 {
+            let fork_choice = if i == primary_imports.len() - 1 {
                 fork_choice
             } else {
                 ForkChoiceStrategy::Custom(false)
