@@ -152,16 +152,7 @@ async fn execution_proof_creation_and_verification_should_work() {
             ForkChoiceStrategy::LongestChain,
         )
     };
-    alice
-        .executor
-        .clone()
-        .process_bundles(
-            primary_info,
-            bundles,
-            BlakeTwo256::hash_of(&[1u8; 64]).into(),
-            None,
-        )
-        .await;
+    alice.executor.clone().process_bundles(primary_info).await;
 
     let best_hash = alice.client.info().best_hash;
     let header = alice

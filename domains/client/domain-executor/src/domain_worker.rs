@@ -59,7 +59,6 @@ pub(crate) async fn handle_block_import_notifications<
     ProcessorFn,
     BlockImports,
 >(
-    domain_id: DomainId,
     primary_chain_client: &PClient,
     best_secondary_number: NumberFor<Block>,
     processor: ProcessorFn,
@@ -73,9 +72,6 @@ pub(crate) async fn handle_block_import_notifications<
     PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     ProcessorFn: Fn(
             (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-            DomainBundles<Block, PBlock>,
-            Randomness,
-            Option<Cow<'static, [u8]>>,
         ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
@@ -90,13 +86,9 @@ pub(crate) async fn handle_block_import_notifications<
         let _ = active_leaves.insert(hash, number);
         // Skip the blocks that have been processed by the execution chain.
         if number > best_secondary_number.into() {
-            if let Err(error) = process_primary_block::<Block, PBlock, _, _>(
-                domain_id,
-                primary_chain_client,
-                &processor,
-                (hash, number, fork_choice),
-            )
-            .await
+            if let Err(error) =
+                process_primary_block::<Block, PBlock, _>(&processor, (hash, number, fork_choice))
+                    .await
             {
                 tracing::error!(?error, "Failed to process primary block on startup");
                 // Bring down the service as bundles processor is an essential task.
@@ -134,9 +126,7 @@ pub(crate) async fn handle_block_import_notifications<
                 let _ = block_import_acknowledgement_sender.send(()).await;
             }
             Some(block_info) = block_info_receiver.next() => {
-                if let Err(error) = block_imported::<Block, PBlock, _, _>(
-                    domain_id,
-                    primary_chain_client,
+                if let Err(error) = block_imported::<Block, PBlock, _>(
                     &processor,
                     &mut active_leaves,
                     block_info,
@@ -197,9 +187,7 @@ where
     Ok(())
 }
 
-async fn block_imported<Block, PBlock, PClient, ProcessorFn>(
-    domain_id: DomainId,
-    primary_chain_client: &PClient,
+async fn block_imported<Block, PBlock, ProcessorFn>(
     processor: &ProcessorFn,
     active_leaves: &mut HashMap<PBlock::Hash, NumberFor<PBlock>>,
     block_info: BlockInfo<PBlock>,
@@ -207,13 +195,8 @@ async fn block_imported<Block, PBlock, PClient, ProcessorFn>(
 where
     Block: BlockT,
     PBlock: BlockT,
-    PClient: HeaderBackend<PBlock> + BlockBackend<PBlock> + ProvideRuntimeApi<PBlock> + Send + Sync,
-    PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     ProcessorFn: Fn(
             (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-            DomainBundles<Block, PBlock>,
-            Randomness,
-            Option<Cow<'static, [u8]>>,
         ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
@@ -230,9 +213,7 @@ where
         debug_assert_eq!(block_info.number.saturating_sub(One::one()), number);
     }
 
-    process_primary_block::<Block, PBlock, _, _>(
-        domain_id,
-        primary_chain_client,
+    process_primary_block::<Block, PBlock, _>(
         processor,
         (block_info.hash, block_info.number, block_info.fork_choice),
     )
@@ -245,105 +226,20 @@ where
 ///
 /// 1. Extract the bundles from the block given the `domain_id`.
 /// 2. Pass the bundles to the respective domain bundle processor and do the computation there.
-async fn process_primary_block<Block, PBlock, PClient, ProcessorFn>(
-    domain_id: DomainId,
-    primary_chain_client: &PClient,
+async fn process_primary_block<Block, PBlock, ProcessorFn>(
     processor: &ProcessorFn,
     (block_hash, block_number, fork_choice): (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
 ) -> sp_blockchain::Result<()>
 where
     Block: BlockT,
     PBlock: BlockT,
-    PClient: HeaderBackend<PBlock> + BlockBackend<PBlock> + ProvideRuntimeApi<PBlock> + Send + Sync,
-    PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     ProcessorFn: Fn(
             (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-            DomainBundles<Block, PBlock>,
-            Randomness,
-            Option<Cow<'static, [u8]>>,
         ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
 {
-    let block_id = BlockId::Hash(block_hash);
-    let extrinsics = match primary_chain_client.block_body(block_hash) {
-        Err(err) => {
-            tracing::error!(?err, "Failed to get block body from primary chain");
-            return Ok(());
-        }
-        Ok(None) => {
-            tracing::error!(?block_hash, "BlockBody unavailable");
-            return Ok(());
-        }
-        Ok(Some(body)) => body,
-    };
-
-    let header = match primary_chain_client.header(block_id) {
-        Err(err) => {
-            tracing::error!(?err, "Failed to get block from primary chain");
-            return Ok(());
-        }
-        Ok(None) => {
-            tracing::error!(?block_hash, "BlockHeader unavailable");
-            return Ok(());
-        }
-        Ok(Some(header)) => header,
-    };
-
-    let maybe_new_runtime = if header
-        .digest()
-        .logs
-        .iter()
-        .any(|item| *item == DigestItem::RuntimeEnvironmentUpdated)
-    {
-        let system_domain_runtime = primary_chain_client
-            .runtime_api()
-            .system_domain_wasm_bundle(&block_id)?;
-
-        let new_runtime = match domain_id {
-            DomainId::SYSTEM => system_domain_runtime,
-            DomainId::CORE_PAYMENTS => {
-                read_core_domain_runtime_blob(system_domain_runtime.as_ref(), domain_id)
-                    .map_err(|err| sp_blockchain::Error::Application(Box::new(err)))?
-                    .into()
-            }
-            _ => {
-                return Err(sp_blockchain::Error::Application(Box::from(format!(
-                    "No new runtime code for {domain_id:?}"
-                ))));
-            }
-        };
-
-        Some(new_runtime)
-    } else {
-        None
-    };
-
-    let shuffling_seed = primary_chain_client
-        .runtime_api()
-        .extrinsics_shuffling_seed(&block_id, header)?;
-
-    let domain_bundles = if domain_id.is_system() {
-        let (system_bundles, core_bundles) = primary_chain_client
-            .runtime_api()
-            .extract_system_bundles(&block_id, extrinsics)?;
-        DomainBundles::System(system_bundles, core_bundles)
-    } else if domain_id.is_core() {
-        let core_bundles = primary_chain_client
-            .runtime_api()
-            .extract_core_bundles(&block_id, extrinsics, domain_id)?;
-        DomainBundles::Core(core_bundles)
-    } else {
-        unreachable!("Open domains are unsupported")
-    };
-
-    processor(
-        (block_hash, block_number, fork_choice),
-        domain_bundles,
-        shuffling_seed,
-        maybe_new_runtime,
-    )
-    .await?;
+    processor((block_hash, block_number, fork_choice)).await?;
 
     Ok(())
 }

@@ -15,7 +15,6 @@ use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT};
 use sp_runtime::{Digest, DigestItem};
-use std::borrow::Cow;
 use std::sync::Arc;
 use subspace_core_primitives::Randomness;
 use system_runtime_primitives::SystemDomainApi;
@@ -93,9 +92,6 @@ where
     pub(crate) async fn process_bundles(
         self,
         primary_info: (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-        _bundles: DomainBundles<Block, PBlock>,
-        _shuffling_seed: Randomness,
-        _maybe_new_runtime: Option<Cow<'static, [u8]>>,
     ) -> Result<(), sp_blockchain::Error> {
         tracing::debug!("Processing bundles on imported primary block {primary_info:?}");
 
