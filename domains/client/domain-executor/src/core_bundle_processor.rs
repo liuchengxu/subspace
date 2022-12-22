@@ -1,4 +1,6 @@
-use crate::domain_block_processor::{DomainBlockProcessor, ForkAwareBlockImports};
+use crate::domain_block_processor::{
+    preprocess_primary_block, DomainBlockProcessor, ForkAwareBlockImports,
+};
 use crate::parent_chain::{CoreDomainParentChain, ParentChainInterface};
 use crate::utils::{translate_number_type, DomainBundles};
 use crate::TransactionFor;
@@ -168,7 +170,7 @@ where
         let (primary_hash, primary_number, fork_choice) = primary_info;
 
         let (bundles, shuffling_seed, maybe_new_runtime) =
-            crate::domain_worker::preprocess_primary_block::<Block, PBlock, _>(
+            preprocess_primary_block::<Block, PBlock, _>(
                 self.domain_id,
                 &*self.primary_chain_client,
                 primary_hash,

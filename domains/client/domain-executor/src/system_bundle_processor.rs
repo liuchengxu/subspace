@@ -1,4 +1,6 @@
-use crate::domain_block_processor::{DomainBlockProcessor, ForkAwareBlockImports};
+use crate::domain_block_processor::{
+    preprocess_primary_block, DomainBlockProcessor, ForkAwareBlockImports,
+};
 use crate::utils::{translate_number_type, DomainBundles};
 use crate::TransactionFor;
 use codec::Decode;
@@ -143,7 +145,7 @@ where
         let (parent_hash, parent_number) = parent_info;
 
         let (bundles, shuffling_seed, maybe_new_runtime) =
-            crate::domain_worker::preprocess_primary_block::<Block, PBlock, _>(
+            preprocess_primary_block::<Block, PBlock, _>(
                 sp_domains::DomainId::SYSTEM,
                 &*self.primary_chain_client,
                 primary_hash,
