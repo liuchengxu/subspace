@@ -82,10 +82,7 @@ pub(crate) async fn handle_block_import_notifications<
         let _ = active_leaves.insert(hash, number);
         // Skip the blocks that have been processed by the execution chain.
         if number > best_secondary_number.into() {
-            if let Err(error) =
-                process_primary_block::<Block, PBlock, _>(&processor, (hash, number, fork_choice))
-                    .await
-            {
+            if let Err(error) = processor((hash, number, fork_choice)).await {
                 tracing::error!(?error, "Failed to process primary block on startup");
                 // Bring down the service as bundles processor is an essential task.
                 // TODO: more graceful shutdown.
@@ -209,33 +206,7 @@ where
         debug_assert_eq!(block_info.number.saturating_sub(One::one()), number);
     }
 
-    process_primary_block::<Block, PBlock, _>(
-        processor,
-        (block_info.hash, block_info.number, block_info.fork_choice),
-    )
-    .await?;
-
-    Ok(())
-}
-
-/// Apply the domain bundles for given primary block as follows:
-///
-/// 1. Extract the bundles from the block given the `domain_id`.
-/// 2. Pass the bundles to the respective domain bundle processor and do the computation there.
-async fn process_primary_block<Block, PBlock, ProcessorFn>(
-    processor: &ProcessorFn,
-    (block_hash, block_number, fork_choice): (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-) -> sp_blockchain::Result<()>
-where
-    Block: BlockT,
-    PBlock: BlockT,
-    ProcessorFn: Fn(
-            (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
-        ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
-        + Send
-        + Sync,
-{
-    processor((block_hash, block_number, fork_choice)).await?;
+    processor((block_info.hash, block_info.number, block_info.fork_choice)).await?;
 
     Ok(())
 }
