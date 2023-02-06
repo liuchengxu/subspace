@@ -11,7 +11,7 @@ use futures::channel::mpsc;
 use futures::{Stream, StreamExt};
 use jsonrpsee::tracing;
 use pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi;
-use sc_client_api::{BlockBackend, StateBackendFor};
+use sc_client_api::{BlockBackend, BlockchainEvents, StateBackendFor};
 use sc_consensus::ForkChoiceStrategy;
 use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch};
 use sc_network::NetworkService;
@@ -236,6 +236,7 @@ where
         + HeaderMetadata<PBlock, Error = sp_blockchain::Error>
         + BlockBackend<PBlock>
         + ProvideRuntimeApi<PBlock>
+        + BlockchainEvents<PBlock>
         + Send
         + Sync
         + 'static,

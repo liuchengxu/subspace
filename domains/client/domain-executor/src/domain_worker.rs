@@ -2,7 +2,7 @@ use crate::utils::{to_number_primitive, BlockInfo, ExecutorSlotInfo};
 use codec::{Decode, Encode};
 use futures::channel::mpsc;
 use futures::{SinkExt, Stream, StreamExt};
-use sc_client_api::BlockBackend;
+use sc_client_api::{BlockBackend, BlockchainEvents};
 use sc_consensus::ForkChoiceStrategy;
 use sp_api::{ApiError, BlockT, ProvideRuntimeApi};
 use sp_blockchain::HeaderBackend;
@@ -64,7 +64,10 @@ pub(crate) async fn handle_block_import_notifications<
 ) where
     Block: BlockT,
     PBlock: BlockT,
-    PClient: HeaderBackend<PBlock> + BlockBackend<PBlock> + ProvideRuntimeApi<PBlock>,
+    PClient: HeaderBackend<PBlock>
+        + BlockBackend<PBlock>
+        + ProvideRuntimeApi<PBlock>
+        + BlockchainEvents<PBlock>,
     PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     ProcessorFn: Fn(
             (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
@@ -95,8 +98,37 @@ pub(crate) async fn handle_block_import_notifications<
     let (mut block_info_sender, mut block_info_receiver) =
         mpsc::channel(block_import_throttling_buffer_size as usize);
 
+    let mut client_block_import = primary_chain_client.import_notification_stream();
+
+    enum BlockImport<BlockImportNotification> {
+        /// Block import notification from the client.
+        Client(BlockImportNotification),
+        /// Block import notification from `sc-consensus-subspace`.
+        Subspace,
+    }
+
     loop {
         tokio::select! {
+            maybe_client_block_import = client_block_import.next() => {
+                let notification = match maybe_client_block_import {
+                    Some(notification) => notification,
+                    None => break,
+                };
+                tracing::info!("============ [client_block_import] is_new_best: {:?}, hash: {:?}, tree_route: {:?}", notification.is_new_best, notification.hash, notification.tree_route);
+                let header = primary_chain_client
+                    .header(notification.hash)
+                    .expect("Header of imported block must exist; qed")
+                    .expect("Header of imported block must exist; qed");
+                // TODO: remove fork_choice
+                let fork_choice = sc_consensus::ForkChoiceStrategy::Custom(true);
+                let block_info = BlockInfo {
+                    hash: header.hash(),
+                    parent_hash: *header.parent_hash(),
+                    number: *header.number(),
+                    fork_choice
+                };
+                let _ = block_info_sender.feed(BlockImport::Client(block_info)).await;
+            }
             maybe_block_import = block_imports.next() => {
                 let (block_number, fork_choice, mut block_import_acknowledgement_sender) = match maybe_block_import {
                     Some(block_import) => block_import,
@@ -105,34 +137,24 @@ pub(crate) async fn handle_block_import_notifications<
                         break;
                     }
                 };
-                // TODO: `.expect()` on `Option` is fine here, but not for `Error`
-                let header = primary_chain_client
-                    .header(
-                        primary_chain_client.hash(block_number)
-                            .expect("Header of imported block must exist; qed")
-                            .expect("Header of imported block must exist; qed")
-                    )
-                    .expect("Header of imported block must exist; qed")
-                    .expect("Header of imported block must exist; qed");
-                let block_info = BlockInfo {
-                    hash: header.hash(),
-                    parent_hash: *header.parent_hash(),
-                    number: *header.number(),
-                    fork_choice
-                };
-                let _ = block_info_sender.feed(block_info).await;
+                let _ = block_info_sender.feed(BlockImport::Subspace).await;
                 let _ = block_import_acknowledgement_sender.send(()).await;
             }
-            Some(block_info) = block_info_receiver.next() => {
-                if let Err(error) = block_imported::<Block, PBlock, _>(
-                    &processor,
-                    &mut active_leaves,
-                    block_info,
-                ).await {
-                    tracing::error!(?error, "Failed to process primary block");
-                    // Bring down the service as bundles processor is an essential task.
-                    // TODO: more graceful shutdown.
-                    break;
+            Some(block_import_notification) = block_info_receiver.next() => {
+                match block_import_notification {
+                    BlockImport::Client(block_info) => {
+                        if let Err(error) = block_imported::<Block, PBlock, _>(
+                            &processor,
+                            &mut active_leaves,
+                            block_info,
+                        ).await {
+                            tracing::error!(?error, "Failed to process primary block");
+                            // Bring down the service as bundles processor is an essential task.
+                            // TODO: more graceful shutdown.
+                            break;
+                        }
+                    }
+                    BlockImport::Subspace => { }
                 }
             }
         }
