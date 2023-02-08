@@ -60,6 +60,7 @@ subspace-core-primitives = { version = "0.1.0", default-features = false, path =
 subspace-runtime-primitives = { version = "0.1.0", default-features = false, path = "../subspace-runtime-primitives" }
 subspace-verification = { version = "0.1.0", default-features = false, path = "../subspace-verification" }
 system-domain-runtime = { version = "0.1.0", default-features = false, path = "../../domains/runtime/system" }
+pallet-marketplace = { version = "0.1.0", default-features = false, path = "../pallet-marketplace" }
 
 [build-dependencies]
 subspace-wasm-tools = { version = "0.1.0", path = "../subspace-wasm-tools" }
@@ -116,6 +117,7 @@ std = [
 	"subspace-verification/std",
 	"system-domain-runtime/std",
 	"substrate-wasm-builder",
+	"pallet-marketplace/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

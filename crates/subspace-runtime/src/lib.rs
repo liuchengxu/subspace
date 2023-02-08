@@ -429,6 +429,11 @@ impl pallet_object_store::Config for Runtime {
 
 impl pallet_runtime_configs::Config for Runtime {}
 
+impl pallet_marketplace::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+}
+
 parameter_types! {
     // This value doesn't matter, we don't use it (`VestedTransferOrigin = EnsureNever` below).
     pub const MinVestedTransfer: Balance = 0;
@@ -468,6 +473,8 @@ construct_runtime!(
         Receipts: pallet_receipts = 15,
         Domains: pallet_domains = 12,
         RuntimeConfigs: pallet_runtime_configs = 14,
+
+        Marketplace: pallet_marketplace = 50,
 
         Vesting: orml_vesting = 13,
 

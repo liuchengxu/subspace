@@ -5806,6 +5806,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-marketplace"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "sp-trie",
+]
+
+[[package]]
 name = "pallet-messenger"
 version = "0.1.0"
 dependencies = [
@@ -9718,6 +9734,7 @@ dependencies = [
  "pallet-domains",
  "pallet-feeds",
  "pallet-grandpa-finality-verifier",
+ "pallet-marketplace",
  "pallet-object-store",
  "pallet-offences-subspace",
  "pallet-receipts",
