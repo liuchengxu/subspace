@@ -8,7 +8,7 @@ use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use sc_client_api::{AuxStore, BlockBackend, StateBackendFor};
 use sc_consensus::{BlockImport, ForkChoiceStrategy};
 use sp_api::{NumberFor, ProvideRuntimeApi};
-use sp_blockchain::{HeaderBackend, HeaderMetadata, TreeRoute, HashAndNumber};
+use sp_blockchain::{HashAndNumber, HeaderBackend, HeaderMetadata, TreeRoute};
 use sp_core::traits::CodeExecutor;
 use sp_domain_digests::AsPredigest;
 use sp_domains::{DomainId, ExecutorApi};
@@ -92,7 +92,11 @@ where
     // TODO: Handle the returned error properly, ref to https://github.com/subspace/subspace/pull/695#discussion_r926721185
     pub(crate) async fn process_bundles(
         self,
-        primary_info: (PBlock::Hash, NumberFor<PBlock>, Option<Arc<TreeRoute<PBlock>>>),
+        primary_info: (
+            PBlock::Hash,
+            NumberFor<PBlock>,
+            Option<Arc<TreeRoute<PBlock>>>,
+        ),
     ) -> Result<(), sp_blockchain::Error> {
         tracing::debug!(?primary_info, "Processing imported primary block");
 
@@ -135,15 +139,26 @@ where
             )
         };
 
-        // let maybe_pending_primary_blocks = self
-        // .domain_block_processor
-        // .pending_imported_primary_blocks(primary_hash, primary_number)?;
+        tracing::debug!("============= [new] (initial_parent, primary_imports): {:?}", (initial_parent, primary_imports.clone()));
 
-        // if let Some(PendingPrimaryBlocks {
-        // initial_parent,
-        // primary_imports,
-        // }) = maybe_pending_primary_blocks
-        // {
+        let maybe_pending_primary_blocks = self
+            .domain_block_processor
+            .pending_imported_primary_blocks(primary_hash, primary_number)?;
+
+        tracing::debug!("============= [old] (initial_parent, primary_imports): {:?}", maybe_pending_primary_blocks);
+
+        if let Some(pending) = maybe_pending_primary_blocks
+        {
+            if pending.initial_parent != initial_parent {
+                panic!("Initial parent does not match, pending: {:?}, {initial_parent:?}", pending.initial_parent);
+            }
+
+            for (a, b) in pending.primary_imports.iter().zip(primary_imports.iter()) {
+                if a.hash != b.hash || a.number != b.number {
+                    panic!("Primary imports does not match, pending: {:?}, {primary_imports:?}", pending.primary_imports);
+                }
+            }
+        }
         tracing::trace!(
             ?initial_parent,
             ?primary_imports,
@@ -156,9 +171,9 @@ where
             // Use the origin fork_choice for the target primary block,
             // the intermediate ones use `Custom(false)`.
             // let fork_choice = if i == primary_imports.len() - 1 {
-                // fork_choice
+            // fork_choice
             // } else {
-                // ForkChoiceStrategy::Custom(false)
+            // ForkChoiceStrategy::Custom(false)
             // };
             let fork_choice = ForkChoiceStrategy::LongestChain;
 
