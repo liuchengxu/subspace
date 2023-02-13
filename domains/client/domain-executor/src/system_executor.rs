@@ -187,10 +187,10 @@ where
     #[doc(hidden)]
     pub async fn process_bundles(
         self,
-        primary_info: (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
+        primary_info: (PBlock::Hash, NumberFor<PBlock>, Option<std::sync::Arc<sp_blockchain::TreeRoute<PBlock>>>),
     ) {
         if let Err(err) = self.bundle_processor.process_bundles(primary_info).await {
-            tracing::error!(?primary_info, ?err, "Error at processing bundles.");
+            tracing::error!(?err, "Error at processing bundles.");
         }
     }
 }

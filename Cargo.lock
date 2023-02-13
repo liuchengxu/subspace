@@ -1306,7 +1306,7 @@ version = "0.1.0"
 dependencies = [
  "domain-pallet-executive",
  "domain-runtime-primitives",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-support",
  "frame-system",
  "frame-system-benchmarking",
@@ -1543,7 +1543,7 @@ dependencies = [
  "sc-network-common",
  "sc-network-gossip",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-blockchain",
  "sp-core",
  "sp-domains",
@@ -2065,12 +2065,12 @@ dependencies = [
  "async-trait",
  "parking_lot 0.12.1",
  "sc-consensus",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-blockchain",
  "sp-consensus",
  "sp-core",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
 ]
 
 [[package]]
@@ -2097,12 +2097,12 @@ dependencies = [
  "sc-client-api",
  "sc-consensus",
  "sc-executor",
- "sc-executor-common",
+ "sc-executor-common 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sc-network",
  "sc-service",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "schnorrkel",
  "sp-api",
  "sp-block-builder",
@@ -2142,7 +2142,7 @@ dependencies = [
  "sc-network",
  "sc-network-common",
  "sc-network-gossip",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-core",
  "sp-domains",
  "sp-runtime",
@@ -2162,7 +2162,7 @@ dependencies = [
  "sc-consensus",
  "sc-network",
  "sc-network-gossip",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-api",
  "sp-blockchain",
  "sp-consensus",
@@ -2216,7 +2216,7 @@ dependencies = [
  "domain-client-executor-gossip",
  "domain-client-message-relayer",
  "domain-runtime-primitives",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-benchmarking-cli",
  "futures 0.3.25",
  "hex-literal",
@@ -2230,12 +2230,12 @@ dependencies = [
  "sc-network",
  "sc-rpc",
  "sc-rpc-api",
- "sc-rpc-spec-v2",
+ "sc-rpc-spec-v2 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sc-service",
  "sc-telemetry",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "serde",
  "sp-api",
  "sp-block-builder",
@@ -2267,7 +2267,7 @@ dependencies = [
  "core-payments-domain-runtime",
  "domain-pallet-executive",
  "domain-runtime-primitives",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-support",
  "frame-system",
  "frame-system-benchmarking",
@@ -2327,7 +2327,7 @@ dependencies = [
  "sc-service",
  "sc-tracing",
  "sc-transaction-pool",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-arithmetic",
  "sp-blockchain",
  "sp-core",
@@ -2731,6 +2731,13 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "fork-tree"
 version = "3.0.0"
+dependencies = [
+ "parity-scale-codec",
+]
+
+[[package]]
+name = "fork-tree"
+version = "3.0.0"
 source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
@@ -2751,6 +2758,28 @@ name = "fragile"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c2141d6d6c8512188a7891b4b01590a45f6dac67afb4f255c4124dbb86d4eaa"
+
+[[package]]
+name = "frame-benchmarking"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "linregress",
+ "log",
+ "parity-scale-codec",
+ "paste",
+ "scale-info",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-runtime-interface",
+ "sp-std",
+ "sp-storage",
+]
 
 [[package]]
 name = "frame-benchmarking"
@@ -2778,14 +2807,13 @@ dependencies = [
 [[package]]
 name = "frame-benchmarking-cli"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "Inflector",
  "array-bytes",
  "chrono",
  "clap 4.0.26",
  "comfy-table",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev",
  "frame-support",
  "frame-system",
  "gethostname",
@@ -2825,7 +2853,6 @@ dependencies = [
 [[package]]
 name = "frame-executive"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -2853,7 +2880,6 @@ dependencies = [
 [[package]]
 name = "frame-support"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "bitflags",
  "frame-metadata",
@@ -2885,7 +2911,6 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "Inflector",
  "cfg-expr",
@@ -2899,7 +2924,6 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural-tools"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-support-procedural-tools-derive",
  "proc-macro-crate",
@@ -2911,7 +2935,6 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural-tools-derive"
 version = "3.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2921,7 +2944,6 @@ dependencies = [
 [[package]]
 name = "frame-system"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-support",
  "log",
@@ -2941,7 +2963,7 @@ name = "frame-system-benchmarking"
 version = "4.0.0-dev"
 source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -2954,7 +2976,6 @@ dependencies = [
 [[package]]
 name = "frame-system-rpc-runtime-api"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -5695,9 +5716,8 @@ dependencies = [
 [[package]]
 name = "pallet-balances"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev",
  "frame-support",
  "frame-system",
  "log",
@@ -5932,7 +5952,6 @@ dependencies = [
 [[package]]
 name = "pallet-sudo"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5946,9 +5965,8 @@ dependencies = [
 [[package]]
 name = "pallet-timestamp"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev",
  "frame-support",
  "frame-system",
  "log",
@@ -5975,7 +5993,6 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5991,7 +6008,6 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment-rpc"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "jsonrpsee",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -6007,7 +6023,6 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment-rpc-runtime-api"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "pallet-transaction-payment",
  "parity-scale-codec",
@@ -6036,9 +6051,8 @@ dependencies = [
 [[package]]
 name = "pallet-utility"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -7168,18 +7182,27 @@ dependencies = [
 [[package]]
 name = "sc-allocator"
 version = "4.1.0-dev"
+dependencies = [
+ "log",
+ "sp-core",
+ "sp-wasm-interface 7.0.0",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-allocator"
+version = "4.1.0-dev"
 source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "log",
  "sp-core",
- "sp-wasm-interface",
+ "sp-wasm-interface 7.0.0 (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "thiserror",
 ]
 
 [[package]]
 name = "sc-basic-authorship"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "futures 0.3.25",
  "futures-timer",
@@ -7196,13 +7219,12 @@ dependencies = [
  "sp-core",
  "sp-inherents",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
 ]
 
 [[package]]
 name = "sc-block-builder"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "sc-client-api",
@@ -7218,7 +7240,6 @@ dependencies = [
 [[package]]
 name = "sc-chain-spec"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "memmap2",
  "sc-chain-spec-derive",
@@ -7233,7 +7254,6 @@ dependencies = [
 [[package]]
 name = "sc-chain-spec-derive"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -7244,7 +7264,6 @@ dependencies = [
 [[package]]
 name = "sc-cli"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "chrono",
@@ -7266,7 +7285,7 @@ dependencies = [
  "sc-service",
  "sc-telemetry",
  "sc-tracing",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "serde_json",
  "sp-blockchain",
@@ -7284,7 +7303,6 @@ dependencies = [
 [[package]]
 name = "sc-client-api"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "fnv",
  "futures 0.3.25",
@@ -7293,7 +7311,7 @@ dependencies = [
  "parking_lot 0.12.1",
  "sc-executor",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "sp-api",
  "sp-blockchain",
  "sp-consensus",
@@ -7304,13 +7322,12 @@ dependencies = [
  "sp-runtime",
  "sp-state-machine",
  "sp-storage",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
 ]
 
 [[package]]
 name = "sc-client-db"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "hash-db",
  "kvdb",
@@ -7334,7 +7351,6 @@ dependencies = [
 [[package]]
 name = "sc-consensus"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -7344,7 +7360,7 @@ dependencies = [
  "mockall",
  "parking_lot 0.12.1",
  "sc-client-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "sp-api",
  "sp-blockchain",
@@ -7352,7 +7368,7 @@ dependencies = [
  "sp-core",
  "sp-runtime",
  "sp-state-machine",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "thiserror",
 ]
 
@@ -7373,7 +7389,6 @@ dependencies = [
 [[package]]
 name = "sc-consensus-slots"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -7398,7 +7413,7 @@ name = "sc-consensus-subspace"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "fork-tree",
+ "fork-tree 3.0.0 (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "futures 0.3.25",
  "futures-timer",
  "log",
@@ -7415,7 +7430,7 @@ dependencies = [
  "sc-network-test",
  "sc-service",
  "sc-telemetry",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "schnorrkel",
  "serde",
  "sp-api",
@@ -7436,7 +7451,7 @@ dependencies = [
  "subspace-core-primitives",
  "subspace-solving",
  "subspace-verification",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "substrate-test-runtime",
  "substrate-test-runtime-client",
  "thiserror",
@@ -7456,7 +7471,7 @@ dependencies = [
  "sc-client-api",
  "sc-consensus-subspace",
  "sc-rpc",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-api",
  "sp-blockchain",
  "sp-consensus-slots",
@@ -7474,12 +7489,11 @@ dependencies = [
 [[package]]
 name = "sc-executor"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "lru 0.8.1",
  "parity-scale-codec",
  "parking_lot 0.12.1",
- "sc-executor-common",
+ "sc-executor-common 0.10.0-dev",
  "sc-executor-wasmi",
  "sc-executor-wasmtime",
  "sp-api",
@@ -7490,8 +7504,20 @@ dependencies = [
  "sp-runtime-interface",
  "sp-trie",
  "sp-version",
- "sp-wasm-interface",
+ "sp-wasm-interface 7.0.0",
  "tracing",
+ "wasmi",
+]
+
+[[package]]
+name = "sc-executor-common"
+version = "0.10.0-dev"
+dependencies = [
+ "sc-allocator 4.1.0-dev",
+ "sp-maybe-compressed-blob 4.1.0-dev",
+ "sp-wasm-interface 7.0.0",
+ "thiserror",
+ "wasm-instrument",
  "wasmi",
 ]
 
@@ -7500,9 +7526,9 @@ name = "sc-executor-common"
 version = "0.10.0-dev"
 source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
- "sc-allocator",
- "sp-maybe-compressed-blob",
- "sp-wasm-interface",
+ "sc-allocator 4.1.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
+ "sp-maybe-compressed-blob 4.1.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
+ "sp-wasm-interface 7.0.0 (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "thiserror",
  "wasm-instrument",
  "wasmi",
@@ -7511,37 +7537,34 @@ dependencies = [
 [[package]]
 name = "sc-executor-wasmi"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "log",
- "sc-allocator",
- "sc-executor-common",
+ "sc-allocator 4.1.0-dev",
+ "sc-executor-common 0.10.0-dev",
  "sp-runtime-interface",
- "sp-wasm-interface",
+ "sp-wasm-interface 7.0.0",
  "wasmi",
 ]
 
 [[package]]
 name = "sc-executor-wasmtime"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "cfg-if",
  "libc",
  "log",
  "once_cell",
  "rustix",
- "sc-allocator",
- "sc-executor-common",
+ "sc-allocator 4.1.0-dev",
+ "sc-executor-common 0.10.0-dev",
  "sp-runtime-interface",
- "sp-wasm-interface",
+ "sp-wasm-interface 7.0.0",
  "wasmtime",
 ]
 
 [[package]]
 name = "sc-informant"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "ansi_term",
  "futures 0.3.25",
@@ -7556,7 +7579,6 @@ dependencies = [
 [[package]]
 name = "sc-keystore"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "async-trait",
@@ -7571,7 +7593,6 @@ dependencies = [
 [[package]]
 name = "sc-network"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "async-trait",
@@ -7595,7 +7616,7 @@ dependencies = [
  "sc-consensus",
  "sc-network-common",
  "sc-peerset",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "serde_json",
  "smallvec",
@@ -7604,7 +7625,7 @@ dependencies = [
  "sp-consensus",
  "sp-core",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "thiserror",
  "unsigned-varint",
  "zeroize",
@@ -7613,7 +7634,6 @@ dependencies = [
 [[package]]
 name = "sc-network-bitswap"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "cid",
  "futures 0.3.25",
@@ -7632,7 +7652,6 @@ dependencies = [
 [[package]]
 name = "sc-network-common"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "bitflags",
@@ -7651,14 +7670,13 @@ dependencies = [
  "sp-consensus",
  "sp-finality-grandpa",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "thiserror",
 ]
 
 [[package]]
 name = "sc-network-gossip"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "ahash 0.7.6",
  "futures 0.3.25",
@@ -7669,8 +7687,28 @@ dependencies = [
  "sc-network-common",
  "sc-peerset",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "tracing",
+]
+
+[[package]]
+name = "sc-network-light"
+version = "0.10.0-dev"
+dependencies = [
+ "array-bytes",
+ "futures 0.3.25",
+ "libp2p 0.50.0",
+ "log",
+ "parity-scale-codec",
+ "prost",
+ "prost-build",
+ "sc-client-api",
+ "sc-network-common",
+ "sc-peerset",
+ "sp-blockchain",
+ "sp-core",
+ "sp-runtime",
+ "thiserror",
 ]
 
 [[package]]
@@ -7697,11 +7735,10 @@ dependencies = [
 [[package]]
 name = "sc-network-sync"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "async-trait",
- "fork-tree",
+ "fork-tree 3.0.0",
  "futures 0.3.25",
  "libp2p 0.50.0",
  "log",
@@ -7714,7 +7751,7 @@ dependencies = [
  "sc-consensus",
  "sc-network-common",
  "sc-peerset",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "smallvec",
  "sp-arithmetic",
  "sp-blockchain",
@@ -7722,7 +7759,39 @@ dependencies = [
  "sp-core",
  "sp-finality-grandpa",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-network-sync"
+version = "0.10.0-dev"
+source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
+dependencies = [
+ "array-bytes",
+ "async-trait",
+ "fork-tree 3.0.0 (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
+ "futures 0.3.25",
+ "libp2p 0.50.0",
+ "log",
+ "lru 0.8.1",
+ "mockall",
+ "parity-scale-codec",
+ "prost",
+ "prost-build",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-network-common",
+ "sc-peerset",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
+ "smallvec",
+ "sp-arithmetic",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core",
+ "sp-finality-grandpa",
+ "sp-runtime",
+ "substrate-prometheus-endpoint 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "thiserror",
 ]
 
@@ -7742,8 +7811,8 @@ dependencies = [
  "sc-consensus",
  "sc-network",
  "sc-network-common",
- "sc-network-light",
- "sc-network-sync",
+ "sc-network-light 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
+ "sc-network-sync 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sc-service",
  "sp-blockchain",
  "sp-consensus",
@@ -7758,7 +7827,6 @@ dependencies = [
 [[package]]
 name = "sc-network-transactions"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "futures 0.3.25",
@@ -7768,16 +7836,15 @@ dependencies = [
  "pin-project",
  "sc-network-common",
  "sc-peerset",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "sp-consensus",
  "sp-runtime",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
 ]
 
 [[package]]
 name = "sc-offchain"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "bytes",
@@ -7795,7 +7862,7 @@ dependencies = [
  "sc-client-api",
  "sc-network-common",
  "sc-peerset",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "sp-api",
  "sp-core",
  "sp-offchain",
@@ -7807,12 +7874,11 @@ dependencies = [
 [[package]]
 name = "sc-peerset"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "futures 0.3.25",
  "libp2p 0.50.0",
  "log",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde_json",
  "wasm-timer",
 ]
@@ -7820,16 +7886,14 @@ dependencies = [
 [[package]]
 name = "sc-proposer-metrics"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "log",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
 ]
 
 [[package]]
 name = "sc-rpc"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "futures 0.3.25",
  "jsonrpsee",
@@ -7842,7 +7906,7 @@ dependencies = [
  "sc-rpc-api",
  "sc-tracing",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde_json",
  "sp-api",
  "sp-blockchain",
@@ -7858,7 +7922,6 @@ dependencies = [
 [[package]]
 name = "sc-rpc-api"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
@@ -7877,16 +7940,40 @@ dependencies = [
 [[package]]
 name = "sc-rpc-server"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "http",
  "jsonrpsee",
  "log",
  "serde_json",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "tokio",
  "tower",
  "tower-http",
+]
+
+[[package]]
+name = "sc-rpc-spec-v2"
+version = "0.10.0-dev"
+dependencies = [
+ "array-bytes",
+ "futures 0.3.25",
+ "futures-util",
+ "hex",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "parking_lot 0.12.1",
+ "sc-chain-spec",
+ "sc-client-api",
+ "sc-transaction-pool-api",
+ "serde",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core",
+ "sp-runtime",
+ "sp-version",
+ "thiserror",
+ "tokio-stream",
 ]
 
 [[package]]
@@ -7918,7 +8005,6 @@ dependencies = [
 [[package]]
 name = "sc-service"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "directories",
@@ -7942,19 +8028,19 @@ dependencies = [
  "sc-network",
  "sc-network-bitswap",
  "sc-network-common",
- "sc-network-light",
- "sc-network-sync",
+ "sc-network-light 0.10.0-dev",
+ "sc-network-sync 0.10.0-dev",
  "sc-network-transactions",
  "sc-offchain",
  "sc-rpc",
  "sc-rpc-server",
- "sc-rpc-spec-v2",
+ "sc-rpc-spec-v2 0.10.0-dev",
  "sc-sysinfo",
  "sc-telemetry",
  "sc-tracing",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "serde_json",
  "sp-api",
@@ -7972,7 +8058,7 @@ dependencies = [
  "sp-trie",
  "sp-version",
  "static_init",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "tempfile",
  "thiserror",
  "tokio",
@@ -7983,7 +8069,6 @@ dependencies = [
 [[package]]
 name = "sc-state-db"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -8006,7 +8091,6 @@ dependencies = [
 [[package]]
 name = "sc-sysinfo"
 version = "6.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "futures 0.3.25",
  "libc",
@@ -8025,7 +8109,6 @@ dependencies = [
 [[package]]
 name = "sc-telemetry"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "chrono",
  "futures 0.3.25",
@@ -8034,7 +8117,7 @@ dependencies = [
  "parking_lot 0.12.1",
  "pin-project",
  "rand 0.8.5",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "serde_json",
  "thiserror",
@@ -8044,7 +8127,6 @@ dependencies = [
 [[package]]
 name = "sc-tracing"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "ansi_term",
  "atty",
@@ -8075,7 +8157,6 @@ dependencies = [
 [[package]]
 name = "sc-tracing-proc-macro"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -8086,7 +8167,6 @@ dependencies = [
 [[package]]
 name = "sc-transaction-pool"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -8097,7 +8177,7 @@ dependencies = [
  "parking_lot 0.12.1",
  "sc-client-api",
  "sc-transaction-pool-api",
- "sc-utils",
+ "sc-utils 4.0.0-dev",
  "serde",
  "sp-api",
  "sp-blockchain",
@@ -8105,14 +8185,13 @@ dependencies = [
  "sp-runtime",
  "sp-tracing",
  "sp-transaction-pool",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev",
  "thiserror",
 ]
 
 [[package]]
 name = "sc-transaction-pool-api"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -8121,6 +8200,19 @@ dependencies = [
  "sp-blockchain",
  "sp-runtime",
  "thiserror",
+]
+
+[[package]]
+name = "sc-utils"
+version = "4.0.0-dev"
+dependencies = [
+ "backtrace",
+ "futures 0.3.25",
+ "futures-timer",
+ "lazy_static",
+ "log",
+ "parking_lot 0.12.1",
+ "prometheus",
 ]
 
 [[package]]
@@ -8604,7 +8696,6 @@ dependencies = [
 [[package]]
 name = "sp-api"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "hash-db",
  "log",
@@ -8622,7 +8713,6 @@ dependencies = [
 [[package]]
 name = "sp-api-proc-macro"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "blake2",
  "proc-macro-crate",
@@ -8634,7 +8724,6 @@ dependencies = [
 [[package]]
 name = "sp-application-crypto"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -8647,7 +8736,6 @@ dependencies = [
 [[package]]
 name = "sp-arithmetic"
 version = "6.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "integer-sqrt",
  "num-traits",
@@ -8673,7 +8761,6 @@ dependencies = [
 [[package]]
 name = "sp-block-builder"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -8685,7 +8772,6 @@ dependencies = [
 [[package]]
 name = "sp-blockchain"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "futures 0.3.25",
  "log",
@@ -8703,7 +8789,6 @@ dependencies = [
 [[package]]
 name = "sp-consensus"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -8721,7 +8806,6 @@ dependencies = [
 [[package]]
 name = "sp-consensus-slots"
 version = "0.10.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -8760,7 +8844,6 @@ dependencies = [
 [[package]]
 name = "sp-core"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "array-bytes",
  "base58",
@@ -8802,7 +8885,6 @@ dependencies = [
 [[package]]
 name = "sp-core-hashing"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "blake2",
  "byteorder",
@@ -8816,7 +8898,6 @@ dependencies = [
 [[package]]
 name = "sp-core-hashing-proc-macro"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8827,7 +8908,6 @@ dependencies = [
 [[package]]
 name = "sp-database"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "kvdb",
  "parking_lot 0.12.1",
@@ -8836,7 +8916,6 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8889,7 +8968,6 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.13.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -8900,7 +8978,6 @@ dependencies = [
 [[package]]
 name = "sp-finality-grandpa"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "finality-grandpa",
  "log",
@@ -8918,7 +8995,6 @@ dependencies = [
 [[package]]
 name = "sp-inherents"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "impl-trait-for-tuples",
@@ -8932,7 +9008,6 @@ dependencies = [
 [[package]]
 name = "sp-io"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "bytes",
  "ed25519",
@@ -8957,7 +9032,6 @@ dependencies = [
 [[package]]
 name = "sp-keyring"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "lazy_static",
  "sp-core",
@@ -8968,7 +9042,6 @@ dependencies = [
 [[package]]
 name = "sp-keystore"
 version = "0.13.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures 0.3.25",
@@ -9008,6 +9081,14 @@ dependencies = [
 [[package]]
 name = "sp-maybe-compressed-blob"
 version = "4.1.0-dev"
+dependencies = [
+ "thiserror",
+ "zstd",
+]
+
+[[package]]
+name = "sp-maybe-compressed-blob"
+version = "4.1.0-dev"
 source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "thiserror",
@@ -9041,7 +9122,6 @@ dependencies = [
 [[package]]
 name = "sp-offchain"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "sp-api",
  "sp-core",
@@ -9051,7 +9131,6 @@ dependencies = [
 [[package]]
 name = "sp-panic-handler"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "backtrace",
  "lazy_static",
@@ -9061,7 +9140,6 @@ dependencies = [
 [[package]]
 name = "sp-rpc"
 version = "6.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -9071,7 +9149,6 @@ dependencies = [
 [[package]]
 name = "sp-runtime"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "either",
  "hash256-std-hasher",
@@ -9093,7 +9170,6 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -9104,14 +9180,13 @@ dependencies = [
  "sp-std",
  "sp-storage",
  "sp-tracing",
- "sp-wasm-interface",
+ "sp-wasm-interface 7.0.0",
  "static_assertions",
 ]
 
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "6.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "Inflector",
  "proc-macro-crate",
@@ -9123,7 +9198,6 @@ dependencies = [
 [[package]]
 name = "sp-session"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -9137,7 +9211,6 @@ dependencies = [
 [[package]]
 name = "sp-staking"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -9149,7 +9222,6 @@ dependencies = [
 [[package]]
 name = "sp-state-machine"
 version = "0.13.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "hash-db",
  "log",
@@ -9169,12 +9241,10 @@ dependencies = [
 [[package]]
 name = "sp-std"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 
 [[package]]
 name = "sp-storage"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -9187,7 +9257,6 @@ dependencies = [
 [[package]]
 name = "sp-timestamp"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "futures-timer",
@@ -9202,7 +9271,6 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "6.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "sp-std",
@@ -9214,7 +9282,6 @@ dependencies = [
 [[package]]
 name = "sp-transaction-pool"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "sp-api",
  "sp-runtime",
@@ -9223,7 +9290,6 @@ dependencies = [
 [[package]]
 name = "sp-transaction-storage-proof"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "async-trait",
  "log",
@@ -9239,7 +9305,6 @@ dependencies = [
 [[package]]
 name = "sp-trie"
 version = "7.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "ahash 0.7.6",
  "hash-db",
@@ -9262,7 +9327,6 @@ dependencies = [
 [[package]]
 name = "sp-version"
 version = "5.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -9279,12 +9343,23 @@ dependencies = [
 [[package]]
 name = "sp-version-proc-macro"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "sp-wasm-interface"
+version = "7.0.0"
+dependencies = [
+ "impl-trait-for-tuples",
+ "log",
+ "parity-scale-codec",
+ "sp-std",
+ "wasmi",
+ "wasmtime",
 ]
 
 [[package]]
@@ -9303,7 +9378,6 @@ dependencies = [
 [[package]]
 name = "sp-weights"
 version = "4.0.0"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -9652,7 +9726,7 @@ dependencies = [
  "dirs",
  "domain-runtime-primitives",
  "domain-service",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-benchmarking-cli",
  "frame-support",
  "futures 0.3.25",
@@ -9670,7 +9744,7 @@ dependencies = [
  "sc-subspace-chain-specs",
  "sc-telemetry",
  "sc-tracing",
- "sc-utils",
+ "sc-utils 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "serde",
  "serde_json",
  "sp-consensus",
@@ -9706,7 +9780,7 @@ name = "subspace-runtime"
 version = "0.1.0"
 dependencies = [
  "domain-runtime-primitives",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-executive",
  "frame-support",
  "frame-system",
@@ -9793,7 +9867,7 @@ dependencies = [
  "sc-network",
  "sc-rpc",
  "sc-rpc-api",
- "sc-rpc-spec-v2",
+ "sc-rpc-spec-v2 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sc-service",
  "sc-telemetry",
  "sc-tracing",
@@ -9822,7 +9896,7 @@ dependencies = [
  "subspace-runtime-primitives",
  "subspace-transaction-pool",
  "substrate-frame-rpc-system",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "thiserror",
  "tokio",
  "tracing",
@@ -9964,7 +10038,7 @@ dependencies = [
  "sp-runtime",
  "sp-transaction-pool",
  "subspace-fraud-proof",
- "substrate-prometheus-endpoint",
+ "substrate-prometheus-endpoint 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "tracing",
 ]
 
@@ -9988,7 +10062,7 @@ dependencies = [
 name = "subspace-wasm-tools"
 version = "0.1.0"
 dependencies = [
- "sc-executor-common",
+ "sc-executor-common 0.10.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "sp-domains",
 ]
 
@@ -10016,7 +10090,6 @@ dependencies = [
 [[package]]
 name = "substrate-frame-rpc-system"
 version = "4.0.0-dev"
-source = "git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34#100d6c90d4122578006a47c1dcaf155b9c685f34"
 dependencies = [
  "frame-system-rpc-runtime-api",
  "futures 0.3.25",
@@ -10030,6 +10103,17 @@ dependencies = [
  "sp-blockchain",
  "sp-core",
  "sp-runtime",
+]
+
+[[package]]
+name = "substrate-prometheus-endpoint"
+version = "0.10.0-dev"
+dependencies = [
+ "hyper",
+ "log",
+ "prometheus",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]
@@ -10176,7 +10260,7 @@ dependencies = [
  "build-helper",
  "cargo_metadata",
  "filetime",
- "sp-maybe-compressed-blob",
+ "sp-maybe-compressed-blob 4.1.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "strum",
  "tempfile",
  "toml",
@@ -10250,7 +10334,7 @@ dependencies = [
  "core-payments-domain-runtime",
  "domain-pallet-executive",
  "domain-runtime-primitives",
- "frame-benchmarking",
+ "frame-benchmarking 4.0.0-dev (git+https://github.com/subspace/substrate?rev=100d6c90d4122578006a47c1dcaf155b9c685f34)",
  "frame-support",
  "frame-system",
  "frame-system-benchmarking",

@@ -3,7 +3,9 @@ use domain_runtime_primitives::AccountId;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
+use std::sync::Arc;
 use sc_consensus::ForkChoiceStrategy;
+use sp_blockchain::TreeRoute;
 use sp_consensus_slots::Slot;
 use sp_domains::{OpaqueBundles, SignedOpaqueBundles};
 use sp_runtime::traits::{Block as BlockT, NumberFor};
@@ -50,8 +52,8 @@ where
     pub parent_hash: Block::Hash,
     /// block's number.
     pub number: NumberFor<Block>,
-    /// Fork choice of the block.
-    pub fork_choice: ForkChoiceStrategy,
+    /// Tree route.
+    pub tree_route: Option<Arc<TreeRoute<Block>>>,
 }
 
 /// Converts the block number from the generic type `N1` to `N2`.

@@ -138,8 +138,8 @@ pub(super) async fn start_worker<
                          hash,
                          parent_hash: _,
                          number,
-                         fork_choice,
-                     }| (hash, number, fork_choice),
+                         tree_route,
+                     }| (hash, number, tree_route),
                 )
                 .collect(),
             Box::pin(imported_block_notification_stream),

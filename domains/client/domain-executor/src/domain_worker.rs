@@ -4,6 +4,7 @@ use futures::channel::mpsc;
 use futures::{SinkExt, Stream, StreamExt};
 use sc_client_api::{BlockBackend, BlockchainEvents};
 use sc_consensus::ForkChoiceStrategy;
+use sp_blockchain::TreeRoute;
 use sp_api::{ApiError, BlockT, ProvideRuntimeApi};
 use sp_blockchain::HeaderBackend;
 use sp_domains::{ExecutorApi, SignedOpaqueBundle};
@@ -13,6 +14,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::Arc;
 
 pub(crate) async fn handle_slot_notifications<Block, PBlock, PClient, BundlerFn>(
     primary_chain_client: &PClient,
@@ -58,7 +60,7 @@ pub(crate) async fn handle_block_import_notifications<
     primary_chain_client: &PClient,
     best_domain_number: NumberFor<Block>,
     processor: ProcessorFn,
-    mut leaves: Vec<(PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy)>,
+    mut leaves: Vec<(PBlock::Hash, NumberFor<PBlock>, Option<Arc<TreeRoute<PBlock>>>)>,
     mut block_imports: BlockImports,
     block_import_throttling_buffer_size: u32,
 ) where
@@ -70,7 +72,7 @@ pub(crate) async fn handle_block_import_notifications<
         + BlockchainEvents<PBlock>,
     PClient::Api: ExecutorApi<PBlock, Block::Hash>,
     ProcessorFn: Fn(
-            (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
+            (PBlock::Hash, NumberFor<PBlock>, Option<Arc<TreeRoute<PBlock>>>),
         ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
@@ -98,7 +100,7 @@ pub(crate) async fn handle_block_import_notifications<
     let (mut block_info_sender, mut block_info_receiver) =
         mpsc::channel(block_import_throttling_buffer_size as usize);
 
-    let mut client_block_import = primary_chain_client.import_notification_stream();
+    let mut client_block_import = primary_chain_client.full_import_notification_stream();
 
     enum BlockImport<BlockImportNotification> {
         /// Block import notification from the client.
@@ -115,17 +117,27 @@ pub(crate) async fn handle_block_import_notifications<
                     None => break,
                 };
                 tracing::info!("============ [client_block_import] is_new_best: {:?}, hash: {:?}, tree_route: {:?}", notification.is_new_best, notification.hash, notification.tree_route);
+                if let Some(route) = &notification.tree_route {
+                    let retracted = route.retracted();
+                    let enacted = route.enacted();
+
+                    tracing::info!(
+                        ?retracted,
+                        ?enacted,
+                        common_block = ?route.common_block(),
+                        "========== [client_block_import] notification on #{:?}", notification.hash
+                    );
+                }
+
                 let header = primary_chain_client
                     .header(notification.hash)
                     .expect("Header of imported block must exist; qed")
                     .expect("Header of imported block must exist; qed");
-                // TODO: remove fork_choice
-                let fork_choice = sc_consensus::ForkChoiceStrategy::Custom(true);
                 let block_info = BlockInfo {
                     hash: header.hash(),
                     parent_hash: *header.parent_hash(),
                     number: *header.number(),
-                    fork_choice
+                    tree_route: notification.tree_route
                 };
                 let _ = block_info_sender.feed(BlockImport::Client(block_info)).await;
             }
@@ -216,7 +228,7 @@ where
     Block: BlockT,
     PBlock: BlockT,
     ProcessorFn: Fn(
-            (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
+            (PBlock::Hash, NumberFor<PBlock>, Option<Arc<TreeRoute<PBlock>>>),
         ) -> Pin<Box<dyn Future<Output = Result<(), sp_blockchain::Error>> + Send>>
         + Send
         + Sync,
@@ -233,7 +245,7 @@ where
         debug_assert_eq!(block_info.number.saturating_sub(One::one()), number);
     }
 
-    processor((block_info.hash, block_info.number, block_info.fork_choice)).await?;
+    processor((block_info.hash, block_info.number, block_info.tree_route)).await?;
 
     Ok(())
 }

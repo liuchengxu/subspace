@@ -8,12 +8,12 @@ use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use sc_client_api::{AuxStore, BlockBackend, StateBackendFor};
 use sc_consensus::{BlockImport, ForkChoiceStrategy};
 use sp_api::{NumberFor, ProvideRuntimeApi};
-use sp_blockchain::{HeaderBackend, HeaderMetadata};
+use sp_blockchain::{HashAndNumber, HeaderBackend, HeaderMetadata, TreeRoute};
 use sp_core::traits::CodeExecutor;
 use sp_domains::{DomainId, ExecutorApi};
 use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::generic::BlockId;
-use sp_runtime::traits::{Block as BlockT, HashFor};
+use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT, One};
 use std::marker::PhantomData;
 use std::sync::Arc;
 use subspace_core_primitives::Randomness;
@@ -116,46 +116,84 @@ where
     // TODO: Handle the returned error properly, ref to https://github.com/subspace/subspace/pull/695#discussion_r926721185
     pub(crate) async fn process_bundles(
         self,
-        primary_info: (PBlock::Hash, NumberFor<PBlock>, ForkChoiceStrategy),
+        primary_info: (PBlock::Hash, NumberFor<PBlock>, Option<Arc<TreeRoute<PBlock>>>),
     ) -> Result<(), sp_blockchain::Error> {
         tracing::debug!(?primary_info, "Processing imported primary block");
 
-        let (primary_hash, primary_number, fork_choice) = primary_info;
+        let (primary_hash, primary_number, tree_route) = primary_info;
 
-        let maybe_pending_primary_blocks = self
-            .domain_block_processor
-            .pending_imported_primary_blocks(primary_hash, primary_number)?;
+        let (initial_parent, primary_imports) = if let Some(tree_route) = tree_route {
+            let mut enacted = tree_route.enacted().to_vec();
+            enacted.push(HashAndNumber {
+                hash: primary_hash,
+                number: primary_number,
+            });
 
-        if let Some(PendingPrimaryBlocks {
-            initial_parent,
-            primary_imports,
-        }) = maybe_pending_primary_blocks
-        {
-            tracing::trace!(
-                ?initial_parent,
-                ?primary_imports,
-                "Pending primary blocks to process"
-            );
+            let common_block_number =
+                crate::utils::translate_number_type(tree_route.common_block().number);
+            let parent_header = self
+                .client
+                .header(self.client.hash(common_block_number)?.ok_or_else(|| {
+                    sp_blockchain::Error::Backend(format!(
+                        "Header for #{common_block_number} not found"
+                    ))
+                })?)?
+                .ok_or_else(|| {
+                    sp_blockchain::Error::Backend(format!(
+                        "Header for #{common_block_number} not found"
+                    ))
+                })?;
 
-            let mut domain_parent = initial_parent;
+            let initial_parent = (parent_header.hash(), *parent_header.number());
 
-            for (i, primary_info) in primary_imports.iter().enumerate() {
-                // Use the origin fork_choice for the target primary block,
-                // the intermediate ones use `Custom(false)`.
-                let fork_choice = if i == primary_imports.len() - 1 {
-                    fork_choice
-                } else {
-                    ForkChoiceStrategy::Custom(false)
-                };
+            (initial_parent, enacted)
+        } else {
+            let enacted = vec![HashAndNumber {
+                hash: primary_hash,
+                number: primary_number,
+            }];
+            let parent_number = crate::utils::translate_number_type(primary_number - One::one());
+            (
+                (self.client.hash(parent_number)?.unwrap(), parent_number),
+                enacted,
+            )
+        };
 
-                domain_parent = self
-                    .process_bundles_at(
-                        (primary_info.hash, primary_info.number, fork_choice),
-                        domain_parent,
-                    )
-                    .await?;
-            }
+        // let maybe_pending_primary_blocks = self
+        // .domain_block_processor
+        // .pending_imported_primary_blocks(primary_hash, primary_number)?;
+
+        // if let Some(PendingPrimaryBlocks {
+        // initial_parent,
+        // primary_imports,
+        // }) = maybe_pending_primary_blocks
+        // {
+        tracing::trace!(
+            ?initial_parent,
+            ?primary_imports,
+            "Pending primary blocks to process"
+        );
+
+        let mut domain_parent = initial_parent;
+
+        for (i, primary_info) in primary_imports.iter().enumerate() {
+            // Use the origin fork_choice for the target primary block,
+            // the intermediate ones use `Custom(false)`.
+            // let fork_choice = if i == primary_imports.len() - 1 {
+            // fork_choice
+            // } else {
+            // ForkChoiceStrategy::Custom(false)
+            // };
+            let fork_choice = ForkChoiceStrategy::LongestChain;
+
+            domain_parent = self
+                .process_bundles_at(
+                    (primary_info.hash, primary_info.number, fork_choice),
+                    domain_parent,
+                )
+                .await?;
         }
+        // }
 
         Ok(())
     }

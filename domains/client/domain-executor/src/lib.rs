@@ -213,7 +213,7 @@ where
                 hash,
                 parent_hash,
                 number,
-                fork_choice: ForkChoiceStrategy::LongestChain,
+                tree_route: None,
             })
         })
         .collect::<Vec<_>>();
@@ -225,7 +225,7 @@ where
         hash: best_block.hash(),
         parent_hash: *best_block.parent_hash(),
         number: *best_block.number(),
-        fork_choice: ForkChoiceStrategy::LongestChain,
+        tree_route: None,
     });
 
     /// The maximum number of active leaves we forward to the [`Overseer`] on startup.
