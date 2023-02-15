@@ -483,3 +483,66 @@ fn test_total_stake_overflow() {
         assert_eq!(TotalStakeWeight::<Test>::get(), StakeWeight::MAX / 2 + 100);
     });
 }
+
+#[test]
+fn test_kzg() {
+    use codec::Encode;
+    use dusk_bls12_381::BlsScalar;
+    use subspace_core_primitives::crypto::kzg;
+    use subspace_core_primitives::crypto::kzg::dusk_bytes::Serializable;
+    use subspace_core_primitives::crypto::kzg::{Commitment, Kzg};
+
+    // TODO: Probably should have public parameters in chain constants instead
+    let kzg = Kzg::new(kzg::test_public_parameters());
+
+    let authorities = vec![
+        (
+            ExecutorPair::from_seed(&U256::from(1u32).into()).public(),
+            1u128,
+        ),
+        (
+            ExecutorPair::from_seed(&U256::from(2u32).into()).public(),
+            2u128,
+        ),
+    ];
+    let data = authorities
+        .iter()
+        .map(|authority_with_stake_weight| {
+            let mut d = vec![0u8; 256];
+            // 48 = ExecutorPublicKey(32byte) + StakeWeight(16byte)
+            d[..48].copy_from_slice(&authority_with_stake_weight.encode());
+            d
+        })
+        .flatten()
+        .collect::<Vec<_>>();
+
+    let total_authorities = authorities.len();
+
+    let polynomial = kzg
+        .poly(&data)
+        .expect("Internally produced values must never fail; qed");
+    let commitment = kzg
+        .commit(&polynomial)
+        .expect("Internally produced values must never fail; qed");
+
+    println!("commitment: {commitment:?}");
+
+    let values = data.chunks_exact(BlsScalar::SIZE);
+    println!("values: {values:?}");
+    let num_values = values.len() as u32;
+    println!("num values: {:?}", num_values);
+
+    // 256 / 32
+    assert_eq!(num_values as usize, total_authorities * 8);
+
+    for (index, value) in values.enumerate() {
+        let index = index.try_into().unwrap();
+
+        let witness = kzg.create_witness(&polynomial, index).unwrap();
+
+        assert!(
+            kzg.verify(&commitment, num_values, index, value, &witness),
+            "failed on index {index}"
+        );
+    }
+}
