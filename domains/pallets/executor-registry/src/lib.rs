@@ -39,8 +39,8 @@ const MIN_ACTIVE_EXECUTORS_FACTOR: Percent = Percent::from_percent(75);
 #[frame_support::pallet]
 mod pallet {
     use super::{BalanceOf, MIN_ACTIVE_EXECUTORS_FACTOR};
-    use codec::Codec;
-    use frame_support::pallet_prelude::*;
+    use codec::{Codec, Encode};
+    use frame_support::pallet_prelude::{StorageValue, *};
     use frame_support::traits::{Currency, LockableCurrency};
     use frame_system::pallet_prelude::*;
     use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
@@ -53,6 +53,8 @@ mod pallet {
     use sp_std::collections::btree_map::BTreeMap;
     use sp_std::fmt::Debug;
     use sp_std::vec::Vec;
+    use subspace_core_primitives::crypto::kzg;
+    use subspace_core_primitives::crypto::kzg::{Commitment, Kzg};
 
     /// Same sematic as `AtLeast32Bit` but requires at least `u128`.
     pub trait AtLeast128Bit:
@@ -710,6 +712,33 @@ mod pallet {
                     })
                     .collect::<Vec<_>>();
 
+                // TODO: Probably should have public parameters in chain constants instead
+                let kzg = Kzg::new(kzg::test_public_parameters());
+
+                let data = authorities
+                    .iter()
+                    .map(|authority_with_stake_weight| {
+                        let mut d = sp_std::vec![0u8; 256];
+                        // 48 = ExecutorPublicKey(32byte) + StakeWeight(16byte)
+                        d[..48].copy_from_slice(&authority_with_stake_weight.encode());
+                        d
+                    })
+                    .flatten()
+                    .collect::<Vec<_>>();
+                let polynomial = kzg
+                    .poly(&data)
+                    .expect("Internally produced values must never fail; qed");
+                let commitment = kzg
+                    .commit(&polynomial)
+                    .expect("Internally produced values must never fail; qed");
+                AuthoritiesRoot::<T>::put(commitment);
+
+                let total_authorities: u32 = authorities
+                    .len()
+                    .try_into()
+                    .expect("Must fit into u32 due to `T::MaxExecutors` bound; qed");
+                TotalAuthorities::<T>::put(total_authorities);
+
                 let bounded_authorities = BoundedVec::<_, T::MaxExecutors>::try_from(authorities)
                     .expect(
                         "T::MaxExecutors bound is ensured while registering a new executor; qed",
@@ -767,6 +796,14 @@ mod pallet {
         BoundedVec<(ExecutorPublicKey, T::StakeWeight), T::MaxExecutors>,
         ValueQuery,
     >;
+
+    /// Kzg commitment to the authorities.
+    #[pallet::storage]
+    pub(super) type AuthoritiesRoot<T: Config> = StorageValue<_, Commitment, ValueQuery>;
+
+    /// Number of authorities.
+    #[pallet::storage]
+    pub(super) type TotalAuthorities<T> = StorageValue<_, u32, ValueQuery>;
 
     /// Total stake weight of authorities.
     #[pallet::storage]

@@ -5752,6 +5752,7 @@ dependencies = [
 name = "pallet-executor-registry"
 version = "0.1.0"
 dependencies = [
+ "dusk-bls12_381",
  "frame-support",
  "frame-system",
  "pallet-balances",
@@ -5764,6 +5765,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "subspace-core-primitives",
 ]
 
 [[package]]

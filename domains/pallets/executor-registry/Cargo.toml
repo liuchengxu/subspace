@@ -22,10 +22,12 @@ sp-executor-registry = { version = "0.1.0", path = "../../primitives/executor-re
 sp-io = { version = "7.0.0", git = "https://github.com/subspace/substrate", rev = "100d6c90d4122578006a47c1dcaf155b9c685f34", default-features = false }
 sp-runtime = { version = "7.0.0", git = "https://github.com/subspace/substrate", rev = "100d6c90d4122578006a47c1dcaf155b9c685f34", default-features = false }
 sp-std = { version = "5.0.0", git = "https://github.com/subspace/substrate", rev = "100d6c90d4122578006a47c1dcaf155b9c685f34", default-features = false }
+subspace-core-primitives = { version = "0.1.0", path = "../../../crates/subspace-core-primitives", default-features = false }
 
 [dev-dependencies]
 pallet-balances = { version = "4.0.0-dev", git = "https://github.com/subspace/substrate", rev = "100d6c90d4122578006a47c1dcaf155b9c685f34" }
 sp-core = { version = "7.0.0", git = "https://github.com/subspace/substrate", rev = "100d6c90d4122578006a47c1dcaf155b9c685f34" }
+dusk-bls12_381 = { version = "0.11.2", default-features = false, features = ["alloc", "groups", "pairings", "endo"] }
 
 [features]
 default = ["std"]
@@ -40,5 +42,6 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",
+	"subspace-core-primitives/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
