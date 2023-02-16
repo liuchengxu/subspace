@@ -488,6 +488,8 @@ fn test_total_stake_overflow() {
 fn test_kzg() {
     use codec::Encode;
     use dusk_bls12_381::BlsScalar;
+    use sp_core::H256;
+    use sp_runtime::traits::{BlakeTwo256, Hash};
     use subspace_core_primitives::crypto::kzg;
     use subspace_core_primitives::crypto::kzg::dusk_bytes::Serializable;
     use subspace_core_primitives::crypto::kzg::{Commitment, Kzg};
@@ -504,23 +506,53 @@ fn test_kzg() {
             ExecutorPair::from_seed(&U256::from(2u32).into()).public(),
             2u128,
         ),
+        (
+            ExecutorPair::from_seed(&U256::from(3u32).into()).public(),
+            3u128,
+        ),
+        // (
+            // ExecutorPair::from_seed(&U256::from(4u32).into()).public(),
+            // 4u128,
+        // ),
+        // (
+            // ExecutorPair::from_seed(&U256::from(5u32).into()).public(),
+            // 5u128,
+        // ),
+        // (
+        // ExecutorPair::from_seed(&U256::from(6u32).into()).public(),
+        // 6u128,
+        // ),
+        // (
+        // ExecutorPair::from_seed(&U256::from(7u32).into()).public(),
+        // 7u128,
+        // ),
+        // (
+        // ExecutorPair::from_seed(&U256::from(8u32).into()).public(),
+        // 8u128,
+        // ),
     ];
     let data = authorities
         .iter()
         .map(|authority_with_stake_weight| {
-            let mut d = vec![0u8; 256];
-            // 48 = ExecutorPublicKey(32byte) + StakeWeight(16byte)
-            d[..48].copy_from_slice(&authority_with_stake_weight.encode());
+            let mut d =
+                BlakeTwo256::hash_of(&authority_with_stake_weight.encode()).to_fixed_bytes();
+            // Erase the last byte
+            if let Some(last) = d.last_mut() {
+                *last = 0;
+            }
             d
         })
         .flatten()
         .collect::<Vec<_>>();
 
+    println!("data: {:?}, data_len: {:?}", data, data.len());
     let total_authorities = authorities.len();
 
-    let polynomial = kzg
-        .poly(&data)
-        .expect("Internally produced values must never fail; qed");
+    let polynomial = kzg.poly(&data).expect("Create polynomial");
+    println!(
+        "============ polynomial degree: {:?}",
+        polynomial.0.degree()
+    );
     let commitment = kzg
         .commit(&polynomial)
         .expect("Internally produced values must never fail; qed");
@@ -532,17 +564,28 @@ fn test_kzg() {
     let num_values = values.len() as u32;
     println!("num values: {:?}", num_values);
 
-    // 256 / 32
-    assert_eq!(num_values as usize, total_authorities * 8);
+    assert_eq!(num_values as usize, total_authorities);
 
     for (index, value) in values.enumerate() {
         let index = index.try_into().unwrap();
+        println!("index: {index}, value: {value:?}");
 
-        let witness = kzg.create_witness(&polynomial, index).unwrap();
+        let witness = kzg
+            .create_witness(&polynomial, index)
+            .expect("Failed to create witness");
 
         assert!(
             kzg.verify(&commitment, num_values, index, value, &witness),
-            "failed on index {index}"
+            "Kzg verification failed on index {index}"
         );
     }
+
+    println!(
+        "=========== TotalAuthorities: {:?}",
+        crate::TotalAuthorities::<Test>::hashed_key()
+    );
+    println!(
+        "=========== AuthoritiesRoot: {:?}",
+        crate::AuthoritiesRoot::<Test>::hashed_key()
+    );
 }

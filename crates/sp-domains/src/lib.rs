@@ -32,6 +32,7 @@ use sp_runtime::OpaqueExtrinsic;
 use sp_std::borrow::Cow;
 use sp_std::vec::Vec;
 use sp_trie::StorageProof;
+use subspace_core_primitives::crypto::kzg::Witness;
 use subspace_core_primitives::{Blake2b256Hash, BlockNumber, Randomness};
 
 /// Key type for Executor.
@@ -200,6 +201,9 @@ pub struct ProofOfElection<DomainHash> {
     pub state_root: DomainHash,
     /// Storage proof for the bundle election state.
     pub storage_proof: StorageProof,
+    pub authority_index: u32,
+    pub authority_stake_weight: StakeWeight,
+    pub authority_witness: Witness,
     /// Number of the system domain block at which the proof of election was created.
     pub block_number: BlockNumber,
     /// Block hash corresponding to the `block_number` above.
@@ -217,6 +221,9 @@ impl<DomainHash: Default> ProofOfElection<DomainHash> {
             global_challenge: Blake2b256Hash::default(),
             state_root: Default::default(),
             storage_proof: StorageProof::empty(),
+            authority_index: Default::default(),
+            authority_stake_weight: Default::default(),
+            authority_witness: Default::default(),
             block_number: Default::default(),
             block_hash: Default::default(),
         }

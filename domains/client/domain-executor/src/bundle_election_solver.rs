@@ -55,6 +55,13 @@ where
         domain_id: DomainId,
         global_challenge: Blake2b256Hash,
     ) -> sp_blockchain::Result<Option<ProofOfElection<Block::Hash>>> {
+        use codec::Encode;
+        use subspace_core_primitives::crypto::kzg;
+        use subspace_core_primitives::crypto::kzg::Kzg;
+
+        // TODO: Probably should have public parameters in chain constants instead
+        let kzg = Kzg::new(kzg::test_public_parameters());
+
         let best_block_id = BlockId::Hash(best_hash);
 
         let BundleElectionParams {
@@ -77,7 +84,7 @@ where
 
         let transcript_data = make_local_randomness_transcript_data(&global_challenge);
 
-        for (authority_id, stake_weight) in authorities {
+        for (index, (authority_id, stake_weight)) in authorities.iter().enumerate() {
             if let Ok(Some(vrf_signature)) = SyncCryptoStore::sr25519_vrf_sign(
                 &*self.keystore,
                 ExecutorPublicKey::ID,
@@ -97,7 +104,7 @@ where
                 })?;
 
                 let threshold = calculate_bundle_election_threshold(
-                    stake_weight,
+                    *stake_weight,
                     total_stake_weight,
                     slot_probability,
                 );
@@ -140,14 +147,39 @@ where
                     let block_hash = translate_block_hash_type::<SBlock, Block>(best_hash);
                     let state_root = translate_block_hash_type::<SBlock, Block>(state_root);
 
+                    let data = authorities
+                        .iter()
+                        .map(|authority_with_stake_weight| {
+                            use sp_runtime::traits::{BlakeTwo256, Hash};
+                            let mut d = BlakeTwo256::hash_of(&authority_with_stake_weight.encode())
+                                .to_fixed_bytes();
+                            // Erase the last byte
+                            if let Some(last) = d.last_mut() {
+                                *last = 0;
+                            }
+                            d
+                        })
+                        .flatten()
+                        .collect::<Vec<_>>();
+
+                    let polynomial = kzg
+                        .poly(&data)
+                        .expect("Internally produced values must never fail; qed");
+
+                    let index = index as u32;
+                    let witness = kzg.create_witness(&polynomial, index).unwrap();
+
                     let proof_of_election = ProofOfElection {
                         domain_id,
                         vrf_output: vrf_signature.output.to_bytes(),
                         vrf_proof: vrf_signature.proof.to_bytes(),
-                        executor_public_key: authority_id,
+                        executor_public_key: authority_id.clone(),
                         global_challenge,
                         state_root,
                         storage_proof,
+                        authority_index: index,
+                        authority_stake_weight: *stake_weight,
+                        authority_witness: witness,
                         block_number: to_number_primitive(best_number),
                         block_hash,
                     };

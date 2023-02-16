@@ -48,7 +48,7 @@ fn test_public_parameters_correct() {
 
 /// Commitment to polynomial
 #[derive(Debug, Clone)]
-pub struct Polynomial(PlonkPolynomial);
+pub struct Polynomial(pub PlonkPolynomial);
 
 impl From<Polynomial> for Vec<u8> {
     fn from(polynomial: Polynomial) -> Vec<u8> {

@@ -10,9 +10,10 @@ use sp_keystore::vrf::{VRFTranscriptData, VRFTranscriptValue};
 use sp_runtime::traits::BlakeTwo256;
 use sp_std::vec::Vec;
 use sp_trie::{read_trie_value, LayoutV1, StorageProof};
-use subspace_core_primitives::crypto::blake2b_256_hash_list;
+use subspace_core_primitives::crypto::kzg::{Commitment, Kzg};
+use subspace_core_primitives::crypto::{blake2b_256_hash_list, kzg};
 use subspace_core_primitives::Blake2b256Hash;
-use well_known_keys::{AUTHORITIES, SLOT_PROBABILITY, TOTAL_STAKE_WEIGHT};
+use well_known_keys::{AUTHORITIES_ROOT, SLOT_PROBABILITY, TOTAL_AUTHORITIES, TOTAL_STAKE_WEIGHT};
 
 const VRF_TRANSCRIPT_LABEL: &[u8] = b"executor";
 
@@ -110,6 +111,22 @@ pub mod well_known_keys {
         134, 154, 166, 12, 2, 190, 154, 220, 201, 138, 13, 29,
     ];
 
+    /// Storage key of `pallet_executor_registry::TotalAuthorities`.
+    ///
+    /// TotalAuthorities::<T>::hashed_key().
+    pub(crate) const TOTAL_AUTHORITIES: [u8; 32] = [
+        185, 61, 20, 0, 90, 16, 106, 134, 14, 150, 35, 100, 152, 229, 203, 187, 8, 189, 144, 48,
+        130, 232, 120, 170, 9, 239, 96, 88, 35, 101, 226, 106,
+    ];
+
+    /// Storage key of `pallet_executor_registry::AuthoritiesRoot`.
+    ///
+    /// AuthoritiesRoot::<T>::hashed_key().
+    pub(crate) const AUTHORITIES_ROOT: [u8; 32] = [
+        185, 61, 20, 0, 90, 16, 106, 134, 14, 150, 35, 100, 152, 229, 203, 187, 229, 73, 72, 152,
+        132, 52, 185, 74, 34, 205, 232, 65, 110, 2, 255, 36,
+    ];
+
     /// Storage key of `pallet_executor_registry::TotalStakeWeight`.
     ///
     /// TotalStakeWeight::<T>::hashed_key().
@@ -128,7 +145,7 @@ pub mod well_known_keys {
 
     /// Returns the storage keys for verifying the system domain bundle election.
     pub fn system_bundle_election_storage_keys() -> Vec<[u8; 32]> {
-        vec![AUTHORITIES, TOTAL_STAKE_WEIGHT, SLOT_PROBABILITY]
+        vec![TOTAL_AUTHORITIES, TOTAL_STAKE_WEIGHT, SLOT_PROBABILITY]
     }
 }
 
@@ -144,6 +161,26 @@ impl BundleElectionParams {
     pub fn empty() -> Self {
         Self {
             authorities: Vec::new(),
+            total_stake_weight: 0,
+            slot_probability: (0, 0),
+        }
+    }
+}
+
+/// Parameters for verifying the bundle election.
+#[derive(Debug, Decode, Encode, TypeInfo, PartialEq, Eq, Clone)]
+pub struct BundleElectionVerifierParams {
+    pub total_authorities: u32,
+    pub authorities_root: Commitment,
+    pub total_stake_weight: StakeWeight,
+    pub slot_probability: (u64, u64),
+}
+
+impl BundleElectionVerifierParams {
+    pub fn empty() -> Self {
+        Self {
+            total_authorities: 0,
+            authorities_root: Default::default(),
             total_stake_weight: 0,
             slot_probability: (0, 0),
         }
@@ -192,10 +229,10 @@ pub enum ReadBundleElectionParamsError {
 }
 
 /// Returns the bundle election parameters read from the given storage proof.
-pub fn read_bundle_election_params(
+pub fn read_bundle_election_verifier_params(
     storage_proof: StorageProof,
     state_root: &H256,
-) -> Result<BundleElectionParams, ReadBundleElectionParamsError> {
+) -> Result<BundleElectionVerifierParams, ReadBundleElectionParamsError> {
     let db = storage_proof.into_memory_db::<BlakeTwo256>();
 
     let read_value = |storage_key| {
@@ -203,11 +240,15 @@ pub fn read_bundle_election_params(
             .map_err(|_| ReadBundleElectionParamsError::TrieError)
     };
 
-    let authorities =
-        read_value(&AUTHORITIES)?.ok_or(ReadBundleElectionParamsError::MissingValue)?;
-    let authorities: Vec<(ExecutorPublicKey, StakeWeight)> =
-        Decode::decode(&mut authorities.as_slice())
-            .map_err(|_| ReadBundleElectionParamsError::DecodeError)?;
+    let authorities_root =
+        read_value(&AUTHORITIES_ROOT)?.ok_or(ReadBundleElectionParamsError::MissingValue)?;
+    let authorities_root: Commitment = Decode::decode(&mut authorities_root.as_slice())
+        .map_err(|_| ReadBundleElectionParamsError::DecodeError)?;
+
+    let total_authorities =
+        read_value(&TOTAL_AUTHORITIES)?.ok_or(ReadBundleElectionParamsError::MissingValue)?;
+    let total_authorities: u32 = Decode::decode(&mut total_authorities.as_slice())
+        .map_err(|_| ReadBundleElectionParamsError::DecodeError)?;
 
     let total_stake_weight_value =
         read_value(&TOTAL_STAKE_WEIGHT)?.ok_or(ReadBundleElectionParamsError::MissingValue)?;
@@ -219,8 +260,9 @@ pub fn read_bundle_election_params(
     let slot_probability: (u64, u64) = Decode::decode(&mut slot_probability_value.as_slice())
         .map_err(|_| ReadBundleElectionParamsError::DecodeError)?;
 
-    Ok(BundleElectionParams {
-        authorities,
+    Ok(BundleElectionVerifierParams {
+        authorities_root,
+        total_authorities,
         total_stake_weight,
         slot_probability,
     })
@@ -248,31 +290,58 @@ pub fn verify_system_bundle_solution<DomainHash>(
         executor_public_key,
         global_challenge,
         storage_proof,
+        authority_index,
+        authority_stake_weight,
+        authority_witness,
         ..
     } = proof_of_election;
 
-    let BundleElectionParams {
-        authorities,
+    let BundleElectionVerifierParams {
+        authorities_root,
+        total_authorities,
         total_stake_weight,
         slot_probability,
-    } = read_bundle_election_params(storage_proof.clone(), &verified_state_root)
+    } = read_bundle_election_verifier_params(storage_proof.clone(), &verified_state_root)
         .map_err(BundleSolutionError::BadStorageProof)?;
 
-    let stake_weight = authorities
-        .iter()
-        .find_map(|(authority, weight)| {
-            if authority == executor_public_key {
-                Some(weight)
-            } else {
-                None
-            }
-        })
-        .ok_or(BundleSolutionError::AuthorityNotFound)?;
+    let kzg = Kzg::new(kzg::test_public_parameters());
+
+    let commitment = authorities_root;
+    let stake_weight = *authority_stake_weight;
+
+    use sp_runtime::traits::Hash;
+    let mut value =
+        BlakeTwo256::hash_of(&(executor_public_key, stake_weight).encode()).to_fixed_bytes();
+    if let Some(last) = value.last_mut() {
+        *last = 0;
+    }
+
+    // TODO: verify kzg
+    if !kzg.verify(
+        &commitment,
+        total_authorities,
+        *authority_index,
+        &value,
+        &authority_witness,
+    ) {
+        panic!("Failed to verify kzg proof of election");
+    }
+
+    // let stake_weight = authorities
+    // .iter()
+    // .find_map(|(authority, weight)| {
+    // if authority == executor_public_key {
+    // Some(weight)
+    // } else {
+    // None
+    // }
+    // })
+    // .ok_or(BundleSolutionError::AuthorityNotFound)?;
 
     verify_bundle_solution_threshold(
         *domain_id,
         *vrf_output,
-        *stake_weight,
+        stake_weight,
         total_stake_weight,
         slot_probability,
         executor_public_key,

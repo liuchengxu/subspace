@@ -718,9 +718,15 @@ mod pallet {
                 let data = authorities
                     .iter()
                     .map(|authority_with_stake_weight| {
-                        let mut d = sp_std::vec![0u8; 256];
-                        // 48 = ExecutorPublicKey(32byte) + StakeWeight(16byte)
-                        d[..48].copy_from_slice(&authority_with_stake_weight.encode());
+                        use sp_runtime::traits::Hash;
+                        let mut d = sp_runtime::traits::BlakeTwo256::hash_of(
+                            &authority_with_stake_weight.encode(),
+                        )
+                        .to_fixed_bytes();
+                        // Erase the last byte
+                        if let Some(last) = d.last_mut() {
+                            *last = 0;
+                        }
                         d
                     })
                     .flatten()
