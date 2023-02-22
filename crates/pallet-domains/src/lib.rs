@@ -33,7 +33,7 @@ use sp_domains::transaction::InvalidTransactionCode;
 use sp_domains::{BundleSolution, DomainId, ExecutionReceipt, ProofOfElection, SignedOpaqueBundle};
 use sp_runtime::traits::{BlockNumberProvider, CheckedSub, One, Zero};
 use sp_runtime::transaction_validity::TransactionValidityError;
-use sp_runtime::RuntimeAppPublic;
+use sp_runtime::{RuntimeAppPublic, SaturatedConversion};
 
 #[frame_support::pallet]
 mod pallet {
@@ -556,11 +556,31 @@ impl<T: Config> Pallet<T> {
     ) -> Result<(), BundleError> {
         let current_block_number = frame_system::Pallet::<T>::current_block_number();
 
-        if let Some(last_finalized) =
-            current_block_number.checked_sub(&T::ConfirmationDepthK::get())
-        {
-            if bundle.header.primary_number <= last_finalized {
-                return Err(BundleError::StaleBundle);
+        // Reject the stale bundles so that they can't be used by attacker to occupy the block space without cost.
+        let confirmation_depth_k = T::ConfirmationDepthK::get();
+        if let Some(finalized) = current_block_number.checked_sub(&confirmation_depth_k) {
+            {
+                // Ideally, `bundle.header.primary_number` is `current_block_number - 1`, we need
+                // to handle the edge case that `T::ConfirmationDepthK` happens to be 1.
+                let is_stale_bundle = match confirmation_depth_k.saturated_into() {
+                    0u32 => {
+                        unreachable!(
+                            "ConfirmationDepthK is guaranteed to be non-zero at genesis config"
+                        )
+                    }
+                    1u32 => bundle.header.primary_number < finalized,
+                    _ => bundle.header.primary_number <= finalized,
+                };
+
+                if is_stale_bundle {
+                    log::error!(
+                        target: "runtime::domains",
+                        "Bundle created on an ancient consensus block, current_block_number: {current_block_number:?}, \
+                        ConfirmationDepthK: {confirmation_depth_k:?}, `bundle.header.primary_number`: {:?}, `finalized`: {finalized:?}",
+                        bundle.header.primary_number,
+                    );
+                    return Err(BundleError::StaleBundle);
+                }
             }
         }
 
