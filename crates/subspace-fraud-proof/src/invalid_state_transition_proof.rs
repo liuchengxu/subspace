@@ -7,7 +7,7 @@ use sp_core::H256;
 use sp_domains::fraud_proof::{ExecutionPhase, InvalidStateTransitionProof, VerificationError};
 use sp_domains::{DomainId, ExecutorApi};
 use sp_receipts::ReceiptsApi;
-use sp_runtime::traits::{BlakeTwo256, Block as BlockT, HashFor, NumberFor};
+use sp_runtime::traits::{BlakeTwo256, Block as BlockT, HashFor, Header as HeaderT, NumberFor};
 use sp_state_machine::backend::AsTrieBackend;
 use sp_state_machine::{TrieBackend, TrieBackendBuilder, TrieBackendStorage};
 use sp_trie::DBValue;
@@ -397,6 +397,7 @@ where
 
         let InvalidStateTransitionProof {
             domain_id,
+            parent_number,
             primary_parent_hash,
             pre_state_root,
             post_state_root,
@@ -442,7 +443,30 @@ where
             heap_pages: None,
         };
 
-        let call_data = b"TODO: fetch call_data from the original primary block";
+        use domain_runtime_primitives::opaque::Block;
+
+        let call_data = match execution_phase {
+            ExecutionPhase::InitializeBlock { domain_parent_hash } => {
+                let parent_hash =
+                    <Block as BlockT>::Hash::decode(&mut domain_parent_hash.encode().as_slice())
+                        .expect("Failed to decode `domain_parent_hash`");
+                let parent_number =
+                    <NumberFor<Block>>::decode(&mut parent_number.encode().as_slice())
+                        .expect("Failed to decode `parent_number`");
+                let new_header = <Block as BlockT>::Header::new(
+                    parent_number,
+                    Default::default(),
+                    Default::default(),
+                    parent_hash,
+                    Default::default(),
+                );
+                new_header.encode()
+            }
+            ExecutionPhase::ApplyExtrinsic(_extrinsic_index) => {
+                todo!("Rebuild the domain extrinsic list using domain_block_preprocessor")
+            }
+            ExecutionPhase::FinalizeBlock { .. } => Vec::new(),
+        };
 
         let execution_result = sp_state_machine::execution_proof_check::<BlakeTwo256, _, _>(
             *pre_state_root,
@@ -451,7 +475,7 @@ where
             &self.executor,
             self.spawn_handle.clone(),
             execution_phase.verifying_method(),
-            call_data,
+            &call_data,
             &runtime_code,
         )
         .map_err(VerificationError::BadProof)?;
