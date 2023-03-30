@@ -4,6 +4,7 @@ use crate::runtime_api::{
 use codec::{Codec, Encode};
 use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use sc_executor::RuntimeVersionOf;
+use sc_executor_common::runtime_blob::RuntimeBlob;
 use sp_api::{ApiError, BlockT, Core, Hasher, RuntimeVersion};
 use sp_core::traits::{CallContext, CodeExecutor, FetchRuntimeCode, RuntimeCode};
 use sp_core::ExecutionContext;
@@ -101,10 +102,12 @@ where
     }
 
     fn runtime_version(&self) -> Result<RuntimeVersion, ApiError> {
-        let mut ext = BasicExternalities::new_empty();
-        self.executor
-            .runtime_version(&mut ext, &self.runtime_code())
-            .map_err(|err| ApiError::Application(Box::new(err)))
+        let runtime_blob = RuntimeBlob::new(&self.runtime_code).unwrap();
+        sc_executor::read_embedded_version(&runtime_blob)
+            .map_err(|err| ApiError::Application(Box::new(err)))?
+            .ok_or(ApiError::Application(Box::from(
+                "domain runtime version not found".to_string(),
+            )))
     }
 
     fn dispatch_call(
