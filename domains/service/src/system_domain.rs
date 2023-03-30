@@ -123,6 +123,7 @@ type InvalidStateTransitionProofVerifier<PBlock, PClient, RuntimeApi, Executor> 
         SpawnTaskHandle,
         Hash,
         subspace_fraud_proof::PrePostStateRootVerifier<FullClient<RuntimeApi, Executor>, Block>,
+        (),
     >;
 
 type FraudProofVerifier<PBlock, PClient, RuntimeApi, Executor> =

@@ -183,16 +183,31 @@ pub struct InvalidStateTransitionProofVerifier<
     Spawn,
     Hash,
     PrePostStateRootVerifier,
+    DomainExtrinsicsBuilder,
 > {
     client: Arc<C>,
     executor: Exec,
     spawn_handle: Spawn,
     pre_post_state_root_verifier: PrePostStateRootVerifier,
+    domain_extrinsics_builder: DomainExtrinsicsBuilder,
     _phantom: PhantomData<(PBlock, Hash)>,
 }
 
-impl<PBlock, C, Exec: Clone, Spawn: Clone, Hash, PrePostStateRootVerifier: Clone> Clone
-    for InvalidStateTransitionProofVerifier<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier>
+impl<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier, DomainExtrinsicsBuilder> Clone
+    for InvalidStateTransitionProofVerifier<
+        PBlock,
+        C,
+        Exec,
+        Spawn,
+        Hash,
+        PrePostStateRootVerifier,
+        DomainExtrinsicsBuilder,
+    >
+where
+    Exec: Clone,
+    Spawn: Clone,
+    PrePostStateRootVerifier: Clone,
+    DomainExtrinsicsBuilder: Clone,
 {
     fn clone(&self) -> Self {
         Self {
@@ -200,6 +215,7 @@ impl<PBlock, C, Exec: Clone, Spawn: Clone, Hash, PrePostStateRootVerifier: Clone
             executor: self.executor.clone(),
             spawn_handle: self.spawn_handle.clone(),
             pre_post_state_root_verifier: self.pre_post_state_root_verifier.clone(),
+            domain_extrinsics_builder: self.domain_extrinsics_builder.clone(),
             _phantom: self._phantom,
         }
     }
@@ -357,8 +373,34 @@ impl VerifyPrePostStateRoot for SkipPreStateRootVerification {
     }
 }
 
-impl<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier>
-    InvalidStateTransitionProofVerifier<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier>
+pub trait BuildDomainExtrinsics<PBlock: BlockT> {
+    fn build_domain_extrinsics(
+        &self,
+        primary_hash: PBlock::Hash,
+        domain_runtime: Vec<u8>,
+    ) -> sp_blockchain::Result<Vec<Vec<u8>>>;
+}
+
+impl<PBlock: BlockT> BuildDomainExtrinsics<PBlock> for () {
+    fn build_domain_extrinsics(
+        &self,
+        primary_hash: <PBlock as BlockT>::Hash,
+        domain_runtime: Vec<u8>,
+    ) -> sp_blockchain::Result<Vec<Vec<u8>>> {
+        todo!("Remove this empty impl")
+    }
+}
+
+impl<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier, DomainExtrinsicsBuilder>
+    InvalidStateTransitionProofVerifier<
+        PBlock,
+        C,
+        Exec,
+        Spawn,
+        Hash,
+        PrePostStateRootVerifier,
+        DomainExtrinsicsBuilder,
+    >
 where
     PBlock: BlockT,
     C: ProvideRuntimeApi<PBlock> + Send + Sync,
@@ -367,6 +409,7 @@ where
     Spawn: SpawnNamed + Clone + Send + 'static,
     Hash: Encode + Decode,
     PrePostStateRootVerifier: VerifyPrePostStateRoot,
+    DomainExtrinsicsBuilder: BuildDomainExtrinsics<PBlock>,
 {
     /// Constructs a new instance of [`InvalidStateTransitionProofVerifier`].
     pub fn new(
@@ -374,12 +417,14 @@ where
         executor: Exec,
         spawn_handle: Spawn,
         pre_post_state_root_verifier: PrePostStateRootVerifier,
+        domain_extrinsics_builder: DomainExtrinsicsBuilder,
     ) -> Self {
         Self {
             client,
             executor,
             spawn_handle,
             pre_post_state_root_verifier,
+            domain_extrinsics_builder,
             _phantom: PhantomData::<(PBlock, Hash)>,
         }
     }
@@ -462,8 +507,19 @@ where
                 );
                 new_header.encode()
             }
-            ExecutionPhase::ApplyExtrinsic(_extrinsic_index) => {
-                todo!("Rebuild the domain extrinsic list using domain_block_preprocessor")
+            ExecutionPhase::ApplyExtrinsic(extrinsic_index) => {
+                // TODO: primary_parent_hash should be primary_hash
+                let primary_hash =
+                    PBlock::Hash::decode(&mut primary_parent_hash.encode().as_slice())
+                        .expect("TODO: refactor this");
+                let domain_extrinsics = self
+                    .domain_extrinsics_builder
+                    .build_domain_extrinsics(primary_hash, wasm_bundle.to_vec())
+                    .map_err(|_| VerificationError::FailedToBuildDomainExtrinsic)?;
+                domain_extrinsics
+                    .into_iter()
+                    .nth(*extrinsic_index as usize)
+                    .ok_or(VerificationError::ExtrinsicDataNotFound(*extrinsic_index))?
             }
             ExecutionPhase::FinalizeBlock { .. } => Vec::new(),
         };
@@ -504,8 +560,17 @@ pub trait VerifyInvalidStateTransitionProof {
     ) -> Result<(), VerificationError>;
 }
 
-impl<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier> VerifyInvalidStateTransitionProof
-    for InvalidStateTransitionProofVerifier<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier>
+impl<PBlock, C, Exec, Spawn, Hash, PrePostStateRootVerifier, DomainExtrinsicsBuilder>
+    VerifyInvalidStateTransitionProof
+    for InvalidStateTransitionProofVerifier<
+        PBlock,
+        C,
+        Exec,
+        Spawn,
+        Hash,
+        PrePostStateRootVerifier,
+        DomainExtrinsicsBuilder,
+    >
 where
     PBlock: BlockT,
     C: ProvideRuntimeApi<PBlock> + Send + Sync,
@@ -514,6 +579,7 @@ where
     Spawn: SpawnNamed + Clone + Send + 'static,
     Hash: Encode + Decode,
     PrePostStateRootVerifier: VerifyPrePostStateRoot,
+    DomainExtrinsicsBuilder: BuildDomainExtrinsics<PBlock>,
 {
     fn verify_invalid_state_transition_proof(
         &self,

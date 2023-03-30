@@ -83,6 +83,15 @@ pub enum VerificationError {
         error("`post_state_root` is same as the one on chain")
     )]
     SamePostStateRoot,
+    /// Full extrinsic data at index not found.
+    #[cfg_attr(feature = "thiserror", error("Extrinsic data not found at index {0}"))]
+    ExtrinsicDataNotFound(u32),
+    /// Failed to rebuild the domain extrinsic list.
+    #[cfg_attr(
+        feature = "thiserror",
+        error("Failed to rebuild the domain extrinsic list")
+    )]
+    FailedToBuildDomainExtrinsic,
     /// Failed to pass the execution proof check.
     #[cfg_attr(
         feature = "thiserror",

@@ -10293,6 +10293,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "derive_more",
+ "domain-block-preprocessor",
  "domain-runtime-primitives",
  "either",
  "frame-support",

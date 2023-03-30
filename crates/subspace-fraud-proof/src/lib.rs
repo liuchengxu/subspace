@@ -16,8 +16,8 @@ use futures::channel::oneshot;
 use futures::FutureExt;
 use invalid_state_transition_proof::VerifyInvalidStateTransitionProof;
 pub use invalid_state_transition_proof::{
-    ExecutionProver, InvalidStateTransitionProofVerifier, PrePostStateRootVerifier,
-    VerifyPrePostStateRoot,
+    BuildDomainExtrinsics, ExecutionProver, InvalidStateTransitionProofVerifier,
+    PrePostStateRootVerifier, VerifyPrePostStateRoot,
 };
 use sp_api::ProvideRuntimeApi;
 use sp_core::traits::{CodeExecutor, SpawnNamed};
