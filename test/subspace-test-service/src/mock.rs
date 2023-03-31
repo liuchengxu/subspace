@@ -94,12 +94,18 @@ impl MockPrimaryNode {
 
         let bundle_validator = BundleValidator::new(client.clone());
 
-        let proof_verifier = subspace_fraud_proof::ProofVerifier::new(
-            client.clone(),
-            executor.clone(),
-            task_manager.spawn_handle(),
-            subspace_fraud_proof::PrePostStateRootVerifier::new(client.clone()),
-        );
+        let proof_verifier = subspace_fraud_proof::ProofVerifier::new(Arc::new(
+            subspace_fraud_proof::InvalidStateTransitionProofVerifier::new(
+                client.clone(),
+                executor.clone(),
+                task_manager.spawn_handle(),
+                subspace_fraud_proof::PrePostStateRootVerifier::new(client.clone()),
+                subspace_service::SystemDomainExtrinsicsBuilder::new(
+                    client.clone(),
+                    Arc::new(executor.clone()),
+                ),
+            ),
+        ));
         let tx_pre_validator = PrimaryChainTxPreValidator::new(
             client.clone(),
             Box::new(task_manager.spawn_handle()),

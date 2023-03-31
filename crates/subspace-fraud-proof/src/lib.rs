@@ -7,7 +7,7 @@
 
 #![warn(missing_docs)]
 
-mod invalid_state_transition_proof;
+pub mod invalid_state_transition_proof;
 #[cfg(test)]
 mod tests;
 
@@ -15,10 +15,6 @@ use codec::{Decode, Encode};
 use futures::channel::oneshot;
 use futures::FutureExt;
 use invalid_state_transition_proof::VerifyInvalidStateTransitionProof;
-pub use invalid_state_transition_proof::{
-    BuildDomainExtrinsics, ExecutionProver, InvalidStateTransitionProofVerifier,
-    PrePostStateRootVerifier, VerifyPrePostStateRoot,
-};
 use sp_api::ProvideRuntimeApi;
 use sp_core::traits::{CodeExecutor, SpawnNamed};
 use sp_domains::fraud_proof::{FraudProof, VerificationError};
@@ -37,12 +33,12 @@ pub trait VerifyFraudProof<FPBlock: BlockT> {
 }
 
 /// Fraud proof verifier.
-pub struct ProofVerifier<FPBlock, ISTPVerifier> {
-    invalid_state_transition_proof_verifier: Arc<ISTPVerifier>,
+pub struct ProofVerifier<FPBlock, ISTProofVerifier> {
+    invalid_state_transition_proof_verifier: Arc<ISTProofVerifier>,
     _phantom: PhantomData<FPBlock>,
 }
 
-impl<FPBlock, ISTPVerifier> Clone for ProofVerifier<FPBlock, ISTPVerifier> {
+impl<FPBlock, ISTProofVerifier> Clone for ProofVerifier<FPBlock, ISTProofVerifier> {
     fn clone(&self) -> Self {
         Self {
             invalid_state_transition_proof_verifier: self
@@ -53,13 +49,13 @@ impl<FPBlock, ISTPVerifier> Clone for ProofVerifier<FPBlock, ISTPVerifier> {
     }
 }
 
-impl<FPBlock, ISTPVerifier> ProofVerifier<FPBlock, ISTPVerifier>
+impl<FPBlock, ISTProofVerifier> ProofVerifier<FPBlock, ISTProofVerifier>
 where
     FPBlock: BlockT,
-    ISTPVerifier: VerifyInvalidStateTransitionProof,
+    ISTProofVerifier: VerifyInvalidStateTransitionProof,
 {
     /// Constructs a new instance of [`ProofVerifier`].
-    pub fn new(invalid_state_transition_proof_verifier: Arc<ISTPVerifier>) -> Self {
+    pub fn new(invalid_state_transition_proof_verifier: Arc<ISTProofVerifier>) -> Self {
         Self {
             invalid_state_transition_proof_verifier,
             _phantom: Default::default(),
@@ -80,10 +76,11 @@ where
     }
 }
 
-impl<FPBlock, ISTPVerifier> VerifyFraudProof<FPBlock> for ProofVerifier<FPBlock, ISTPVerifier>
+impl<FPBlock, ISTProofVerifier> VerifyFraudProof<FPBlock>
+    for ProofVerifier<FPBlock, ISTProofVerifier>
 where
     FPBlock: BlockT,
-    ISTPVerifier: VerifyInvalidStateTransitionProof,
+    ISTProofVerifier: VerifyInvalidStateTransitionProof,
 {
     fn verify_fraud_proof(
         &self,

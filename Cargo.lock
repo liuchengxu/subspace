@@ -10086,6 +10086,7 @@ name = "subspace-fraud-proof"
 version = "0.1.0"
 dependencies = [
  "domain-block-builder",
+ "domain-block-preprocessor",
  "domain-runtime-primitives",
  "domain-test-service",
  "futures 0.3.27",

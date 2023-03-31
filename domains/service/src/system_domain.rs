@@ -210,6 +210,7 @@ where
             executor.clone(),
             task_manager.spawn_handle(),
             subspace_fraud_proof::PrePostStateRootVerifier::new(client.clone()),
+            (),
         ),
     ));
 

@@ -1,5 +1,6 @@
 use crate::runtime_api::{
-    CoreBundleConstructor, ExtractedStateRoots, SetCodeConstructor, StateRootExtractor,
+    CoreBundleConstructor, ExtractSignerResult, ExtractedStateRoots, SetCodeConstructor,
+    SignerExtractor, StateRootExtractor,
 };
 use codec::{Codec, Encode};
 use domain_runtime_primitives::{AccountId, DomainCoreApi};
@@ -205,5 +206,19 @@ where
             at,
             runtime_code,
         )
+    }
+}
+
+impl<Executor, Block> SignerExtractor<Block, AccountId> for RuntimeApiLight<Executor>
+where
+    Block: BlockT,
+    Executor: CodeExecutor,
+{
+    fn extract_signer(
+        &self,
+        at: Block::Hash,
+        extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+    ) -> Result<ExtractSignerResult<Block, AccountId>, ApiError> {
+        <Self as DomainCoreApi<Block, AccountId>>::extract_signer(self, at, extrinsics)
     }
 }

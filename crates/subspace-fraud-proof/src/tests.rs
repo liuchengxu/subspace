@@ -15,6 +15,7 @@ use sp_domains::fraud_proof::{ExecutionPhase, FraudProof, InvalidStateTransition
 use sp_domains::DomainId;
 use sp_runtime::generic::{Digest, DigestItem};
 use sp_runtime::traits::{BlakeTwo256, Header as HeaderT};
+use std::sync::Arc;
 use subspace_runtime_primitives::opaque::Block;
 use tempfile::TempDir;
 

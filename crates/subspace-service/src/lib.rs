@@ -77,6 +77,9 @@ use std::marker::PhantomData;
 use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex};
 use subspace_core_primitives::crypto::kzg::{embedded_kzg_settings, Kzg};
+use subspace_fraud_proof::invalid_state_transition_proof::{
+    InvalidStateTransitionProofVerifier, PrePostStateRootVerifier, SystemDomainExtrinsicsBuilder,
+};
 use subspace_networking::libp2p::multiaddr::Protocol;
 use subspace_networking::libp2p::Multiaddr;
 use subspace_networking::{peer_id, Node};
@@ -130,20 +133,17 @@ pub type FullBackend = sc_service::TFullBackend<Block>;
 pub type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 pub type InvalidStateTransitionProofVerifier<RuntimeApi, ExecutorDispatch> =
-    subspace_fraud_proof::InvalidStateTransitionProofVerifier<
+    InvalidStateTransitionProofVerifier<
         Block,
         FullClient<RuntimeApi, ExecutorDispatch>,
         NativeElseWasmExecutor<ExecutorDispatch>,
         SpawnTaskHandle,
         Hash,
-        subspace_fraud_proof::PrePostStateRootVerifier<
-            FullClient<RuntimeApi, ExecutorDispatch>,
-            Block,
-        >,
+        PrePostStateRootVerifier<FullClient<RuntimeApi, ExecutorDispatch>, Block>,
         SystemDomainExtrinsicsBuilder<
             Block,
             FullClient<RuntimeApi, ExecutorDispatch>,
-            WasmExecutor<ExecutorDispatch>,
+            NativeElseWasmExecutor<ExecutorDispatch>,
         >,
     >;
 
@@ -151,63 +151,6 @@ pub type FraudProofVerifier<RuntimeApi, ExecutorDispatch> = subspace_fraud_proof
     Block,
     InvalidStateTransitionProofVerifier<RuntimeApi, ExecutorDispatch>,
 >;
-
-struct SystemDomainExtrinsicsBuilder<PBlock, PClient, Executor> {
-    primary_chain_client: Arc<PClient>,
-    wasm_executor: Arc<Executor>,
-    _phantom: PhantomData<PBlock>,
-}
-
-impl<PBlock, PClient, Executor> SystemDomainExtrinsicsBuilder<PBlock, PClient, Executor>
-where
-    PBlock: BlockT,
-    PClient: BlockBackend<PBlock>,
-    Executor: CodeExecutor + sc_executor::RuntimeVersionOf,
-{
-    pub fn new(primary_chain_client: Arc<PClient>, wasm_executor: Executor) -> Self {
-        Self {
-            primary_chain_client,
-            wasm_executor: Arc::new(wasm_executor),
-            _phantom: Default::default(),
-        }
-    }
-
-    fn build_domain_extrinsics(
-        &self,
-        primary_hash: PBlock::Hash,
-        runtime_code: Vec<u8>,
-    ) -> sp_blockchain::Result<Vec<Vec<u8>>> {
-        let system_runtime_api_light =
-            domain_block_preprocessor::runtime_api_light::RuntimeApiLight::new(
-                self.wasm_executor.clone(),
-                runtime_code.into(),
-            );
-        let system_domain_block_preprocessor =
-            domain_block_preprocessor::SystemDomainBlockPreprocessor::new(
-                self.primary_chain_client.clone(),
-                system_runtime_api_light,
-            );
-        let domain_extrinsics = system_domain_block_preprocessor
-            .preprocess_primary_block(primary_hash, Default::default())?;
-        Ok(domain_extrinsics.into_iter().map(|ext| ext.encode()))
-    }
-}
-
-impl<PBlock, PClient, Executor> subspace_fraud_proof::BuildDomainExtrinsics<PBlock>
-    for SystemDomainExtrinsicsBuilder<PBlock, PClient, Executor>
-where
-    PBlock: BlockT,
-    PClient: BlockBackend<PBlock>,
-    Executor: CodeExecutor + sc_executor::RuntimeVersionOf,
-{
-    fn build_domain_extrinsics(
-        &self,
-        primary_hash: <PBlock as BlockT>::Hash,
-        domain_runtime: Vec<u8>,
-    ) -> sp_blockchain::Result<Vec<Vec<u8>>> {
-        self.build_domain_extrinsics(primary_hash, domain_runtime)
-    }
-}
 
 /// Subspace networking instantiation variant
 #[derive(Debug, Clone)]
@@ -363,21 +306,13 @@ where
 
     let bundle_validator = BundleValidator::new(client.clone());
 
-    let wasm_executor = WasmExecutor::new(
-        sc_executor::WasmExecutionMethod::default(),
-        None,
-        8,
-        None,
-        8,
-    );
-
     let proof_verifier = subspace_fraud_proof::ProofVerifier::new(Arc::new(
-        subspace_fraud_proof::InvalidStateTransitionProofVerifier::new(
+        InvalidStateTransitionProofVerifier::new(
             client.clone(),
-            executor,
+            executor.clone(),
             task_manager.spawn_handle(),
-            subspace_fraud_proof::PrePostStateRootVerifier::new(client.clone()),
-            SystemDomainExtrinsicsBuilder::new(client.clone(), wasm_executor),
+            PrePostStateRootVerifier::new(client.clone()),
+            SystemDomainExtrinsicsBuilder::new(client.clone(), Arc::new(executor)),
         ),
     ));
     let tx_pre_validator = PrimaryChainTxPreValidator::new(

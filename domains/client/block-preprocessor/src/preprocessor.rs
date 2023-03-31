@@ -314,6 +314,18 @@ where
         Ok(extrinsics)
     }
 
+    pub fn preprocess_primary_block_for_verifier(
+        &self,
+        primary_hash: PBlock::Hash,
+        domain_hash: Block::Hash,
+    ) -> sp_blockchain::Result<Vec<Vec<u8>>> {
+        Ok(self
+            .preprocess_primary_block(primary_hash, domain_hash)?
+            .into_iter()
+            .map(|ext| ext.encode())
+            .collect())
+    }
+
     fn filter_invalid_xdm_extrinsics(
         &self,
         at: Block::Hash,
