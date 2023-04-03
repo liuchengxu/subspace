@@ -166,6 +166,7 @@ impl MockPrimaryNode {
 
         let (slot_acknowledgement_sender, mut slot_acknowledgement_receiver) = mpsc::channel(0);
 
+        tracing::info!("=========== Sending slot notifications to the subscribers");
         // Must drop `slot_acknowledgement_sender` after the notification otherwise the receiver
         // will block forever as there is still a sender not closed.
         {
@@ -178,9 +179,13 @@ impl MockPrimaryNode {
                 .retain(|subscriber| subscriber.unbounded_send(value.clone()).is_ok());
         }
 
+        tracing::info!("=========== Waiting for acks from the slot handlers");
+
         while (slot_acknowledgement_receiver.next().await).is_some() {
             // Wait for all the acknowledgements to progress.
         }
+
+        tracing::info!("=========== Slot produced");
 
         slot
     }
