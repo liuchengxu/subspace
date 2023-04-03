@@ -44,9 +44,11 @@ pub(crate) async fn handle_slot_notifications<Block, PBlock, PClient, BundlerFn>
             tracing::error!(?error, "Failed to submit bundle");
             break;
         }
+        tracing::info!("==================== Bundle has been submitted, sending ack");
         if let Some(mut sender) = slot_acknowledgement_sender {
             let _ = sender.send(()).await;
         }
+        tracing::info!("==================== Bundle has been submitted, ack sent");
     }
 }
 
