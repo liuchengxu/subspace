@@ -72,6 +72,7 @@ pub struct MockPrimaryNode {
         MockBlockImport<BoxBlockImport<Block, TransactionFor<Client, Block>>, Client, Block>,
     /// Mock subspace solution used to mock the subspace `PreDigest`
     mock_solution: Solution<FarmerPublicKey, AccountId>,
+    log_prefix: &'static str,
 }
 
 impl MockPrimaryNode {
@@ -81,6 +82,7 @@ impl MockPrimaryNode {
         key: Sr25519Keyring,
         base_path: BasePath,
     ) -> MockPrimaryNode {
+        let log_prefix = key.into();
         let config = node_config(tokio_handle, key, vec![], false, false, false, base_path);
 
         let executor = NativeElseWasmExecutor::<TestExecutorDispatch>::new(
@@ -90,7 +92,7 @@ impl MockPrimaryNode {
             config.runtime_cache_size,
         );
 
-        let (client, backend, _, task_manager) =
+        let (client, backend, keystore_container, task_manager) =
             sc_service::new_full_parts::<Block, RuntimeApi, _>(&config, None, executor.clone())
                 .expect("Fail to new full parts");
 
@@ -141,6 +143,47 @@ impl MockPrimaryNode {
             gs
         };
 
+        // Spawn informant task
+        // task_manager.spawn_handle().spawn(
+        // "informant",
+        // None,
+        // sc_informant::build(client.clone(), NoNetwork, config.informant_output_format),
+        // );
+
+        // let import_queue = sc_consensus::BasicQueue::new(
+        // (),
+        // block_import,
+        // None,
+        // &task_manager.spawn_essential_handle(),
+        // None,
+        // );
+
+        // let (network_service, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
+        // sc_service::build_network(sc_service::BuildNetworkParams {
+        // config: &config,
+        // client: client.clone(),
+        // transaction_pool: transaction_pool.clone(),
+        // spawn_handle: task_manager.spawn_handle(),
+        // import_queue,
+        // block_announce_validator_builder: None,
+        // warp_sync_params: None,
+        // })?;
+
+        // let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
+        // network: network_service.clone(),
+        // client: client.clone(),
+        // keystore: keystore_container.keystore(),
+        // task_manager: &mut task_manager,
+        // transaction_pool: transaction_pool.clone(),
+        // rpc_builder: Box::new(|_, _| Ok(jsonrpsee::RpcModule::new(()))),
+        // backend: backend.clone(),
+        // system_rpc_tx,
+        // config: config.into(),
+        // telemetry: None,
+        // tx_handler_controller,
+        // sync_service: sync_service.clone(),
+        // })?;
+
         MockPrimaryNode {
             task_manager,
             client,
@@ -152,6 +195,7 @@ impl MockPrimaryNode {
             new_slot_notification_subscribers: Vec::new(),
             block_import,
             mock_solution,
+            log_prefix,
         }
     }
 
@@ -163,6 +207,12 @@ impl MockPrimaryNode {
     /// Return the next slot number
     pub fn next_slot(&self) -> u64 {
         self.next_slot
+    }
+
+    pub fn produce_slot_only(&mut self) -> Slot {
+        let slot = Slot::from(self.next_slot);
+        self.next_slot += 1;
+        slot
     }
 
     /// Produce a slot and wait for the acknowledgement of all the slot notification subscribers
@@ -317,8 +367,10 @@ impl MockPrimaryNode {
         &mut self,
         block: Block,
         storage_changes: Option<StorageChanges>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<<Block as BlockT>::Hash, Box<dyn Error>> {
         let (header, body) = block.deconstruct();
+        let number = *header.number();
+        let hash = header.hash();
         let block_import_params = {
             let mut import_block = BlockImportParams::new(BlockOrigin::Own, header);
             import_block.body = Some(body);
@@ -334,13 +386,20 @@ impl MockPrimaryNode {
         let import_result = self.block_import.import_block(block_import_params).await?;
 
         match import_result {
-            ImportResult::Imported(_) | ImportResult::AlreadyInChain => Ok(()),
+            ImportResult::Imported(_) => {
+                tracing::info!("Imported #{number}, {hash}");
+                Ok(hash)
+            }
+            ImportResult::AlreadyInChain => Ok(hash),
             bad_res => Err(format!("Fail to import block due to {bad_res:?}").into()),
         }
     }
 
     /// Produce block based on the current best block and the extrinsics in pool
-    pub async fn produce_block_with_slot(&mut self, slot: Slot) -> Result<(), Box<dyn Error>> {
+    pub async fn produce_block_with_slot(
+        &mut self,
+        slot: Slot,
+    ) -> Result<<Block as BlockT>::Hash, Box<dyn Error>> {
         let block_timer = time::Instant::now();
 
         let parent_hash = self.client.info().best_hash;
@@ -351,7 +410,7 @@ impl MockPrimaryNode {
         let (block, storage_changes) = self.build_block(slot, parent_hash, extrinsics).await?;
 
         tracing::info!(
-			"🎁 Prepared block for proposing at {} ({} ms) [hash: {:?}; parent_hash: {}; extrinsics ({}): [{}]]",
+			"🎁 Prepared block for proposing at #{} ({} ms) [hash: {:?}; parent_hash: {}; extrinsics ({}): [{}]]",
 			block.header().number(),
 			block_timer.elapsed().as_millis(),
 			block.header().hash(),
@@ -364,12 +423,42 @@ impl MockPrimaryNode {
 				.join(", ")
 		);
 
-        self.import_block(block, Some(storage_changes)).await?;
+        self.import_block(block, Some(storage_changes)).await
+    }
 
-        Ok(())
+    #[sc_tracing::logging::prefix_logs_with(self.log_prefix)]
+    pub async fn produce_block_with_slot_at(
+        &mut self,
+        slot: Slot,
+        parent_hash: <Block as BlockT>::Hash,
+        parent_number: NumberFor<Block>,
+    ) -> Result<<Block as BlockT>::Hash, Box<dyn Error>> {
+        let block_timer = time::Instant::now();
+
+        // let extrinsics = self.collect_txn_from_pool(parent_number).await;
+        let extrinsics = vec![];
+
+        let (block, storage_changes) = self.build_block(slot, parent_hash, extrinsics).await?;
+
+        tracing::info!(
+			"🎁 Prepared block for proposing at #{} ({} ms) [hash: {:?}; parent_hash: {}; extrinsics ({}): [{}]]",
+			block.header().number(),
+			block_timer.elapsed().as_millis(),
+			block.header().hash(),
+			block.header().parent_hash(),
+			block.extrinsics().len(),
+			block.extrinsics()
+				.iter()
+				.map(|xt| BlakeTwo256::hash_of(xt).to_string())
+				.collect::<Vec<_>>()
+				.join(", ")
+		);
+
+        self.import_block(block, Some(storage_changes)).await
     }
 
     /// Produce `n` number of blocks.
+    #[sc_tracing::logging::prefix_logs_with(self.log_prefix)]
     pub async fn produce_blocks(&mut self, n: u64) -> Result<(), Box<dyn Error>> {
         for _ in 0..n {
             let slot = self.produce_slot_and_wait_for_bundle_submission().await;

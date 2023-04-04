@@ -27,6 +27,122 @@ use subspace_wasm_tools::read_core_domain_runtime_blob;
 use tempfile::TempDir;
 
 #[substrate_test_utils::test(flavor = "multi_thread")]
+async fn collect_receipts_under_primary_chain_forks() {
+    let directory = TempDir::new().expect("Must be able to create temporary directory");
+
+    let mut builder = sc_cli::LoggerBuilder::new("domain_client_executor=trace,runtime=debug");
+    builder.with_colors(false);
+    let _ = builder.init();
+
+    let tokio_handle = tokio::runtime::Handle::current();
+
+    // Start Ferdie
+    let mut primary_node = MockPrimaryNode::run_mock_primary_node(
+        tokio_handle.clone(),
+        Ferdie,
+        BasePath::new(directory.path().join("ferdie")),
+    );
+
+    // Run Alice (a system domain authority node)
+    let executor_authority = domain_test_service::SystemDomainNodeBuilder::new(
+        tokio_handle.clone(),
+        Alice,
+        BasePath::new(directory.path().join("alice")),
+    )
+    .build_with_mock_primary_node(Role::Authority, &mut primary_node)
+    .await;
+
+    futures::join!(
+        executor_authority.wait_for_blocks(3),
+        primary_node.produce_blocks(3),
+    )
+    .1
+    .expect("Primary blocks produced successfully");
+
+    let best_primary_hash = primary_node.client.info().best_hash;
+    let best_primary_number = primary_node.client.info().best_number;
+    let best_header = primary_node
+        .client
+        .header(best_primary_hash)
+        .unwrap()
+        .unwrap();
+    let parent_hash = *best_header.parent_hash();
+
+    let slot = primary_node
+        .produce_slot_and_wait_for_bundle_submission()
+        .await;
+    assert!(primary_node.is_bundle_present_in_tx_pool(slot.into(), executor_authority.key));
+
+    println!("================ Produce fork block1");
+    primary_node
+        .produce_block_with_slot_at(slot, parent_hash, best_primary_number - 1)
+        .await
+        .unwrap();
+    println!(
+        "================ primary hash at #{best_primary_number}: {:?}",
+        primary_node.client.hash(best_primary_number).unwrap()
+    );
+
+    println!("================ Produce fork block2");
+    let slot = primary_node
+        .produce_slot_and_wait_for_bundle_submission()
+        .await;
+    assert!(primary_node.is_bundle_present_in_tx_pool(slot.into(), executor_authority.key));
+    let new_best_primary_hash = primary_node
+        .produce_block_with_slot_at(slot, parent_hash, best_primary_number - 1)
+        .await
+        .unwrap();
+    println!(
+        "================ primary hash at #{best_primary_number}: {:?}",
+        primary_node.client.hash(best_primary_number).unwrap()
+    );
+
+    println!("================ Produce fork block3");
+    let slot = primary_node
+        .produce_slot_and_wait_for_bundle_submission()
+        .await;
+    assert!(primary_node.is_bundle_present_in_tx_pool(slot.into(), executor_authority.key));
+    primary_node
+        .produce_block_with_slot_at(slot, parent_hash, best_primary_number - 1)
+        .await
+        .unwrap();
+    println!(
+        "================ primary hash at #{best_primary_number}: {:?}",
+        primary_node.client.hash(best_primary_number).unwrap()
+    );
+
+    println!("====================== produce a new block on top of #{best_primary_number}, {new_best_primary_hash}");
+    primary_node
+        .produce_block_with_slot_at(slot, new_best_primary_hash, best_primary_number)
+        .await
+        .unwrap();
+
+    println!(
+        "================ primary hash at #{best_primary_number}: {:?}",
+        primary_node.client.hash(best_primary_number).unwrap()
+    );
+
+    let slot = primary_node.produce_slot_only();
+    futures::future::join(
+        executor_authority.wait_for_blocks(1),
+        primary_node.produce_block_with_slot(slot),
+    )
+    .await
+    .1
+    .unwrap();
+
+    let slot = primary_node
+        .produce_slot_and_wait_for_bundle_submission()
+        .await;
+    assert!(primary_node.is_bundle_present_in_tx_pool(slot.into(), executor_authority.key));
+
+    let slot = primary_node
+        .produce_slot_and_wait_for_bundle_submission()
+        .await;
+    assert!(primary_node.is_bundle_present_in_tx_pool(slot.into(), executor_authority.key));
+}
+
+#[substrate_test_utils::test(flavor = "multi_thread")]
 // TODO: Un-ignore when fixed, see https://github.com/subspace/subspace/pull/1347 for details
 #[ignore]
 async fn test_executor_full_node_catching_up() {

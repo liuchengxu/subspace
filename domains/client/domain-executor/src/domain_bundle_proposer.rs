@@ -144,7 +144,7 @@ where
             ?header_number,
             ?head_receipt_number,
             ?max_drift,
-            "Collecting receipts at {parent_chain_block_hash:?}"
+            "Collecting receipts at parent chain block hash {parent_chain_block_hash}"
         );
 
         let load_receipt = |block_hash| {
@@ -162,10 +162,17 @@ where
         let mut receipts = Vec::new();
         let mut to_send = head_receipt_number + 1;
         let max_allowed = (head_receipt_number + max_drift).min(to_number_primitive(header_number));
+        println!(
+            "=============== current domain best hash: #{},{}",
+            self.client.info().best_number,
+            self.client.info().best_hash
+        );
         loop {
             let block_hash = self.client.hash(to_send.into())?.ok_or_else(|| {
                 sp_blockchain::Error::Backend(format!("Hash for Block {to_send:?} not found"))
             })?;
+            println!("========= loading receipt from #{to_send}, {block_hash:?}");
+
             receipts.push(load_receipt(block_hash)?);
             to_send += 1;
 
