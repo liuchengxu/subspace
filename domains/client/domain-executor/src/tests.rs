@@ -107,19 +107,21 @@ async fn collected_receipts_should_be_on_the_same_branch_with_current_best_block
     //   \
     //     3b - 4
     let slot = primary_node.produce_slot();
-    let fork_block_hash_3a = primary_node
-        .produce_block_with_slot_at(slot, parent_hash, Some(vec![]))
-        .await
-        .expect("Produced first fork block 3a at height #3");
+    let fork_block_hash_3a = futures::join!(
+        alice.wait_for_blocks(1),
+        primary_node.produce_block_with_slot_at(slot, parent_hash, Some(vec![]))
+    )
+    .1
+    .expect("Produced first fork block 3a at height #3");
     // A fork block 3a at #3 produced.
     assert_eq!(number_of(&primary_node, fork_block_hash_3a), 3);
     assert_ne!(fork_block_hash_3a, best_primary_hash);
-    // Best hash unchanged.
-    assert_eq!(primary_node.client.info().best_hash, best_primary_hash);
-    // Hash of block number #3 unchanged.
+    // Best hash is updated to 3a because the fork block 3a is created on a larger slot.
+    assert_eq!(primary_node.client.info().best_hash, fork_block_hash_3a);
+    // Hash of block number #3 is updated to 3a.
     assert_eq!(
         primary_node.client.hash(3).unwrap().unwrap(),
-        best_primary_hash
+        fork_block_hash_3a
     );
 
     let receipts_primary_info =
@@ -148,19 +150,21 @@ async fn collected_receipts_should_be_on_the_same_branch_with_current_best_block
         .for_each(|(a, b)| assert_eq!(a, b));
 
     let slot = primary_node.produce_slot();
-    let fork_block_hash_3b = primary_node
-        .produce_block_with_slot_at(slot, parent_hash, Some(vec![]))
-        .await
-        .expect("Produced second fork block 3b at height #3");
+    let fork_block_hash_3b = futures::join!(
+        alice.wait_for_blocks(1),
+        primary_node.produce_block_with_slot_at(slot, parent_hash, Some(vec![]))
+    )
+    .1
+    .expect("Produced second fork block 3b at height #3");
     // Another fork block 3b at #3 produced,
     assert_eq!(number_of(&primary_node, fork_block_hash_3b), 3);
     assert_ne!(fork_block_hash_3b, best_primary_hash);
-    // Best hash unchanged.
-    assert_eq!(primary_node.client.info().best_hash, best_primary_hash);
-    // Hash of block number #3 unchanged.
+    // Best hash is updated to 3b because the fork block 3b has a larger slot.
+    assert_eq!(primary_node.client.info().best_hash, fork_block_hash_3b);
+    // Hash of block number #3 is updated to 3b.
     assert_eq!(
         primary_node.client.hash(3).unwrap().unwrap(),
-        best_primary_hash
+        fork_block_hash_3b
     );
 
     // Produce a bundle after the fork block #3b has been produced.
@@ -175,24 +179,24 @@ async fn collected_receipts_should_be_on_the_same_branch_with_current_best_block
     let slot = primary_node.produce_slot();
     futures::join!(
         alice.wait_for_blocks(1),
-        primary_node.produce_block_with_slot_at(slot, fork_block_hash_3b, Some(vec![])),
+        primary_node.produce_block_with_slot_at(slot, fork_block_hash_3a, Some(vec![])),
     )
     .1
-    .expect("Produce a new block on top of the second fork block at height #3");
+    .expect("Produce a new block on top of the first fork block at height #3");
     let new_best_hash = primary_node.client.info().best_hash;
     let new_best_number = primary_node.client.info().best_number;
     assert_eq!(new_best_number, 4);
     assert_eq!(alice.client.info().best_number, 4);
 
-    // Hash of block number #3 is updated to the second fork block 3b.
+    // Hash of block number #3 is updated to the first fork block 3a.
     assert_eq!(
         primary_node.client.hash(3).unwrap().unwrap(),
-        fork_block_hash_3b
+        fork_block_hash_3a
     );
 
     let new_best_header = primary_node.client.header(new_best_hash).unwrap().unwrap();
 
-    assert_eq!(*new_best_header.parent_hash(), fork_block_hash_3b);
+    assert_eq!(*new_best_header.parent_hash(), fork_block_hash_3a);
 
     // Produce a bundle after the new block #4 has been produced.
     let (_slot, signed_bundle) = primary_node

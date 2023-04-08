@@ -489,7 +489,28 @@ where
         mut block: BlockImportParams<Block, Self::Transaction>,
     ) -> Result<ImportResult, Self::Error> {
         let block_number = *block.header.number();
-        block.fork_choice = Some(ForkChoiceStrategy::LongestChain);
+
+        let parent_header = self
+            .client
+            .header(*block.header.parent_hash())
+            .expect("Parent header must exist")
+            .expect("Parent header must exist");
+
+        let find_slot = |header: &Block::Header| {
+            header
+                .digest()
+                .logs()
+                .iter()
+                .find_map(|log| log.as_subspace_pre_digest::<AccountId>())
+                .map(|pre_digest| pre_digest.slot)
+        };
+
+        let parent_slot = find_slot(&parent_header).unwrap_or_default();
+
+        let slot =
+            find_slot(&block.header).expect("Subspace PreDigest must exist except for genesis");
+
+        block.fork_choice = Some(ForkChoiceStrategy::Custom(slot > parent_slot));
 
         let import_result = self.inner.import_block(block).await?;
         let (acknowledgement_sender, mut acknowledgement_receiver) = mpsc::channel(0);
