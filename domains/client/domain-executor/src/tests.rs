@@ -60,7 +60,7 @@ fn number_hash_mappings_from_head_receipt_number_to_best_header(
 #[substrate_test_utils::test(flavor = "multi_thread")]
 async fn collected_receipts_should_be_on_the_same_branch_with_current_best_block() {
     let directory = TempDir::new().expect("Must be able to create temporary directory");
-    let _ = sc_cli::LoggerBuilder::new("runtime=debug").init();
+    let _ = sc_cli::LoggerBuilder::new("domain_client_executor=trace,runtime=debug").init();
     let tokio_handle = tokio::runtime::Handle::current();
 
     // Start Ferdie
