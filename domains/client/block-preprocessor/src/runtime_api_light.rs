@@ -56,6 +56,7 @@ where
         params: Vec<u8>,
         fn_name: &dyn Fn(RuntimeVersion) -> &'static str,
     ) -> Result<Vec<u8>, ApiError> {
+        // TODO: dispatch with storage
         self.dispatch_call(fn_name, params)
     }
 }

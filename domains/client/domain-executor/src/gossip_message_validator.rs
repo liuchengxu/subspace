@@ -2,6 +2,7 @@ use crate::fraud_proof::{find_trace_mismatch, FraudProofError, FraudProofGenerat
 use crate::parent_chain::ParentChainInterface;
 use crate::utils::to_number_primitive;
 use crate::{ExecutionReceiptFor, TransactionFor};
+use domain_runtime_primitives::{AccountId, CheckTransactionFeeError, DomainCoreApi};
 use futures::FutureExt;
 use sc_client_api::{AuxStore, BlockBackend, ProofProvider, StateBackendFor};
 use sp_api::ProvideRuntimeApi;
@@ -138,7 +139,8 @@ where
         + ProvideRuntimeApi<Block>
         + ProofProvider<Block>
         + 'static,
-    Client::Api: sp_block_builder::BlockBuilder<Block>
+    Client::Api: DomainCoreApi<Block, AccountId>
+        + sp_block_builder::BlockBuilder<Block>
         + sp_api::ApiExt<Block, StateBackend = StateBackendFor<Backend, Block>>,
     PClient: HeaderBackend<PBlock> + 'static,
     Backend: sc_client_api::Backend<Block> + 'static,
@@ -207,6 +209,7 @@ where
         &self,
         extrinsics: &[Block::Extrinsic],
         domain_id: DomainId,
+        at: Block::Hash,
     ) -> Result<(), GossipMessageError> {
         for extrinsic in extrinsics {
             let tx_hash = self.transaction_pool.hash_of(extrinsic);
@@ -216,7 +219,21 @@ where
             } else {
                 // TODO: check the legality
                 //
-                // if illegal => illegal tx proof
+                // 1. Calculate the fee of each extrinsic via `compute_fee()`.
+                // 2. Check whether the balance is sufficient.
+                // 3. If not, create an invali transaction proof.
+
+                if let Err(err) = self
+                    .client
+                    .runtime_api()
+                    .check_transaction_fee(at, extrinsic.clone())?
+                {
+                    // Generate an invalid transaction proof.
+                    //
+                    // User balance key
+                    // transaction peyment multipler storage
+                }
+
                 let invalid_transaction_proof = InvalidTransactionProof { domain_id };
                 let fraud_proof =
                     FraudProof::<ParentChainBlock>::InvalidTransaction(invalid_transaction_proof);
