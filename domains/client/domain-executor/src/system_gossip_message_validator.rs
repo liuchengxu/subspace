@@ -134,7 +134,8 @@ where
         + AuxStore
         + ProofProvider<Block>
         + 'static,
-    Client::Api: SystemDomainApi<Block, NumberFor<PBlock>, PBlock::Hash>
+    Client::Api: DomainCoreApi<Block, AccountId>
+        + SystemDomainApi<Block, NumberFor<PBlock>, PBlock::Hash>
         + sp_block_builder::BlockBuilder<Block>
         + sp_api::ApiExt<Block, StateBackend = StateBackendFor<Backend, Block>>,
     Backend: sc_client_api::Backend<Block> + 'static,

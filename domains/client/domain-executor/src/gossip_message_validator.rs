@@ -2,7 +2,7 @@ use crate::fraud_proof::{find_trace_mismatch, FraudProofError, FraudProofGenerat
 use crate::parent_chain::ParentChainInterface;
 use crate::utils::to_number_primitive;
 use crate::{ExecutionReceiptFor, TransactionFor};
-use domain_runtime_primitives::{AccountId, CheckTransactionFeeError, DomainCoreApi};
+use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use futures::FutureExt;
 use sc_client_api::{AuxStore, BlockBackend, ProofProvider, StateBackendFor};
 use sp_api::ProvideRuntimeApi;
@@ -223,7 +223,7 @@ where
                 // 2. Check whether the balance is sufficient.
                 // 3. If not, create an invali transaction proof.
 
-                if let Err(err) = self
+                if let Err(_err) = self
                     .client
                     .runtime_api()
                     .check_transaction_fee(at, extrinsic.clone())?
