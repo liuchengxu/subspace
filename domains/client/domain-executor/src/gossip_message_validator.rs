@@ -1,6 +1,6 @@
 use crate::fraud_proof::{find_trace_mismatch, FraudProofError, FraudProofGenerator};
 use crate::parent_chain::ParentChainInterface;
-use crate::utils::to_number_primitive;
+use crate::utils::{to_number_primitive, translate_number_type};
 use crate::{ExecutionReceiptFor, TransactionFor};
 use domain_runtime_primitives::{AccountId, DomainCoreApi};
 use futures::FutureExt;
@@ -211,30 +211,42 @@ where
         domain_id: DomainId,
         at: Block::Hash,
     ) -> Result<(), GossipMessageError> {
-        for extrinsic in extrinsics {
+        let block_number = self
+            .client
+            .number(at)?
+            .ok_or_else(|| sp_blockchain::Error::Backend(format!("Header for #{at} not found")))?;
+
+        for (index, extrinsic) in extrinsics.iter().enumerate() {
             let tx_hash = self.transaction_pool.hash_of(extrinsic);
 
             if self.transaction_pool.ready_transaction(&tx_hash).is_some() {
                 // TODO: Set the status of each tx in the bundle to seen
-            } else {
-                // TODO: check the legality
-                //
-                // 1. Calculate the fee of each extrinsic via `compute_fee()`.
-                // 2. Check whether the balance is sufficient.
-                // 3. If not, create an invali transaction proof.
-
-                if let Err(_err) = self
+            } else if let Err(_err) = self
+                .client
+                .runtime_api()
+                .check_transaction_fee(at, extrinsic.clone())?
+            {
+                // TODO: return the storage keys for the sender.
+                let storage_keys: Vec<Vec<u8>> =
+                    vec![b"System Account sender, TransactionPayment Multiplier".to_vec()];
+                let storage_proof = self
                     .client
-                    .runtime_api()
-                    .check_transaction_fee(at, extrinsic.clone())?
-                {
-                    // Generate an invalid transaction proof.
-                    //
-                    // User balance key
-                    // transaction peyment multipler storage
-                }
+                    .read_proof(at, &mut storage_keys.iter().map(|s| s.as_slice()))?;
 
-                let invalid_transaction_proof = InvalidTransactionProof { domain_id };
+                let block_number = translate_number_type::<
+                    NumberFor<Block>,
+                    NumberFor<ParentChainBlock>,
+                >(block_number);
+
+                let invalid_transaction_proof = InvalidTransactionProof {
+                    domain_id,
+                    block_number: to_number_primitive(block_number),
+                    extrinsic_index: index
+                        .try_into()
+                        .expect("Extrinsic index must fit into u32; qed"),
+                    storage_proof,
+                };
+
                 let fraud_proof =
                     FraudProof::<ParentChainBlock>::InvalidTransaction(invalid_transaction_proof);
 
