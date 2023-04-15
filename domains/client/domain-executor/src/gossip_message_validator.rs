@@ -2,7 +2,7 @@ use crate::fraud_proof::{find_trace_mismatch, FraudProofError, FraudProofGenerat
 use crate::parent_chain::ParentChainInterface;
 use crate::utils::{to_number_primitive, translate_number_type};
 use crate::{ExecutionReceiptFor, TransactionFor};
-use domain_runtime_primitives::{AccountId, DomainCoreApi};
+use domain_runtime_primitives::{AccountId, CheckTransactionFeeError, DomainCoreApi};
 use futures::FutureExt;
 use sc_client_api::{AuxStore, BlockBackend, ProofProvider, StateBackendFor};
 use sp_api::ProvideRuntimeApi;
@@ -221,14 +221,21 @@ where
 
             if self.transaction_pool.ready_transaction(&tx_hash).is_some() {
                 // TODO: Set the status of each tx in the bundle to seen
-            } else if let Err(_err) = self
+            } else if let Err(transaction_fee_err) = self
                 .client
                 .runtime_api()
                 .check_transaction_fee(at, extrinsic.clone())?
             {
-                // TODO: return the storage keys for the sender.
-                let storage_keys: Vec<Vec<u8>> =
-                    vec![b"System Account sender, TransactionPayment Multiplier".to_vec()];
+                let storage_keys = match transaction_fee_err {
+                    CheckTransactionFeeError::Lookup => Default::default(),
+                    CheckTransactionFeeError::DispatchError {
+                        error,
+                        storage_keys,
+                    } => {
+                        tracing::debug!(?extrinsic, ?error, "Invalid transaction");
+                        storage_keys
+                    }
+                };
                 let storage_proof = self
                     .client
                     .read_proof(at, &mut storage_keys.iter().map(|s| s.as_slice()))?;
