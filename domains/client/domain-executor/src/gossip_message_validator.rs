@@ -245,9 +245,11 @@ where
                     NumberFor<ParentChainBlock>,
                 >(block_number);
 
+                use codec::{Decode, Encode};
                 let invalid_transaction_proof = InvalidTransactionProof {
                     domain_id,
                     block_number: to_number_primitive(block_number),
+                    domain_block_hash: sp_core::H256::decode(&mut at.encode().as_slice()).unwrap(),
                     extrinsic_index: index
                         .try_into()
                         .expect("Extrinsic index must fit into u32; qed"),

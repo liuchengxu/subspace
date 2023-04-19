@@ -3,7 +3,8 @@
 use crate::domain_extrinsics_builder::BuildDomainExtrinsics;
 use codec::{Decode, Encode};
 use domain_block_preprocessor::runtime_api_light::RuntimeApiLight;
-use domain_runtime_primitives::DomainCoreApi;
+use domain_runtime_primitives::opaque::Block;
+use domain_runtime_primitives::{AccountId, Balance, DomainCoreApi, Index};
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_core::traits::CodeExecutor;
@@ -25,6 +26,14 @@ pub trait GetPrimaryHash {
         domain_id: DomainId,
         domain_block_number: u32,
     ) -> Result<H256, VerificationError>;
+
+    // TODO: retrieve from ReceiptsApi
+    fn state_root(
+        &self,
+        domain_id: DomainId,
+        domain_block_number: u32,
+        domain_block_hash: H256,
+    ) -> Option<domain_runtime_primitives::Hash>;
 }
 
 /// Invalid transaction proof verifier.
@@ -66,6 +75,22 @@ where
         }
     }
 }
+
+struct AccountStorageInstance;
+
+impl frame_support::traits::StorageInstance for AccountStorageInstance {
+    fn pallet_prefix() -> &'static str {
+        "System"
+    }
+    const STORAGE_PREFIX: &'static str = "Account";
+}
+
+type AccountStorageMap = frame_support::storage::types::StorageMap<
+    AccountStorageInstance,
+    frame_support::Blake2_128Concat,
+    AccountId,
+    frame_system::AccountInfo<Index, pallet_balances::AccountData<Balance>>,
+>;
 
 impl<PBlock, Client, Hash, Exec, PrimaryHashProvider, DomainExtrinsicsBuilder>
     InvalidTransactionProofVerifier<
@@ -110,6 +135,7 @@ where
         let InvalidTransactionProof {
             domain_id,
             block_number,
+            domain_block_hash,
             extrinsic_index,
             storage_proof,
         } = invalid_transaction_proof;
@@ -146,54 +172,72 @@ where
             .ok_or(VerificationError::DomainExtrinsicNotFound(*extrinsic_index))?;
 
         // TODO: convert StorageProof into Storage
+        let state_root = self
+            .primary_hash_provider
+            .state_root(*domain_id, *block_number, *domain_block_hash)
+            .expect("Can not fetch state root");
+
         let db = storage_proof.clone().into_memory_db::<BlakeTwo256>();
-        let state_root = H256::default();
         let read_value = |storage_key| {
             read_trie_value::<LayoutV1<BlakeTwo256>, _>(&db, &state_root, storage_key, None, None)
                 .map_err(|_| VerificationError::InvalidStorageProof)
         };
 
-        let next_fee_multiplier_storage_key = b"stoage key".to_vec();
+        // <NextFeeMultiplier<Runtime>>::hashed_key()
+        let next_fee_multiplier_storage_key = [
+            63, 20, 103, 160, 150, 188, 215, 26, 91, 106, 12, 129, 85, 226, 8, 16, 63, 46, 223, 59,
+            223, 56, 29, 235, 227, 49, 171, 116, 70, 173, 223, 220,
+        ];
         let next_fee_multiplier_value = read_value(&next_fee_multiplier_storage_key)?;
 
-        let balance_storage_key = b"storage key".to_vec();
-        let balance_value = read_value(&balance_storage_key)?;
+        // let mut storage = Storage::default();
+        // sp_state_machine::BasicExternalities::execute_with_storage(&mut storage, || {
+        // // TODO: use default value when it's None?
+        // if let Some(value) = next_fee_multiplier_value {
+        // sp_io::storage::set(&next_fee_multiplier_storage_key, &value);
+        // }
+        // if let Some(value) = balance_value {
+        // sp_io::storage::set(&balance_storage_key, &value);
+        // }
+        // Ok::<(), sp_blockchain::Error>(())
+        // })?;
 
-        // let storage = Storage {
-        // top: [
-        // (
-        // next_fee_multiplier_storage_key,
-        // next_fee_multiplier_value.encode(),
-        // ),
-        // (balance_storage_key, balance_value.encode()),
-        // ]
-        // .into_iter()
-        // .collect(),
-        // children_default: Default::default(),
-        // };
+        let mut runtime_api_light =
+            RuntimeApiLight::new(self.executor.clone(), domain_runtime_code.wasm_bundle);
 
-        let mut storage = Storage::default();
-        sp_state_machine::BasicExternalities::execute_with_storage(&mut storage, || {
-            // TODO: use default value when it's None?
-            if let Some(value) = next_fee_multiplier_value {
-                sp_io::storage::set(&next_fee_multiplier_storage_key, &value);
-            }
-            if let Some(value) = balance_value {
-                sp_io::storage::set(&balance_storage_key, &value);
-            }
-            Ok::<(), sp_blockchain::Error>(())
-        })?;
+        let sender =
+            <RuntimeApiLight<Exec> as DomainCoreApi<Block, AccountId, Balance>>::extract_signer(
+                &runtime_api_light,
+                Default::default(),
+                vec![OpaqueExtrinsic::from_bytes(&extrinsic)?],
+            )?
+            .into_iter()
+            .next()
+            .and_then(|(maybe_signer, _)| maybe_signer)
+            .ok_or(VerificationError::SignerNotFound)?;
 
-        let runtime_api_light = RuntimeApiLight::new(
-            self.executor.clone(),
-            domain_runtime_code.wasm_bundle,
-            Some(storage),
-        );
+        let account_storage_key = AccountStorageMap::hashed_key_for(sender);
+        let account_value = read_value(&account_storage_key)?;
+
+        let storage = Storage {
+            top: [
+                (
+                    next_fee_multiplier_storage_key.to_vec(),
+                    next_fee_multiplier_value.encode(),
+                ),
+                (account_storage_key, account_value.encode()),
+            ]
+            .into_iter()
+            .collect(),
+            children_default: Default::default(),
+        };
+
+        runtime_api_light.set_storage(storage);
 
         let check_result = <RuntimeApiLight<Exec> as DomainCoreApi<
-            domain_runtime_primitives::opaque::Block,
-            domain_runtime_primitives::AccountId,
-            domain_runtime_primitives::Balance,
+            Block,
+            AccountId,
+            Balance,
         >>::check_transaction_fee(
             &runtime_api_light,
             Default::default(),

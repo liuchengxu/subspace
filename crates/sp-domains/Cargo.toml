@@ -32,6 +32,7 @@ sp-trie = { version = "7.0.0", default-features = false, git = "https://github.c
 subspace-core-primitives = { version = "0.1.0", default-features = false, path = "../subspace-core-primitives" }
 subspace-runtime-primitives = { version = "0.1.0", default-features = false, path = "../subspace-runtime-primitives" }
 thiserror = { version = "1.0.38", optional = true }
+sp-io = { version = "7.0.0", git = "https://github.com/subspace/substrate", rev = "fdb68194ab6995447610b3dbdee70559711dbd63", default-features = false }
 
 [features]
 default = ["std"]
@@ -56,4 +57,5 @@ std = [
 	"subspace-core-primitives/std",
 	"subspace-runtime-primitives/std",
 	"thiserror",
+	"sp-io/std",
 ]

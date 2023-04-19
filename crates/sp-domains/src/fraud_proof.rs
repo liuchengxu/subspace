@@ -132,6 +132,12 @@ pub enum VerificationError {
         error("Failed to decode the header from verifying `finalize_block`: {0}")
     )]
     HeaderDecode(parity_scale_codec::Error),
+    /// Can not find the signer from domain extrinsic.
+    #[cfg_attr(
+        feature = "thiserror",
+        error("Can not find the signer from domain extrinsic")
+    )]
+    SignerNotFound,
     /// Sender of transaction has enough balance to pay the transaction fee.
     #[cfg_attr(
         feature = "thiserror",
@@ -266,6 +272,8 @@ pub struct InvalidTransactionProof {
     pub domain_id: DomainId,
     /// Number of the block at which the invalid transaction occurred.
     pub block_number: u32,
+    ///
+    pub domain_block_hash: H256,
     ///
     pub extrinsic_index: u32,
     ///
