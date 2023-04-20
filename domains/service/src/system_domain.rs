@@ -4,7 +4,6 @@ use cross_domain_message_gossip::{DomainTxPoolSink, Message as GossipMessage};
 use domain_client_block_preprocessor::runtime_api_full::RuntimeApiFull;
 use domain_client_executor::{
     EssentialExecutorParams, ExecutorStreams, SystemDomainParentChain, SystemExecutor,
-    SystemGossipMessageValidator,
 };
 use domain_client_executor_gossip::ExecutorGossipParams;
 use domain_client_message_relayer::GossipMessageSink;
@@ -54,6 +53,18 @@ type SystemDomainExecutor<PBlock, PClient, RuntimeApi, ExecutorDispatch> = Syste
     FullBackend<Block>,
     NativeElseWasmExecutor<ExecutorDispatch>,
 >;
+
+type SystemGossipMessageValidator<PBlock, PClient, RuntimeApi, ExecutorDispatch> =
+    domain_client_executor::SystemGossipMessageValidator<
+        Block,
+        PBlock,
+        FullClient<RuntimeApi, ExecutorDispatch>,
+        PClient,
+        FullPool<PBlock, PClient, RuntimeApi, ExecutorDispatch>,
+        FullBackend,
+        NativeElseWasmExecutor<ExecutorDispatch>,
+        SystemDomainParentChain<PClient, Block, PBlock>,
+    >;
 
 /// System domain full node along with some other components.
 pub struct NewFullSystem<C, CodeExecutor, PBlock, PClient, RuntimeApi, ExecutorDispatch>
@@ -107,6 +118,8 @@ where
     pub network_starter: NetworkStarter,
     /// Executor.
     pub executor: SystemDomainExecutor<PBlock, PClient, RuntimeApi, ExecutorDispatch>,
+    pub gossip_message_validator:
+        SystemGossipMessageValidator<PBlock, PClient, RuntimeApi, ExecutorDispatch>,
     /// Transaction pool sink
     pub tx_pool_sink: DomainTxPoolSink,
 }
@@ -439,7 +452,7 @@ where
         domain_client_executor_gossip::start_gossip_worker(ExecutorGossipParams {
             network: network_service.clone(),
             sync: sync_service.clone(),
-            executor: gossip_message_validator,
+            executor: gossip_message_validator.clone(),
             bundle_receiver,
         });
     spawn_essential.spawn_essential_blocking(
@@ -519,6 +532,7 @@ where
         rpc_handlers,
         network_starter,
         executor,
+        gossip_message_validator,
         tx_pool_sink: msg_sender,
     };
 
