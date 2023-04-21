@@ -316,7 +316,7 @@ mod pallet {
                     {
                         log::debug!(
                             target: "runtime::domains",
-                            "Bad fraud proof: {fraud_proof:?}, error: {e:?}",
+                            "Bad fraud proof {:?}, error: {e:?}", fraud_proof.domain_id()
                         );
                         return InvalidTransactionCode::FraudProof.into();
                     }

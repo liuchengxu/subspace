@@ -534,10 +534,14 @@ impl_runtime_apis! {
                 (address.clone(), charge_transaction_payment.tip())
             });
 
+
+            log::info!("============================ maybe_address_and_tip: {maybe_address_and_tip:?}");
+
             if let Some((address, tip)) = maybe_address_and_tip {
                 let len = uxt.encode().len().try_into().expect("Size of extrinsic must fit into u32");
                 let fee = TransactionPayment::query_fee_details(uxt, len).final_fee() + tip;
 
+                log::info!("============================ fee: {fee:?}, address: {address:?}");
                 let sender = <Runtime as frame_system::Config>::Lookup::lookup(address)?;
 
                 let withdraw_reason = if tip.is_zero() {
@@ -545,6 +549,7 @@ impl_runtime_apis! {
                 } else {
                     WithdrawReasons::TRANSACTION_PAYMENT | WithdrawReasons::TIP
                 };
+                log::info!("============================ fee: {fee:?}, sender: {sender:?}, free_balance: {:?}", Balances::free_balance(&sender));
 
                 Balances::withdraw(
                     &sender,

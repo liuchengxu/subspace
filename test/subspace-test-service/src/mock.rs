@@ -111,15 +111,32 @@ impl MockPrimaryNode {
 
         let mut bundle_validator = BundleValidator::new(client.clone());
 
-        let proof_verifier = subspace_fraud_proof::ProofVerifier::new(Arc::new(
-            InvalidStateTransitionProofVerifier::new(
-                client.clone(),
-                executor.clone(),
-                task_manager.spawn_handle(),
-                PrePostStateRootVerifier::new(client.clone()),
-                SystemDomainExtrinsicsBuilder::new(client.clone(), Arc::new(executor.clone())),
-            ),
-        ));
+        let domain_extrinsics_builder =
+            SystemDomainExtrinsicsBuilder::new(client.clone(), Arc::new(executor.clone()));
+
+        use subspace_fraud_proof::invalid_transaction_proof::{
+            InvalidTransactionProofVerifier, ParentChainClient,
+        };
+
+        let invalid_transaction_proof_verifier = InvalidTransactionProofVerifier::new(
+            client.clone(),
+            Arc::new(executor.clone()),
+            ParentChainClient::new(client.clone()),
+            domain_extrinsics_builder.clone(),
+        );
+
+        let invalid_state_transition_proof_verifier = InvalidStateTransitionProofVerifier::new(
+            client.clone(),
+            executor.clone(),
+            task_manager.spawn_handle(),
+            PrePostStateRootVerifier::new(client.clone()),
+            domain_extrinsics_builder,
+        );
+
+        let proof_verifier = subspace_fraud_proof::ProofVerifier::new(
+            Arc::new(invalid_transaction_proof_verifier),
+            Arc::new(invalid_state_transition_proof_verifier),
+        );
         let tx_pre_validator = PrimaryChainTxPreValidator::new(
             client.clone(),
             Box::new(task_manager.spawn_handle()),

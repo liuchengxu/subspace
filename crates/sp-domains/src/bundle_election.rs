@@ -218,23 +218,6 @@ fn read_system_bundle_election_verifier_params(
         Decode::decode(&mut authorities_root_value.as_slice())
             .map_err(|_| ReadBundleElectionParamsError::DecodeError)?;
 
-    #[cfg(feature = "std")]
-    {
-        let mut storage = sp_runtime::Storage::default();
-        sp_state_machine::BasicExternalities::execute_with_storage(&mut storage, || {
-            // TODO: use default value when it's None?
-            sp_io::storage::set(&AUTHORITIES_ROOT, &authorities_root_value);
-            Ok::<(), String>(())
-        })
-        .expect("Failed to execute with storage");
-
-        println!("======= storage key: {AUTHORITIES_ROOT:?}");
-        println!("======= storage value: {authorities_root_value:?}");
-        for (k, v) in storage.top.iter() {
-            println!("=========== after: {k:?}, {v:?}");
-        }
-    }
-
     let total_stake_weight_value =
         read_value(&TOTAL_STAKE_WEIGHT)?.ok_or(ReadBundleElectionParamsError::MissingValue)?;
     let total_stake_weight: StakeWeight = Decode::decode(&mut total_stake_weight_value.as_slice())

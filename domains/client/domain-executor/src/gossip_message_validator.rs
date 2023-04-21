@@ -218,6 +218,12 @@ where
 
         for (index, extrinsic) in extrinsics.iter().enumerate() {
             let tx_hash = self.transaction_pool.hash_of(extrinsic);
+            let res = self
+                .client
+                .runtime_api()
+                .check_transaction_fee(at, extrinsic.clone())?;
+
+            println!("==================== checking extrinsic tx_hash: {tx_hash:?}, res: {res:?}");
 
             if self.transaction_pool.ready_transaction(&tx_hash).is_some() {
                 // TODO: Set the status of each tx in the bundle to seen
@@ -236,6 +242,10 @@ where
                         storage_keys
                     }
                 };
+                println!(
+                    "===================== read proof state_root: {:?}",
+                    self.client.header(at).unwrap().unwrap().state_root()
+                );
                 let storage_proof = self
                     .client
                     .read_proof(at, &mut storage_keys.iter().map(|s| s.as_slice()))?;
@@ -258,6 +268,8 @@ where
 
                 let fraud_proof =
                     FraudProof::<ParentChainBlock>::InvalidTransaction(invalid_transaction_proof);
+
+                println!("==================== creating fraud proof: fraud_proof: {fraud_proof:?}");
 
                 self.parent_chain.submit_fraud_proof_unsigned(fraud_proof)?;
             }

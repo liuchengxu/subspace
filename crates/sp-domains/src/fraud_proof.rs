@@ -138,6 +138,12 @@ pub enum VerificationError {
         error("Can not find the signer from domain extrinsic")
     )]
     SignerNotFound,
+    /// Domain state root not found.
+    #[cfg_attr(feature = "thiserror", error("Domain state root not found"))]
+    DomainStateRootNotFound,
+    /// Account state not found
+    #[cfg_attr(feature = "thiserror", error("Account state not found"))]
+    AccountNotFoundInStorageProof,
     /// Sender of transaction has enough balance to pay the transaction fee.
     #[cfg_attr(
         feature = "thiserror",

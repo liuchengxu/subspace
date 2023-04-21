@@ -296,6 +296,10 @@ impl<T: Config> Pallet<T> {
         fraud_proof: FraudProof<T::BlockNumber, T::Hash>,
     ) -> Result<(), Error> {
         match fraud_proof {
+            FraudProof::InvalidTransaction(_proof) => {
+                // TODO: process_invalid_transaction_proof()
+                Ok(())
+            }
             FraudProof::InvalidStateTransition(proof) => {
                 Self::process_invalid_state_transition_proof(proof)
             }
@@ -339,6 +343,10 @@ impl<T: Config> Pallet<T> {
         fraud_proof: &FraudProof<T::BlockNumber, T::Hash>,
     ) -> Result<(), Error> {
         match fraud_proof {
+            FraudProof::InvalidTransaction(proof) => {
+                // TODO
+                Ok(())
+            }
             FraudProof::InvalidStateTransition(proof) => {
                 Self::validate_invalid_state_transition_proof(proof)
             }

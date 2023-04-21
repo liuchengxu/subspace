@@ -155,6 +155,8 @@ where
             .system_domain_block_preprocessor
             .preprocess_primary_block(primary_hash, parent_hash)?;
 
+        tracing::info!("========================= extracted extrinsics: {extrinsics:?}");
+
         let logs = if primary_number == One::one() {
             // Manually inject the genesis block info.
             vec![

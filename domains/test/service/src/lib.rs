@@ -20,7 +20,10 @@
 
 pub mod chain_spec;
 
+use cross_domain_message_gossip::GossipWorker;
 use domain_client_executor::ExecutorStreams;
+use domain_service::DomainConfiguration;
+pub use domain_test_runtime as runtime;
 use domain_test_runtime::opaque::Block;
 use domain_test_runtime::Hash;
 use futures::StreamExt;
@@ -42,7 +45,9 @@ use sp_arithmetic::traits::SaturatedConversion;
 use sp_blockchain::HeaderBackend;
 use sp_core::traits::SpawnEssentialNamed;
 use sp_core::H256;
+use sp_domains::DomainId;
 use sp_keyring::Sr25519Keyring;
+pub use sp_keyring::Sr25519Keyring as Keyring;
 use sp_runtime::codec::Encode;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::collections::BTreeMap;
@@ -57,11 +62,12 @@ use substrate_test_client::{
     BlockchainEventsExt, RpcHandlersExt, RpcTransactionError, RpcTransactionOutput,
 };
 
-use cross_domain_message_gossip::GossipWorker;
-use domain_service::{DomainConfiguration, FullPool};
-pub use domain_test_runtime as runtime;
-use sp_domains::DomainId;
-pub use sp_keyring::Sr25519Keyring as Keyring;
+pub type FullPool = domain_service::FullPool<
+    PBlock,
+    subspace_test_client::Client,
+    runtime::RuntimeApi,
+    RuntimeExecutor,
+>;
 
 /// The signature of the announce block fn.
 pub type WrapAnnounceBlockFn = Arc<dyn Fn(Hash, Option<Vec<u8>>) + Send + Sync>;
@@ -78,7 +84,7 @@ pub type Executor = domain_client_executor::SystemExecutor<
     PBlock,
     Client,
     subspace_test_client::Client,
-    FullPool<PBlock, subspace_test_client::Client, runtime::RuntimeApi, RuntimeExecutor>,
+    FullPool,
     Backend,
     CodeExecutor,
 >;
@@ -88,7 +94,7 @@ pub type SystemGossipMessageValidator = domain_client_executor::SystemGossipMess
     PBlock,
     Client,
     subspace_test_client::Client,
-    FullPool<PBlock, subspace_test_client::Client, runtime::RuntimeApi, RuntimeExecutor>,
+    FullPool,
     Backend,
     CodeExecutor,
     domain_client_executor::SystemDomainParentChain<subspace_test_client::Client, Block, PBlock>,
@@ -132,6 +138,7 @@ async fn run_executor(
     RpcHandlers,
     Executor,
     SystemGossipMessageValidator,
+    Arc<FullPool>,
 )> {
     let primary_chain_full_node = {
         let span = tracing::info_span!(
@@ -248,6 +255,7 @@ async fn run_executor(
         rpc_handlers,
         executor,
         gossip_message_validator,
+        transaction_pool,
         tx_pool_sink,
     } = system_domain_node;
 
@@ -283,6 +291,7 @@ async fn run_executor(
         rpc_handlers,
         executor,
         gossip_message_validator,
+        transaction_pool,
     ))
 }
 
@@ -301,6 +310,7 @@ async fn run_executor_with_mock_primary_node(
     RpcHandlers,
     Executor,
     SystemGossipMessageValidator,
+    Arc<FullPool>,
 )> {
     let (gossip_msg_sink, gossip_msg_stream) =
         sc_utils::mpsc::tracing_unbounded("cross_domain_gossip_messages", 100);
@@ -350,6 +360,7 @@ async fn run_executor_with_mock_primary_node(
         rpc_handlers,
         executor,
         gossip_message_validator,
+        transaction_pool,
         tx_pool_sink,
     } = system_domain_node;
 
@@ -381,6 +392,7 @@ async fn run_executor_with_mock_primary_node(
         rpc_handlers,
         executor,
         gossip_message_validator,
+        transaction_pool,
     ))
 }
 
@@ -407,6 +419,7 @@ pub struct SystemDomainNode {
     pub rpc_handlers: RpcHandlers,
     /// System domain executor.
     pub executor: Executor,
+    pub transaction_pool: Arc<FullPool>,
     pub gossip_message_validator: SystemGossipMessageValidator,
 }
 
@@ -539,6 +552,7 @@ impl SystemDomainNodeBuilder {
             rpc_handlers,
             executor,
             gossip_message_validator,
+            transaction_pool,
         ) = run_executor(system_domain_config, primary_chain_config)
             .await
             .expect("could not start system domain node");
@@ -557,6 +571,7 @@ impl SystemDomainNodeBuilder {
             addr,
             rpc_handlers,
             executor,
+            transaction_pool,
             gossip_message_validator,
         }
     }
@@ -588,6 +603,7 @@ impl SystemDomainNodeBuilder {
             rpc_handlers,
             executor,
             gossip_message_validator,
+            transaction_pool,
         ) = run_executor_with_mock_primary_node(system_domain_config, mock_primary_node)
             .await
             .expect("could not start system domain node");
@@ -606,6 +622,7 @@ impl SystemDomainNodeBuilder {
             addr,
             rpc_handlers,
             executor,
+            transaction_pool,
             gossip_message_validator,
         }
     }

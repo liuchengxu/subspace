@@ -1,7 +1,8 @@
 use codec::{Decode, Encode};
+use domain_client_executor_gossip::GossipMessageHandler;
 use domain_runtime_primitives::{DomainCoreApi, Hash};
 use domain_test_service::runtime::{Header, UncheckedExtrinsic};
-use domain_test_service::Keyring::{Alice, Bob, Ferdie};
+use domain_test_service::Keyring::{Alice, Bob, Ferdie, One};
 use futures::StreamExt;
 use sc_client_api::{Backend, BlockBackend, HeaderBackend};
 use sc_executor_common::runtime_blob::RuntimeBlob;
@@ -20,6 +21,7 @@ use sp_runtime::traits::{BlakeTwo256, Header as HeaderT};
 use sp_runtime::OpaqueExtrinsic;
 use subspace_core_primitives::BlockNumber;
 use subspace_fraud_proof::invalid_state_transition_proof::ExecutionProver;
+use subspace_runtime_primitives::SSC;
 use subspace_test_service::mock::MockPrimaryNode;
 use subspace_wasm_tools::read_core_domain_runtime_blob;
 use tempfile::TempDir;
@@ -449,6 +451,130 @@ async fn test_invalid_state_transition_proof_creation_and_verification(
     // Produce a primary block that contains the fraud proof, the fraud proof wil be verified
     // in the block import pipeline
     ferdie.produce_blocks(1).await.unwrap();
+}
+
+#[substrate_test_utils::test(flavor = "multi_thread")]
+async fn test_invalid_transaction_proof_creation_and_verification() {
+    let directory = TempDir::new().expect("Must be able to create temporary directory");
+
+    let mut builder = sc_cli::LoggerBuilder::new("runtime=debug,runtime::domains=trace");
+    builder.with_colors(false);
+    let _ = builder.init();
+
+    let tokio_handle = tokio::runtime::Handle::current();
+
+    // Start Ferdie
+    let mut ferdie = MockPrimaryNode::run_mock_primary_node(
+        tokio_handle.clone(),
+        Ferdie,
+        BasePath::new(directory.path().join("ferdie")),
+    );
+
+    // Run Alice (a system domain authority node)
+    let alice = domain_test_service::SystemDomainNodeBuilder::new(
+        tokio_handle.clone(),
+        Alice,
+        BasePath::new(directory.path().join("alice")),
+    )
+    .build_with_mock_primary_node(Role::Authority, &mut ferdie)
+    .await;
+
+    // let bundle_to_tx = |signed_opaque_bundle| {
+    // subspace_test_runtime::UncheckedExtrinsic::new_unsigned(
+    // pallet_domains::Call::submit_bundle {
+    // signed_opaque_bundle,
+    // }
+    // .into(),
+    // )
+    // .into()
+    // };
+
+    futures::join!(alice.wait_for_blocks(3), ferdie.produce_blocks(3))
+        .1
+        .unwrap();
+
+    let (_slot, maybe_bundle) = ferdie.produce_slot_and_wait_for_bundle_submission().await;
+
+    futures::join!(alice.wait_for_blocks(3), ferdie.produce_blocks(3))
+        .1
+        .unwrap();
+
+    let signed_bundle = maybe_bundle.unwrap();
+
+    let transfer_to_bob = domain_test_service::construct_extrinsic(
+        &alice.client,
+        pallet_balances::Call::transfer {
+            dest: domain_test_service::runtime::Address::Id(Bob.public().into()),
+            value: 1000 * SSC + 1,
+        },
+        One,
+        false,
+        0,
+    );
+
+    let mut bad_bundle = signed_bundle.clone();
+    bad_bundle.bundle.extrinsics =
+        vec![OpaqueExtrinsic::from_bytes(&transfer_to_bob.encode()).unwrap()];
+    bad_bundle.signature = alice
+        .key
+        .pair()
+        .sign(bad_bundle.bundle.hash().as_ref())
+        .into();
+
+    let gossip_message_validator = alice.gossip_message_validator;
+
+    gossip_message_validator
+        .on_bundle(&bad_bundle)
+        .expect("Validate gossiped bundle");
+
+    // let bundle_to_tx = |signed_opaque_bundle| {
+    // subspace_test_runtime::UncheckedExtrinsic::new_unsigned(
+    // pallet_domains::Call::submit_fraud_proof {
+    // signed_opaque_bundle,
+    // }
+    // .into(),
+    // )
+    // .into()
+    // };
+
+    let ready_txs = ferdie
+        .transaction_pool
+        .pool()
+        .validated_pool()
+        .ready()
+        .map(|tx| tx)
+        .collect::<Vec<_>>();
+
+    println!(
+        "status: {:?}",
+        ferdie.transaction_pool.pool().validated_pool().status()
+    );
+
+    let submit_fraud_proof_tx = ready_txs
+        .into_iter()
+        .find_map(|ready_tx| {
+            let uxt = subspace_test_runtime::UncheckedExtrinsic::decode(
+                &mut ready_tx.data.encode().as_slice(),
+            )
+            .unwrap();
+            match uxt.function {
+                subspace_test_runtime::RuntimeCall::Domains(
+                    pallet_domains::Call::submit_fraud_proof { .. },
+                ) => Some(uxt),
+                _ => None,
+            }
+        })
+        .expect("Can not find submit_fraud_proof extrinsic")
+        .into();
+
+    ferdie
+        .remove_tx_from_tx_pool(&submit_fraud_proof_tx)
+        .unwrap();
+
+    ferdie
+        .submit_transaction(submit_fraud_proof_tx)
+        .await
+        .expect("Failed to submit submit_fraud_proof_tx");
 }
 
 #[substrate_test_utils::test(flavor = "multi_thread")]

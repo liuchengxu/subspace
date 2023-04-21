@@ -120,6 +120,8 @@ where
     pub executor: SystemDomainExecutor<PBlock, PClient, RuntimeApi, ExecutorDispatch>,
     pub gossip_message_validator:
         SystemGossipMessageValidator<PBlock, PClient, RuntimeApi, ExecutorDispatch>,
+    ///
+    pub transaction_pool: Arc<FullPool<PBlock, PClient, RuntimeApi, ExecutorDispatch>>,
     /// Transaction pool sink
     pub tx_pool_sink: DomainTxPoolSink,
 }
@@ -136,6 +138,25 @@ pub type FullPool<PBlock, PClient, RuntimeApi, Executor> = subspace_transaction_
         RuntimeApiFull<FullClient<Block, RuntimeApi, Executor>>,
     >,
 >;
+
+type InvalidTransactionProofVerifier<PBlock, PClient, RuntimeApi, Executor> =
+    subspace_fraud_proof::invalid_transaction_proof::InvalidTransactionProofVerifier<
+        PBlock,
+        PClient,
+        Hash,
+        NativeElseWasmExecutor<Executor>,
+        subspace_fraud_proof::invalid_transaction_proof::ParentChainClient<
+            Block,
+            FullClient<RuntimeApi, Executor>,
+        >,
+        CoreDomainExtrinsicsBuilder<
+            PBlock,
+            Block,
+            PClient,
+            FullClient<RuntimeApi, Executor>,
+            NativeElseWasmExecutor<Executor>,
+        >,
+    >;
 
 type InvalidStateTransitionProofVerifier<PBlock, PClient, RuntimeApi, Executor> =
     subspace_fraud_proof::invalid_state_transition_proof::InvalidStateTransitionProofVerifier<
@@ -157,6 +178,7 @@ type InvalidStateTransitionProofVerifier<PBlock, PClient, RuntimeApi, Executor> 
 type FraudProofVerifier<PBlock, PClient, RuntimeApi, Executor> =
     subspace_fraud_proof::ProofVerifier<
         Block,
+        InvalidTransactionProofVerifier<PBlock, PClient, RuntimeApi, Executor>,
         InvalidStateTransitionProofVerifier<PBlock, PClient, RuntimeApi, Executor>,
     >;
 
@@ -237,19 +259,36 @@ where
         telemetry
     });
 
-    let proof_verifier = subspace_fraud_proof::ProofVerifier::new(Arc::new(
-        InvalidStateTransitionProofVerifier::new(
+    let domain_extrinsics_builder = CoreDomainExtrinsicsBuilder::<PBlock, Block, _, _, _>::new(
+        primary_chain_client.clone(),
+        client.clone(),
+        Arc::new(executor.clone()),
+    );
+
+    use subspace_fraud_proof::invalid_transaction_proof::{
+        InvalidTransactionProofVerifier, ParentChainClient,
+    };
+
+    let invalid_state_transition_proof_verifier = InvalidStateTransitionProofVerifier::new(
+        primary_chain_client.clone(),
+        executor.clone(),
+        task_manager.spawn_handle(),
+        PrePostStateRootVerifier::new(client.clone()),
+        domain_extrinsics_builder.clone(),
+    );
+
+    let invalid_transaction_proof_verifier =
+        InvalidTransactionProofVerifier::<PBlock, _, _, _, _, _>::new(
             primary_chain_client.clone(),
-            executor.clone(),
-            task_manager.spawn_handle(),
-            PrePostStateRootVerifier::new(client.clone()),
-            CoreDomainExtrinsicsBuilder::new(
-                primary_chain_client.clone(),
-                client.clone(),
-                Arc::new(executor.clone()),
-            ),
-        ),
-    ));
+            Arc::new(executor.clone()),
+            ParentChainClient::new(client.clone()),
+            domain_extrinsics_builder.clone(),
+        );
+
+    let proof_verifier = subspace_fraud_proof::ProofVerifier::new(
+        Arc::new(invalid_transaction_proof_verifier),
+        Arc::new(invalid_state_transition_proof_verifier),
+    );
 
     let system_domain_tx_pre_validator = SystemDomainTxPreValidator::new(
         client.clone(),
@@ -497,25 +536,28 @@ where
     );
 
     spawn_essential.spawn_blocking("system-domain-transaction-gossip", None, {
-        Box::pin(async move {
-            while let Some(hash) = transaction_pool.import_notification_stream().next().await {
-                let maybe_transaction = transaction_pool.ready_transaction(&hash).and_then(
-                    // Only propagable transactions should be resolved for network service.
-                    |tx| {
-                        if tx.is_propagable() {
-                            Some(tx.data().clone())
-                        } else {
-                            None
+        Box::pin({
+            let transaction_pool = transaction_pool.clone();
+            async move {
+                while let Some(hash) = transaction_pool.import_notification_stream().next().await {
+                    let maybe_transaction = transaction_pool.ready_transaction(&hash).and_then(
+                        // Only propagable transactions should be resolved for network service.
+                        |tx| {
+                            if tx.is_propagable() {
+                                Some(tx.data().clone())
+                            } else {
+                                None
+                            }
+                        },
+                    );
+                    if let Some(tx) = maybe_transaction {
+                        let msg = GossipMessage {
+                            domain_id: DomainId::SYSTEM,
+                            encoded_data: tx.encode(),
+                        };
+                        if let Err(_e) = gossip_message_sink.unbounded_send(msg) {
+                            return;
                         }
-                    },
-                );
-                if let Some(tx) = maybe_transaction {
-                    let msg = GossipMessage {
-                        domain_id: DomainId::SYSTEM,
-                        encoded_data: tx.encode(),
-                    };
-                    if let Err(_e) = gossip_message_sink.unbounded_send(msg) {
-                        return;
                     }
                 }
             }
@@ -533,6 +575,7 @@ where
         network_starter,
         executor,
         gossip_message_validator,
+        transaction_pool,
         tx_pool_sink: msg_sender,
     };
 

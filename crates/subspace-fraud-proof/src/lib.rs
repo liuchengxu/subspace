@@ -12,6 +12,7 @@ mod tests;
 use futures::channel::oneshot;
 use futures::FutureExt;
 use invalid_state_transition_proof::VerifyInvalidStateTransitionProof;
+use invalid_transaction_proof::VerifyInvalidTransactionProof;
 use sp_core::traits::SpawnNamed;
 use sp_domains::fraud_proof::{FraudProof, VerificationError};
 use sp_runtime::traits::{Block as BlockT, NumberFor};
@@ -28,14 +29,18 @@ pub trait VerifyFraudProof<FPBlock: BlockT> {
 }
 
 /// Fraud proof verifier.
-pub struct ProofVerifier<FPBlock, ISTPVerifier> {
+pub struct ProofVerifier<FPBlock, ITPVerifier, ISTPVerifier> {
+    pub invalid_transaction_proof_verifier: Arc<ITPVerifier>,
     invalid_state_transition_proof_verifier: Arc<ISTPVerifier>,
     _phantom: PhantomData<FPBlock>,
 }
 
-impl<FPBlock, ISTPVerifier> Clone for ProofVerifier<FPBlock, ISTPVerifier> {
+impl<FPBlock, ITPVerifier, ISTPVerifier> Clone
+    for ProofVerifier<FPBlock, ITPVerifier, ISTPVerifier>
+{
     fn clone(&self) -> Self {
         Self {
+            invalid_transaction_proof_verifier: self.invalid_transaction_proof_verifier.clone(),
             invalid_state_transition_proof_verifier: self
                 .invalid_state_transition_proof_verifier
                 .clone(),
@@ -44,14 +49,19 @@ impl<FPBlock, ISTPVerifier> Clone for ProofVerifier<FPBlock, ISTPVerifier> {
     }
 }
 
-impl<FPBlock, ISTPVerifier> ProofVerifier<FPBlock, ISTPVerifier>
+impl<FPBlock, ITPVerifier, ISTPVerifier> ProofVerifier<FPBlock, ITPVerifier, ISTPVerifier>
 where
     FPBlock: BlockT,
+    ITPVerifier: VerifyInvalidTransactionProof,
     ISTPVerifier: VerifyInvalidStateTransitionProof,
 {
     /// Constructs a new instance of [`ProofVerifier`].
-    pub fn new(invalid_state_transition_proof_verifier: Arc<ISTPVerifier>) -> Self {
+    pub fn new(
+        invalid_transaction_proof_verifier: Arc<ITPVerifier>,
+        invalid_state_transition_proof_verifier: Arc<ISTPVerifier>,
+    ) -> Self {
         Self {
+            invalid_transaction_proof_verifier,
             invalid_state_transition_proof_verifier,
             _phantom: Default::default(),
         }
@@ -63,17 +73,32 @@ where
         fraud_proof: &FraudProof<NumberFor<FPBlock>, FPBlock::Hash>,
     ) -> Result<(), VerificationError> {
         match fraud_proof {
+            FraudProof::InvalidTransaction(proof) => self
+                .invalid_transaction_proof_verifier
+                .verify_invalid_transaction_proof(proof),
             FraudProof::InvalidStateTransition(proof) => self
                 .invalid_state_transition_proof_verifier
                 .verify_invalid_state_transition_proof(proof),
             proof => unimplemented!("Can not verify {proof:?}"),
         }
     }
+
+    #[cfg(test)]
+    pub fn verify_invalid_transaction_proof(
+        &self,
+        extrinsic: Vec<u8>,
+        invalid_transaction_proof: &sp_domains::fraud_proof::InvalidTransactionProof,
+    ) -> Result<(), VerificationError> {
+        self.invalid_transaction_proof_verifier
+            .verify_with_extrinsic(extrinsic, invalid_transaction_proof)
+    }
 }
 
-impl<FPBlock, ISTPVerifier> VerifyFraudProof<FPBlock> for ProofVerifier<FPBlock, ISTPVerifier>
+impl<FPBlock, ITPVerifier, ISTPVerifier> VerifyFraudProof<FPBlock>
+    for ProofVerifier<FPBlock, ITPVerifier, ISTPVerifier>
 where
     FPBlock: BlockT,
+    ITPVerifier: VerifyInvalidTransactionProof,
     ISTPVerifier: VerifyInvalidStateTransitionProof,
 {
     fn verify_fraud_proof(
