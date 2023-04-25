@@ -87,6 +87,11 @@ inherits = "release"
 lto = "fat"
 codegen-units = 1
 
+[profile.production-without-lto]
+inherits = "release"
+lto = false
+codegen-units = 1
+
 # Reason: We need to patch substrate dependency of snowfork and frontier libraries to our fork
 # TODO: Remove when we are using upstream substrate instead of fork
 [patch."https://github.com/paritytech/substrate.git"]
