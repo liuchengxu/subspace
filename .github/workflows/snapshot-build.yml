@@ -205,7 +205,14 @@ jobs:
           mkdir executables
           mv ${{ env.PRODUCTION_TARGET }}/subspace-farmer executables/subspace-farmer-${{ matrix.build.suffix }}
           mv ${{ env.PRODUCTION_TARGET }}/subspace-node executables/subspace-node-${{ matrix.build.suffix }}
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.build.target != 'aarch64-unknown-linux-gnu'
+
+      - name: Prepare executables for uploading (Ubuntu aarch64)
+        run: |
+          mkdir executables
+          mv target/${{ matrix.build.target }}/production-without-lto/subspace-farmer executables/subspace-farmer-${{ matrix.build.suffix }}
+          mv target/${{ matrix.build.target }}/production-without-lto/subspace-node executables/subspace-node-${{ matrix.build.suffix }}
+        if: runner.os == 'Linux' && matrix.build.target == 'aarch64-unknown-linux-gnu'
 
       - name: Prepare executables for uploading (macOS)
         run: |
@@ -226,18 +233,18 @@ jobs:
           move ${{ env.PRODUCTION_TARGET }}/subspace-node.exe executables/subspace-node-${{ matrix.build.suffix }}.exe
         if: runner.os == 'Windows'
 
-      - name: Upload node and farmer executables to artifacts
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # @v3.1.1
-        with:
-          name: executables-${{ matrix.build.suffix }}
-          path: |
-            executables/*
-          if-no-files-found: error
+      # - name: Upload node and farmer executables to artifacts
+        # uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # @v3.1.1
+        # with:
+          # name: executables-${{ matrix.build.suffix }}
+          # path: |
+            # executables/*
+          # if-no-files-found: error
 
-      - name: Upload node and farmer executables to assets
-        uses: alexellis/upload-assets@259de5111cb56966d046ced998941e93f91d2c93 # @0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["executables/*"]'
-        if: github.event_name == 'push' && github.ref_type == 'tag'
+      # - name: Upload node and farmer executables to assets
+        # uses: alexellis/upload-assets@259de5111cb56966d046ced998941e93f91d2c93 # @0.4.0
+        # env:
+          # GITHUB_TOKEN: ${{ github.token }}
+        # with:
+          # asset_paths: '["executables/*"]'
+        # if: github.event_name == 'push' && github.ref_type == 'tag'
