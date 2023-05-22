@@ -132,7 +132,7 @@ where
         let primary_hash_for_best_domain_hash =
             crate::aux_schema::primary_hash_for(&*self.backend, best_hash)?.ok_or_else(|| {
                 sp_blockchain::Error::Backend(format!(
-                    "Primary hash for domain hash #{best_hash} not found"
+                    "Primary hash for domain hash #{best_number},{best_hash} not found"
                 ))
             })?;
 
