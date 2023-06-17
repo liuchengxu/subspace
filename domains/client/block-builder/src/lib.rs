@@ -356,13 +356,11 @@ mod tests {
     // TODO: Remove `substrate_test_runtime_client` dependency for faster build time
     use substrate_test_runtime_client::{DefaultTestClientBuilderExt, TestClientBuilderExt};
 
-    // TODO: Unlock this test, it got broken in https://github.com/subspace/subspace/pull/1548 and
-    //  doesn't run on Windows at all
     #[test]
-    #[ignore]
     fn block_building_storage_proof_does_not_include_runtime_by_default() {
-        let (client, backend) =
-            substrate_test_runtime_client::TestClientBuilder::new().build_with_backend();
+        let builder = substrate_test_runtime_client::TestClientBuilder::new();
+        let backend = builder.backend();
+        let client = builder.build();
 
         let block = BlockBuilder::new(
             &client,
@@ -378,12 +376,15 @@ mod tests {
         .unwrap();
 
         let proof = block.proof.expect("Proof is build on request");
+        let state_root = client
+            .header(client.info().best_hash)
+            .unwrap()
+            .unwrap()
+            .state_root;
 
-        let backend = sp_state_machine::create_proof_check_backend::<Blake2Hasher>(
-            block.storage_changes.transaction_storage_root,
-            proof,
-        )
-        .unwrap();
+        let backend =
+            sp_state_machine::create_proof_check_backend::<Blake2Hasher>(state_root, proof)
+                .unwrap();
 
         assert!(backend
             .storage(sp_core::storage::well_known_keys::CODE)
