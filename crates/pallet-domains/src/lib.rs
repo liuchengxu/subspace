@@ -277,6 +277,11 @@ mod pallet {
             let block_number = frame_system::Pallet::<T>::current_block_number();
             do_upgrade_runtime::<T>(runtime_id, code, block_number).map_err(Error::<T>::from)?;
 
+            sp_domains::domain::generate_genesis_state_root(
+                RuntimeType::Evm,
+                b"TODO: proper serialized runtime genesis config".to_vec(),
+            );
+
             Self::deposit_event(Event::DomainRuntimeUpgraded { runtime_id });
 
             Ok(())

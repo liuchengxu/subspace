@@ -35,6 +35,8 @@ use sp_core::sr25519::vrf::{VrfOutput, VrfProof, VrfSignature};
 use sp_core::H256;
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT, Hash as HashT, NumberFor, Zero};
 use sp_runtime::{OpaqueExtrinsic, RuntimeAppPublic};
+use sp_runtime_interface::pass_by;
+use sp_runtime_interface::pass_by::PassBy;
 use sp_std::vec::Vec;
 use sp_trie::StorageProof;
 use subspace_core_primitives::crypto::blake2b_256_hash;
@@ -479,8 +481,52 @@ pub enum RuntimeType {
     Evm,
 }
 
+impl PassBy for RuntimeType {
+    type PassBy = pass_by::Codec<Self>;
+}
+
 /// Type representing the runtime ID.
 pub type RuntimeId = u32;
+
+#[cfg(feature = "std")]
+pub trait GenerateGenesisStateRoot: Send + Sync {
+    fn generate_genesis_state_root(
+        &self,
+        runtime_type: RuntimeType,
+        raw_runtime_genesis_config: Vec<u8>,
+    ) -> Option<H256>;
+}
+
+#[cfg(feature = "std")]
+sp_externalities::decl_extension! {
+    /// A KZG extension.
+    pub struct DomainExtension(std::sync::Arc<dyn GenerateGenesisStateRoot>);
+}
+
+#[cfg(feature = "std")]
+impl DomainExtension {
+    /// Create new instance.
+    pub fn new<T: GenerateGenesisStateRoot + 'static>(inner: T) -> Self {
+        Self(std::sync::Arc::new(inner))
+    }
+}
+
+/// Domain-related runtime interface
+#[sp_runtime_interface::runtime_interface]
+pub trait Domain {
+    /// Returns the state root of genesis block built from the runtime genesis config on success.
+    fn generate_genesis_state_root(
+        &mut self,
+        runtime_type: RuntimeType,
+        raw_runtime_genesis_config: Vec<u8>,
+    ) -> Option<H256> {
+        use sp_externalities::ExternalitiesExt;
+
+        self.extension::<DomainExtension>()
+            .expect("No `DomainExtension` associated for the current context!")
+            .generate_genesis_state_root(runtime_type, raw_runtime_genesis_config)
+    }
+}
 
 sp_api::decl_runtime_apis! {
     /// API necessary for executor pallet.
