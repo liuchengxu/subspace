@@ -149,6 +149,8 @@ where
             table_generator,
         } = options;
 
+        let start = Instant::now();
+
         let audit_results = audit_plot_sync(
             public_key,
             &slot_info.global_challenge,
@@ -156,6 +158,12 @@ where
             &self.0,
             sectors_metadata,
             maybe_sector_being_modified,
+        );
+
+        info!(
+            audit_results_len = audit_results.len(),
+            "[audit] audit_plot_sync completed, elapsed {}ms",
+            start.elapsed().as_millis()
         );
 
         audit_results
@@ -264,12 +272,16 @@ where
             })
         };
 
+        info!(%slot, sector_solutions_len = ?sectors_solutions.len(), "[farming] Plot audited, elapsed {}ms", start.elapsed().as_millis());
+
         sectors_solutions.sort_by(|a, b| {
             let a_solution_distance = a.1.best_solution_distance().unwrap_or(SolutionRange::MAX);
             let b_solution_distance = b.1.best_solution_distance().unwrap_or(SolutionRange::MAX);
 
             a_solution_distance.cmp(&b_solution_distance)
         });
+
+        let start = Instant::now();
 
         'solutions_processing: for (sector_index, sector_solutions) in sectors_solutions {
             for maybe_solution in sector_solutions {
@@ -283,6 +295,7 @@ where
                     }
                 };
 
+                info!(%slot, %sector_index, "Solution found, elapsed: {}ms", start.elapsed().as_millis());
                 debug!(%slot, %sector_index, "Solution found");
                 trace!(?solution, "Solution found");
 
